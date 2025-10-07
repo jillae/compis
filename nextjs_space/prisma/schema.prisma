@@ -1,0 +1,175 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/flow/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// NextAuth tables
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  firstName     String?
+  lastName      String?
+  companyName   String?
+  jobTitle      String?
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Flow Revenue Intelligence Platform Schema
+
+model Customer {
+  id             String    @id @default(cuid())
+  phone          String?   @unique
+  email          String?   @unique
+  firstName      String?
+  lastName       String?
+  firstVisit     DateTime?
+  totalBookings  Int       @default(0)
+  noShowCount    Int       @default(0)
+  totalSpent     Decimal   @default(0) @db.Decimal(10, 2)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  bookings       Booking[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Staff {
+  id             String    @id @default(cuid())
+  name           String
+  email          String?   @unique
+  specialization String?
+  hourlyRate     Decimal?  @db.Decimal(8, 2)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  bookings       Booking[]
+
+  @@index([name])
+  @@index([specialization])
+}
+
+model Room {
+  id            String    @id @default(cuid())
+  name          String
+  equipmentType String?
+  available     Boolean   @default(true)
+  capacity      Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookings      Booking[]
+
+  @@index([name])
+  @@index([equipmentType])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  customerId      String
+  staffId         String?
+  roomId          String?
+  treatmentType   String
+  scheduledTime   DateTime
+  duration        Int           // Duration in minutes
+  price           Decimal       @db.Decimal(8, 2)
+  bookingChannel  String?       // 'online', 'phone', 'walk-in', etc.
+  bookedAt        DateTime
+  status          BookingStatus @default(SCHEDULED)
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  staff    Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  room     Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
+  @@index([staffId])
+  @@index([roomId])
+  @@index([scheduledTime])
+  @@index([status])
+  @@index([treatmentType])
+  @@index([bookingChannel])
+}
+
+model ImportLog {
+  id           String            @id @default(cuid())
+  filename     String
+  status       ImportStatus      @default(PROCESSING)
+  totalRows    Int               @default(0)
+  successRows  Int               @default(0)
+  errorRows    Int               @default(0)
+  errors       String?           @db.Text
+  metadata     Json?             // Store column mappings, import settings
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Enums
+enum BookingStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+  RESCHEDULED
+}
+
+enum ImportStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
