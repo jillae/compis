@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { 
   TrendingUp, 
   Users, 
@@ -15,7 +16,9 @@ import {
   Activity,
   Upload,
   Settings,
-  LogOut
+  LogOut,
+  Lightbulb,
+  ArrowRight
 } from "lucide-react"
 import { DashboardMetrics } from "@/lib/types"
 import NoShowChart from "@/components/dashboard/no-show-chart"
@@ -24,14 +27,27 @@ import UtilizationChart from "@/components/dashboard/utilization-chart"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
+interface Insight {
+  id: string
+  type: 'warning' | 'optimization' | 'success' | 'info'
+  category: string
+  title: string
+  description: string
+  impact: 'high' | 'medium' | 'low'
+  actionable: boolean
+  recommendation?: string
+}
+
 export default function DashboardClient() {
   const { data: session } = useSession()
   const router = useRouter()
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [insights, setInsights] = useState<Insight[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchMetrics()
+    fetchInsights()
   }, [])
 
   const fetchMetrics = async () => {
@@ -45,6 +61,18 @@ export default function DashboardClient() {
       console.error('Failed to fetch metrics:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchInsights = async () => {
+    try {
+      const response = await fetch('/api/insights')
+      if (response.ok) {
+        const data = await response.json()
+        setInsights(data.insights.slice(0, 3)) // Show top 3 insights
+      }
+    } catch (error) {
+      console.error('Failed to fetch insights:', error)
     }
   }
 
@@ -77,6 +105,10 @@ export default function DashboardClient() {
             </div>
             
             <div className="flex items-center space-x-4">
+              <Button variant="default" size="sm" onClick={() => router.push('/dashboard/insights')} className="bg-purple-600 hover:bg-purple-700">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                AI Insights
+              </Button>
               <Button variant="outline" size="sm" onClick={() => router.push('/dashboard/import')}>
                 <Upload className="h-4 w-4 mr-2" />
                 Import Data
@@ -194,6 +226,75 @@ export default function DashboardClient() {
             </CardContent>
           </Card>
         </div>
+
+        {/* AI Insights Preview */}
+        {insights.length > 0 && (
+          <Card className="mb-8 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Lightbulb className="h-5 w-5 text-purple-600" />
+                  <CardTitle>AI-Powered Recommendations</CardTitle>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => router.push('/dashboard/insights')}
+                  className="border-purple-300 hover:bg-purple-100"
+                >
+                  View All Insights
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+              <CardDescription>
+                Top recommendations to optimize your clinic performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {insights.map((insight) => (
+                <Alert 
+                  key={insight.id} 
+                  className={
+                    insight.type === 'warning' ? 'bg-red-50 border-red-200' :
+                    insight.type === 'optimization' ? 'bg-purple-50 border-purple-200' :
+                    insight.type === 'success' ? 'bg-green-50 border-green-200' :
+                    'bg-blue-50 border-blue-200'
+                  }
+                >
+                  <div className="flex items-start space-x-2">
+                    {insight.type === 'warning' && <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />}
+                    {insight.type === 'optimization' && <Lightbulb className="h-4 w-4 text-purple-600 mt-0.5" />}
+                    {insight.type === 'success' && <Activity className="h-4 w-4 text-green-600 mt-0.5" />}
+                    {insight.type === 'info' && <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5" />}
+                    <div className="flex-1">
+                      <AlertTitle className={
+                        insight.type === 'warning' ? 'text-red-900' :
+                        insight.type === 'optimization' ? 'text-purple-900' :
+                        insight.type === 'success' ? 'text-green-900' :
+                        'text-blue-900'
+                      }>
+                        {insight.title}
+                        {insight.impact === 'high' && (
+                          <Badge className="ml-2 bg-red-100 text-red-700">High Impact</Badge>
+                        )}
+                      </AlertTitle>
+                      <AlertDescription className={
+                        insight.type === 'warning' ? 'text-red-800' :
+                        insight.type === 'optimization' ? 'text-purple-800' :
+                        insight.type === 'success' ? 'text-green-800' :
+                        'text-blue-800'
+                      }>
+                        {insight.description.length > 150 
+                          ? insight.description.substring(0, 150) + '...' 
+                          : insight.description}
+                      </AlertDescription>
+                    </div>
+                  </div>
+                </Alert>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Additional Insights */}
         <Card>
