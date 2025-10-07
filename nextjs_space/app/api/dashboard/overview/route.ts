@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
 
     // Enrich top services with service details
     const topServicesWithDetails = await Promise.all(
-      topServices.map(async (service) => {
+      topServices.map(async (service: any) => {
         const serviceDetails = await prisma.service.findUnique({
           where: { id: service.serviceId! },
           select: { name: true, category: true },
@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group by date (without time)
-    const bookingsByDate = bookingsPerDay.reduce((acc: any, booking) => {
+    const bookingsByDate = bookingsPerDay.reduce((acc: any, booking: any) => {
       const date = booking.scheduledTime.toISOString().split('T')[0];
       if (!acc[date]) {
         acc[date] = 0;
@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
 
     // Enrich staff performance with staff details
     const staffPerformanceWithDetails = await Promise.all(
-      staffPerformance.map(async (staff) => {
+      staffPerformance.map(async (staff: any) => {
         const staffDetails = await prisma.staff.findUnique({
           where: { id: staff.staffId! },
           select: { name: true, role: true },

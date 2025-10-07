@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const totalRevenue = completedBookings.reduce((sum, booking) => {
+    const totalRevenue = completedBookings.reduce((sum: number, booking: any) => {
       return sum + Number(booking.price)
     }, 0)
 
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const totalScheduledMinutes = scheduledBookings.reduce((sum, booking) => sum + (booking.duration || 60), 0)
+    const totalScheduledMinutes = scheduledBookings.reduce((sum: number, booking: any) => sum + (booking.duration || 60), 0)
     const availableMinutes = 30 * 10 * 60 // 30 days, 10 hours per day, 60 minutes
     const utilizationRate = availableMinutes > 0 ? (totalScheduledMinutes / availableMinutes) * 100 : 0
 
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     })
 
     const hourlyNoShows = Array(24).fill(0)
-    noShowPatterns.forEach(booking => {
+    noShowPatterns.forEach((booking: any) => {
       const hour = booking.scheduledTime.getHours()
       hourlyNoShows[hour]++
     })
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
     })
 
     const dailyTrends = Array(7).fill(0).map(() => ({ bookings: 0, noShows: 0 }))
-    dailyBookings.forEach(booking => {
+    dailyBookings.forEach((booking: any) => {
       const dayOfWeek = booking.createdAt.getDay()
       dailyTrends[dayOfWeek].bookings++
       if (booking.status === 'NO_SHOW') {

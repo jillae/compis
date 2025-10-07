@@ -1,6 +1,6 @@
 // Flow Revenue Intelligence Platform - Type definitions
 
-import { User as PrismaUser, Booking, Customer, Staff, Room, ImportLog } from '@prisma/client'
+import type { Booking } from '@prisma/client'
 
 // Extended User type for NextAuth
 declare module "next-auth" {
