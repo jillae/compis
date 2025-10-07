@@ -64,8 +64,33 @@ model VerificationToken {
 
 // Flow Revenue Intelligence Platform Schema
 
+// Clinic (Salon) - represents a beauty/health clinic using Bokadirekt
+model Clinic {
+  id             String     @id @default(cuid())
+  bokadirektId   String?    @unique // Bokadirekt salon ID
+  name           String
+  description    String?
+  address        String?
+  phone          String?
+  email          String?
+  website        String?
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  
+  customers      Customer[]
+  staff          Staff[]
+  services       Service[]
+  bookings       Booking[]
+
+  @@index([bokadirektId])
+  @@index([name])
+}
+
 model Customer {
   id             String    @id @default(cuid())
+  bokadirektId   String?   @unique // Bokadirekt customer ID
+  clinicId       String?
   name           String?
   phone          String?
   email          String?
@@ -81,8 +106,12 @@ model Customer {
   totalSpent     Decimal   @default(0) @db.Decimal(10, 2)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  
+  clinic         Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   bookings       Booking[]
 
+  @@index([bokadirektId])
+  @@index([clinicId])
   @@index([email])
   @@index([phone])
   @@index([name])
@@ -90,16 +119,24 @@ model Customer {
 
 model Staff {
   id              String    @id @default(cuid())
+  bokadirektId    String?   @unique // Bokadirekt resource ID
+  clinicId        String?
   name            String
   email           String?
+  phone           String?
+  role            String?   // E.g., "Hudterapeut", "Massageterapeut"
   specializations String[]  @default([])
   specialization  String?
   hourlyRate      Decimal?  @db.Decimal(8, 2)
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  
+  clinic          Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   bookings        Booking[]
 
+  @@index([bokadirektId])
+  @@index([clinicId])
   @@index([name])
   @@index([specialization])
 }
@@ -119,46 +156,60 @@ model Room {
 }
 
 model Service {
-  id          String    @id @default(cuid())
-  name        String
-  category    String    @default("general")
-  price       Decimal   @default(0) @db.Decimal(10, 2)
-  duration    Int       @default(60) // Duration in minutes
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  bookings    Booking[]
+  id           String    @id @default(cuid())
+  bokadirektId String?   @unique // Bokadirekt service ID
+  clinicId     String?
+  name         String
+  description  String?
+  category     String    @default("general")
+  price        Decimal   @default(0) @db.Decimal(10, 2)
+  duration     Int       @default(60) // Duration in minutes
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  clinic       Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  bookings     Booking[]
 
+  @@index([bokadirektId])
+  @@index([clinicId])
   @@index([name])
   @@index([category])
 }
 
 model Booking {
   id              String        @id @default(cuid())
+  bokadirektId    String?       @unique // Bokadirekt booking ID
+  clinicId        String?
   customerId      String
   staffId         String?
   serviceId       String?
   roomId          String?
-  treatmentType   String
+  treatmentType   String        @default("")
   scheduledTime   DateTime
   startTime       DateTime?
   endTime         DateTime?
-  duration        Int           // Duration in minutes
+  duration        Int?          // Duration in minutes
   price           Decimal       @db.Decimal(8, 2)
   revenue         Decimal       @default(0) @db.Decimal(10, 2)
   cost            Decimal       @default(0) @db.Decimal(10, 2)
   source          String?       // 'bokadirekt', 'bokadirekt_online', 'manual', etc.
   bookingChannel  String?       // 'online', 'phone', 'walk-in', etc.
-  bookedAt        DateTime
+  bookedAt        DateTime      @default(now())
   status          BookingStatus @default(SCHEDULED)
+  isOnlineBooking Boolean       @default(false)
   notes           String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
+  clinic   Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   staff    Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
   service  Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   room     Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
 
+  @@index([bokadirektId])
+  @@index([clinicId])
   @@index([customerId])
   @@index([staffId])
   @@index([serviceId])
@@ -196,6 +247,9 @@ enum BookingStatus {
   NO_SHOW
   CANCELLED
   RESCHEDULED
+  completed    // lowercase for Bokadirekt compatibility
+  cancelled    // lowercase for Bokadirekt compatibility
+  no_show      // lowercase for Bokadirekt compatibility
 }
 
 enum ImportStatus {

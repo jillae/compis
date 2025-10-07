@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const totalScheduledMinutes = scheduledBookings.reduce((sum, booking) => sum + booking.duration, 0)
+    const totalScheduledMinutes = scheduledBookings.reduce((sum, booking) => sum + (booking.duration || 60), 0)
     const availableMinutes = 30 * 10 * 60 // 30 days, 10 hours per day, 60 minutes
     const utilizationRate = availableMinutes > 0 ? (totalScheduledMinutes / availableMinutes) * 100 : 0
 
