@@ -9,16 +9,21 @@ import {
   SyncOptions
 } from './types';
 
-const BASE_URL = process.env.BOKADIREKT_API_URL || 'https://external.api.bokadirekt.se/api/v1';
-const API_KEY = process.env.BOKADIREKT_API_KEY;
+const BASE_URL = process.env.BOKADIREKT_API_URL || 'https://api.bokadirekt.se/api/v1';
 
 // Rate limiting: 10 requests per minute
 const RATE_LIMIT = 10;
 const RATE_LIMIT_WINDOW = 60 * 1000; // 60 seconds
 
 class BokadirektClient {
+  private apiKey: string;
   private requestQueue: Array<() => Promise<any>> = [];
   private requestTimestamps: number[] = [];
+
+  constructor(apiKey?: string) {
+    // Allow API key to be passed in constructor or use environment variable
+    this.apiKey = apiKey || process.env.BOKADIREKT_API_KEY || '';
+  }
   
   private async enforceRateLimit(): Promise<void> {
     const now = Date.now();
@@ -54,7 +59,7 @@ class BokadirektClient {
   ): Promise<T> {
     const { method = 'GET', queryParams = {}, retries = 3 } = options;
     
-    if (!API_KEY) {
+    if (!this.apiKey) {
       throw new Error('BOKADIREKT_API_KEY is not configured');
     }
     
@@ -75,7 +80,7 @@ class BokadirektClient {
       const response = await fetch(url.toString(), {
         method,
         headers: {
-          'X-API-KEY': API_KEY,
+          'X-API-KEY': this.apiKey,
           'Content-Type': 'application/json',
         },
       });
@@ -177,3 +182,6 @@ class BokadirektClient {
 
 // Singleton instance
 export const bokadirektClient = new BokadirektClient();
+
+// Export the class for testing and custom instances
+export { BokadirektClient };
