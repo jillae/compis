@@ -9,7 +9,7 @@ import {
   SyncOptions
 } from './types';
 
-const BASE_URL = process.env.BOKADIREKT_API_URL || 'https://api.bokadirekt.se/api/v1';
+const BASE_URL = process.env.BOKADIREKT_API_URL || 'https://external.api.portal.bokadirekt.se/api/v1';
 
 // Rate limiting: 10 requests per minute
 const RATE_LIMIT = 10;
