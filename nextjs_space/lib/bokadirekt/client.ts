@@ -21,8 +21,14 @@ class BokadirektClient {
   private requestTimestamps: number[] = [];
 
   constructor(apiKey?: string) {
-    // Allow API key to be passed in constructor or use environment variable
-    this.apiKey = apiKey || process.env.BOKADIREKT_API_KEY || '';
+    // Allow API key to be passed in constructor
+    // If not provided, it will be read from env on each request
+    this.apiKey = apiKey || '';
+  }
+  
+  private getApiKey(): string {
+    // Read API key dynamically - allows for env vars to be loaded after import
+    return this.apiKey || process.env.BOKADIREKT_API_KEY || '';
   }
   
   private async enforceRateLimit(): Promise<void> {
@@ -59,7 +65,8 @@ class BokadirektClient {
   ): Promise<T> {
     const { method = 'GET', queryParams = {}, retries = 3 } = options;
     
-    if (!this.apiKey) {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
       throw new Error('BOKADIREKT_API_KEY is not configured');
     }
     
@@ -80,7 +87,7 @@ class BokadirektClient {
       const response = await fetch(url.toString(), {
         method,
         headers: {
-          'X-API-KEY': this.apiKey,
+          'X-API-KEY': apiKey,
           'Content-Type': 'application/json',
         },
       });
