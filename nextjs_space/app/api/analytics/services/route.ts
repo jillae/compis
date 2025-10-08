@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
@@ -47,11 +48,11 @@ export async function GET(request: NextRequest) {
     // Calculate metrics for each service
     const servicesWithMetrics = servicePerformance.map((service) => {
       const totalBookings = service.bookings.length;
-      const completedBookings = service.bookings.filter((b) => b.status === 'completed').length;
-      const cancelledBookings = service.bookings.filter((b) => b.status === 'cancelled').length;
+      const completedBookings = service.bookings.filter((b: any) => b.status === 'completed').length;
+      const cancelledBookings = service.bookings.filter((b: any) => b.status === 'cancelled').length;
       const totalRevenue = service.bookings
-        .filter((b) => b.status === 'completed')
-        .reduce((sum, b) => sum + (Number(b.price) || 0), 0);
+        .filter((b: any) => b.status === 'completed')
+        .reduce((sum: number, b: any) => sum + (Number(b.price) || 0), 0);
       
       const completionRate = totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0;
       const cancellationRate = totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : 0;
@@ -60,8 +61,8 @@ export async function GET(request: NextRequest) {
       // Calculate capacity utilization
       // Assuming 8-hour work day = 480 minutes
       const totalMinutesBooked = service.bookings
-        .filter((b) => b.status === 'completed')
-        .reduce((sum, b) => sum + (b.duration || service.duration || 0), 0);
+        .filter((b: any) => b.status === 'completed')
+        .reduce((sum: number, b: any) => sum + (b.duration || service.duration || 0), 0);
       
       const availableMinutes = days * 480; // days * 8 hours * 60 minutes
       const capacityUtilization = (totalMinutesBooked / availableMinutes) * 100;
@@ -136,7 +137,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // Service mix optimization suggestions
-    const totalRevenue = servicesWithMetrics.reduce((sum, s) => sum + s.totalRevenue, 0);
+    const totalRevenue = servicesWithMetrics.reduce((sum: number, s: any) => sum + s.totalRevenue, 0);
     const serviceOptimization = servicesWithMetrics.map((service) => {
       const revenueContribution = totalRevenue > 0 ? (service.totalRevenue / totalRevenue) * 100 : 0;
       

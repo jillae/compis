@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
         _count: {
           customerId: true,
         },
-      }).then((result) => result.length),
+      }).then((result: any) => result.length),
 
       // At-risk customers (no booking in last 30 days)
       prisma.customer.count({
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
             price: true,
           },
         })
-        .then((result) => Number(result._avg.price) || 0),
+        .then((result: any) => Number(result._avg.price) || 0),
 
       // Repeat rate
       prisma.booking
@@ -97,8 +98,8 @@ export async function GET(request: NextRequest) {
             customerId: true,
           },
         })
-        .then((result) => {
-          const returningCount = result.filter((r) => r._count.customerId > 1).length;
+        .then((result: any) => {
+          const returningCount = result.filter((r: any) => r._count.customerId > 1).length;
           const totalCount = result.length;
           return totalCount > 0 ? (returningCount / totalCount) * 100 : 0;
         }),

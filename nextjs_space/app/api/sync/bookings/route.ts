@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 
 // Sync API for Lovable to poll
 // GET /api/sync/bookings?since=<timestamp>&org_id=<uuid>
