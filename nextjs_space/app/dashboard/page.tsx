@@ -14,6 +14,7 @@ import { BookingPatternChart } from '@/components/dashboard/booking-pattern-char
 import { WeekdayChart } from '@/components/dashboard/weekday-chart';
 import { AIInsightsSection } from '@/components/dashboard/ai-insights-section';
 import { SyncButton } from '@/components/dashboard/sync-button';
+import Link from 'next/link';
 
 interface DashboardData {
   overview: {
@@ -312,6 +313,49 @@ export default function DashboardPage() {
 
         {/* AI Insights Section */}
         <AIInsightsSection days={days} />
+
+        {/* Quick Links to Advanced Analytics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Advanced Analytics</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Dive deeper into your business data with detailed analytics
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link
+                href="/analytics/customers"
+                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
+              >
+                <h3 className="font-semibold mb-2">Customer Analytics</h3>
+                <p className="text-sm text-muted-foreground">
+                  Lifetime value, churn rate, segmentation, and retention insights
+                </p>
+              </Link>
+              
+              <Link
+                href="/analytics/services"
+                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
+              >
+                <h3 className="font-semibold mb-2">Service Analytics</h3>
+                <p className="text-sm text-muted-foreground">
+                  Performance metrics, capacity utilization, and optimization recommendations
+                </p>
+              </Link>
+              
+              <Link
+                href="/analytics/forecast"
+                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
+              >
+                <h3 className="font-semibold mb-2">Revenue Forecast</h3>
+                <p className="text-sm text-muted-foreground">
+                  AI-powered predictions for future revenue and booking trends
+                </p>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

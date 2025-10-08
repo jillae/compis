@@ -2,57 +2,65 @@
 'use client';
 
 import { useState } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Check, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export function SyncButton() {
-  const [syncing, setSyncing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const { toast } = useToast();
 
   const handleSync = async () => {
-    setSyncing(true);
-    toast.info('Starting sync...', { duration: 2000 });
-
     try {
-      const response = await fetch('/api/sync/manual', {
+      setIsSyncing(true);
+      
+      toast({
+        title: 'Syncing...',
+        description: 'Fetching latest data from Bokadirekt',
+      });
+
+      const response = await fetch('/api/sync', {
         method: 'POST',
       });
 
       const result = await response.json();
 
       if (result.success) {
-        toast.success('Sync completed!', {
-          description: `Updated at ${new Date().toLocaleTimeString('sv-SE')}`,
-          duration: 4000,
+        toast({
+          title: 'Sync Successful! 🎉',
+          description: `Updated: ${result.results.bookings.upserted} bookings, ${result.results.customers.upserted} customers, ${result.results.staff.upserted} staff, ${result.results.services.upserted} services`,
         });
-        // Reload page to show new data
-        setTimeout(() => window.location.reload(), 1000);
+        
+        // Reload the page to show updated data
+        window.location.reload();
       } else {
-        toast.error('Sync failed', {
-          description: result.error || 'Unknown error',
-          duration: 5000,
+        toast({
+          title: 'Sync Failed',
+          description: result.error || 'Failed to sync data',
+          variant: 'destructive',
         });
       }
     } catch (error) {
-      toast.error('Sync failed', {
-        description: error instanceof Error ? error.message : 'Network error',
-        duration: 5000,
+      toast({
+        title: 'Sync Error',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
       });
     } finally {
-      setSyncing(false);
+      setIsSyncing(false);
     }
   };
 
   return (
     <Button
       onClick={handleSync}
-      disabled={syncing}
+      disabled={isSyncing}
       variant="outline"
       size="sm"
       className="gap-2"
     >
-      <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-      {syncing ? 'Syncing...' : 'Sync Now'}
+      <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+      {isSyncing ? 'Syncing...' : 'Sync Now'}
     </Button>
   );
 }
