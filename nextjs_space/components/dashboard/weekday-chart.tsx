@@ -3,8 +3,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -13,35 +13,25 @@ import {
   Legend,
 } from 'recharts';
 
-interface RevenueChartProps {
+interface WeekdayChartProps {
   data: Array<{
-    date: string;
-    revenue: number;
+    day: string;
     bookings: number;
+    revenue: number;
   }>;
 }
 
-export function RevenueChart({ data }: RevenueChartProps) {
-  // Format data for display
-  const formattedData = data.map((item) => ({
-    ...item,
-    date: new Date(item.date).toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' }),
-  }));
-
+export function WeekdayChart({ data }: WeekdayChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Revenue Trend</CardTitle>
+        <CardTitle>Performance by Weekday</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={formattedData}>
+          <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey="date"
-              className="text-xs"
-              tick={{ fill: 'currentColor' }}
-            />
+            <XAxis dataKey="day" className="text-xs" tick={{ fill: 'currentColor' }} />
             <YAxis
               className="text-xs"
               tick={{ fill: 'currentColor' }}
@@ -61,23 +51,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
               }}
             />
             <Legend />
-            <Line
-              type="monotone"
-              dataKey="revenue"
-              stroke="hsl(var(--primary))"
-              strokeWidth={2}
-              dot={{ fill: 'hsl(var(--primary))' }}
-              name="Revenue (kr)"
-            />
-            <Line
-              type="monotone"
-              dataKey="bookings"
-              stroke="hsl(var(--chart-2))"
-              strokeWidth={2}
-              dot={{ fill: 'hsl(var(--chart-2))' }}
-              name="Bookings"
-            />
-          </LineChart>
+            <Bar dataKey="bookings" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Bookings" />
+            <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Revenue (kr)" />
+          </BarChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

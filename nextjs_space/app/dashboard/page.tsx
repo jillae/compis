@@ -4,15 +4,16 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  TrendingUp, 
-  TrendingDown, 
   Calendar, 
-  DollarSign, 
-  Users,
+  DollarSign,
   CheckCircle,
   XCircle,
-  UserX
 } from 'lucide-react';
+import { RevenueChart } from '@/components/dashboard/revenue-chart';
+import { BookingPatternChart } from '@/components/dashboard/booking-pattern-chart';
+import { WeekdayChart } from '@/components/dashboard/weekday-chart';
+import { AIInsightsSection } from '@/components/dashboard/ai-insights-section';
+import { SyncButton } from '@/components/dashboard/sync-button';
 
 interface DashboardData {
   overview: {
@@ -46,8 +47,31 @@ interface DashboardData {
   }>;
 }
 
+interface AnalyticsData {
+  revenueTrend: Array<{
+    date: string;
+    revenue: number;
+    bookings: number;
+  }>;
+  bookingPattern: Array<{
+    hour: string;
+    bookings: number;
+  }>;
+  weekdayDistribution: Array<{
+    day: string;
+    bookings: number;
+    revenue: number;
+  }>;
+  categoryBreakdown: Array<{
+    category: string;
+    bookings: number;
+    revenue: number;
+  }>;
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(30);
@@ -59,14 +83,21 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/dashboard/overview?days=${days}`);
-      const result = await response.json();
+      
+      // Fetch overview data
+      const overviewResponse = await fetch(`/api/dashboard/overview?days=${days}`);
+      const overviewResult = await overviewResponse.json();
 
-      if (result.success) {
-        setData(result.data);
+      // Fetch analytics data
+      const analyticsResponse = await fetch(`/api/dashboard/analytics?days=${days}`);
+      const analyticsResult = await analyticsResponse.json();
+
+      if (overviewResult.success && analyticsResult.success) {
+        setData(overviewResult.data);
+        setAnalytics(analyticsResult.data);
         setError(null);
       } else {
-        setError(result.error);
+        setError(overviewResult.error || analyticsResult.error);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
@@ -121,6 +152,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <SyncButton />
             <select
               value={days}
               onChange={(e) => setDays(parseInt(e.target.value))}
@@ -267,37 +299,19 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* AI Insights Section (Placeholder) */}
-        <Card className="border-primary/50 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              AI Insights (Coming Soon)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="p-3 bg-background rounded-md border">
-                <p className="text-sm font-medium">📈 Revenue Opportunity</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Your cancellation rate is {overview.cancellationRate}%. Implementing automated reminders could reduce this by 30-40%, potentially adding {Math.round(overview.totalRevenue * overview.cancellationRate * 0.003).toLocaleString('sv-SE')} kr to monthly revenue.
-                </p>
-              </div>
-              <div className="p-3 bg-background rounded-md border">
-                <p className="text-sm font-medium">⏰ Peak Time Optimization</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  AI analysis will identify your busiest hours and suggest optimal staffing levels to maximize revenue and minimize wait times.
-                </p>
-              </div>
-              <div className="p-3 bg-background rounded-md border">
-                <p className="text-sm font-medium">👥 Customer Retention</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Predictive analytics will identify at-risk customers and suggest personalized retention campaigns.
-                </p>
-              </div>
+        {/* Analytics Charts */}
+        {analytics && (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RevenueChart data={analytics.revenueTrend} />
+              <WeekdayChart data={analytics.weekdayDistribution} />
             </div>
-          </CardContent>
-        </Card>
+            <BookingPatternChart data={analytics.bookingPattern} />
+          </>
+        )}
+
+        {/* AI Insights Section */}
+        <AIInsightsSection days={days} />
       </div>
     </div>
   );
