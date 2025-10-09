@@ -48,10 +48,16 @@ model User {
   lastName      String?
   companyName   String?
   jobTitle      String?
+  role          UserRole  @default(CLINIC_STAFF)
+  clinicId      String?
+  clinic        Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([clinicId])
+  @@index([role])
 }
 
 model VerificationToken {
@@ -66,25 +72,33 @@ model VerificationToken {
 
 // Clinic (Salon) - represents a beauty/health clinic using Bokadirekt
 model Clinic {
-  id             String     @id @default(cuid())
-  bokadirektId   String?    @unique // Bokadirekt salon ID
-  name           String
-  description    String?
-  address        String?
-  phone          String?
-  email          String?
-  website        String?
-  isActive       Boolean    @default(true)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id                String     @id @default(cuid())
+  bokadirektId      String?    @unique // Bokadirekt salon ID
+  bokadirektApiKey  String?    // Each clinic has their own API key
+  name              String
+  description       String?
+  address           String?
+  phone             String?
+  email             String?
+  website           String?
+  tier              SubscriptionTier @default(BASIC)
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  trialEndsAt       DateTime?
+  subscriptionEndsAt DateTime?
+  isActive          Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
   
-  customers      Customer[]
-  staff          Staff[]
-  services       Service[]
-  bookings       Booking[]
+  users             User[]
+  customers         Customer[]
+  staff             Staff[]
+  services          Service[]
+  bookings          Booking[]
 
   @@index([bokadirektId])
   @@index([name])
+  @@index([tier])
+  @@index([subscriptionStatus])
 }
 
 model Customer {
@@ -239,6 +253,26 @@ model ImportLog {
 }
 
 // Enums
+enum UserRole {
+  SUPER_ADMIN      // System owner - can see all clinics
+  CLINIC_ADMIN     // Clinic owner - can see their clinic
+  CLINIC_STAFF     // Staff member - limited access
+}
+
+enum SubscriptionTier {
+  BASIC            // 499 SEK/month
+  PROFESSIONAL     // 1499 SEK/month
+  ENTERPRISE       // 2999+ SEK/month
+}
+
+enum SubscriptionStatus {
+  TRIAL            // 14-day free trial
+  ACTIVE           // Paying customer
+  PAST_DUE         // Payment failed
+  CANCELLED        // Subscription cancelled
+  EXPIRED          // Trial/subscription expired
+}
+
 enum BookingStatus {
   SCHEDULED
   CONFIRMED

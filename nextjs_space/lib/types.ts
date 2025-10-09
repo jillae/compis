@@ -2,38 +2,6 @@
 
 import type { Booking } from '@prisma/client'
 
-// Extended User type for NextAuth
-declare module "next-auth" {
-  interface User {
-    id: string
-    email: string
-    name?: string
-    firstName?: string
-    lastName?: string
-    companyName?: string
-    jobTitle?: string
-  }
-
-  interface Session {
-    user: User & {
-      id: string
-      firstName?: string
-      lastName?: string
-      companyName?: string
-      jobTitle?: string
-    }
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    firstName?: string
-    lastName?: string
-    companyName?: string
-    jobTitle?: string
-  }
-}
-
 // Dashboard metrics types
 export interface DashboardMetrics {
   totalBookings: number

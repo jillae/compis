@@ -67,7 +67,9 @@ export const authOptions: NextAuthOptions = {
             firstName: true,
             lastName: true,
             companyName: true,
-            jobTitle: true
+            jobTitle: true,
+            role: true,
+            clinicId: true
           }
         })
         if (dbUser) {
@@ -75,6 +77,8 @@ export const authOptions: NextAuthOptions = {
           token.lastName = dbUser.lastName || undefined
           token.companyName = dbUser.companyName || undefined
           token.jobTitle = dbUser.jobTitle || undefined
+          token.role = dbUser.role
+          token.clinicId = dbUser.clinicId || undefined
         }
       }
       return token
@@ -86,6 +90,8 @@ export const authOptions: NextAuthOptions = {
         session.user.lastName = token.lastName as string
         session.user.companyName = token.companyName as string
         session.user.jobTitle = token.jobTitle as string
+        session.user.role = token.role as any
+        session.user.clinicId = token.clinicId as string | undefined
       }
       return session
     }
