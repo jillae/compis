@@ -17,6 +17,8 @@ import { BookingPatternChart } from '@/components/dashboard/booking-pattern-char
 import { WeekdayChart } from '@/components/dashboard/weekday-chart';
 import { AIInsightsSection } from '@/components/dashboard/ai-insights-section';
 import { SyncButton } from '@/components/dashboard/sync-button';
+import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
+import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
 import Link from 'next/link';
 
 interface DashboardData {
@@ -88,6 +90,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(30);
+  const [workdays, setWorkdays] = useState<'5' | '7'>('7');
 
   useEffect(() => {
     fetchDashboardData();
@@ -161,6 +164,9 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Onboarding Banner */}
+        <OnboardingBanner />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -169,12 +175,13 @@ export default function DashboardPage() {
               Intäktsintelligens för ArchClinic
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <WorkdayToggle value={workdays} onChange={setWorkdays} />
             <SyncButton />
             <select
               value={days}
               onChange={(e) => setDays(parseInt(e.target.value))}
-              className="px-4 py-2 border rounded-md bg-background"
+              className="px-4 py-2 border rounded-md bg-background text-sm"
             >
               <option value={7}>Senaste 7 dagarna</option>
               <option value={30}>Senaste 30 dagarna</option>
@@ -212,7 +219,7 @@ export default function DashboardPage() {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{overview.totalBookings}</div>
+              <div className="text-4xl font-bold">{overview.totalBookings}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {overview.onlineBookingPercentage}% onlinebokningar
               </p>
@@ -226,7 +233,7 @@ export default function DashboardPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-4xl font-bold">
                 {overview.totalRevenue.toLocaleString('sv-SE')} kr
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -242,7 +249,7 @@ export default function DashboardPage() {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{overview.completionRate}%</div>
+              <div className="text-4xl font-bold">{overview.completionRate}%</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {overview.completedBookings} / {overview.totalBookings} bokningar
               </p>
@@ -256,7 +263,7 @@ export default function DashboardPage() {
               <XCircle className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{overview.cancellationRate}%</div>
+              <div className="text-4xl font-bold">{overview.cancellationRate}%</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {overview.cancelledBookings} avbokade, {overview.noShowBookings} uteblivna
               </p>
@@ -272,7 +279,7 @@ export default function DashboardPage() {
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-destructive">
+                  <div className="text-4xl font-bold text-destructive">
                     {atRiskMetrics.highRiskBookings}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">

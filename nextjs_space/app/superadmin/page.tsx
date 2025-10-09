@@ -1,97 +1,95 @@
 
+'use client'
+
 import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { useSession } from "next-auth/react"
 import { UserRole } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { prisma } from "@/lib/db"
-import { Building2, Users, DollarSign, Calendar, TrendingUp, AlertCircle } from "lucide-react"
+import { Building2, Users, DollarSign, Calendar } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { RoleToggle } from "@/components/dashboard/role-toggle"
+import { useState, useEffect } from "react"
 
-export const dynamic = 'force-dynamic'
-
-async function getSuperAdminData() {
-  // Get all clinics with their stats
-  const clinics = await prisma.clinic.findMany({
-    include: {
-      _count: {
-        select: {
-          users: true,
-          customers: true,
-          bookings: true,
-          services: true,
-          staff: true,
-        }
-      },
-      bookings: {
-        select: {
-          revenue: true,
-          status: true,
-        }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
-
-  // Calculate total metrics
-  const totalClinics = clinics.length
-  const totalUsers = clinics.reduce((sum, c) => sum + c._count.users, 0)
-  const totalCustomers = clinics.reduce((sum, c) => sum + c._count.customers, 0)
-  const totalBookings = clinics.reduce((sum, c) => sum + c._count.bookings, 0)
-  
-  const totalRevenue = clinics.reduce((sum, clinic) => {
-    const clinicRevenue = clinic.bookings.reduce((s, b) => s + Number(b.revenue), 0)
-    return sum + clinicRevenue
-  }, 0)
-
-  // Calculate clinic-specific stats
-  const clinicStats = clinics.map(clinic => {
-    const revenue = clinic.bookings.reduce((s, b) => s + Number(b.revenue), 0)
-    const activeBookings = clinic.bookings.filter(b => 
-      b.status === 'SCHEDULED' || b.status === 'CONFIRMED'
-    ).length
-
-    return {
-      id: clinic.id,
-      name: clinic.name,
-      tier: clinic.tier,
-      status: clinic.subscriptionStatus,
-      isActive: clinic.isActive,
-      users: clinic._count.users,
-      customers: clinic._count.customers,
-      bookings: clinic._count.bookings,
-      activeBookings,
-      services: clinic._count.services,
-      staff: clinic._count.staff,
-      revenue,
-      trialEndsAt: clinic.trialEndsAt,
-      subscriptionEndsAt: clinic.subscriptionEndsAt,
-      createdAt: clinic.createdAt,
-    }
-  })
-
-  return {
-    totalClinics,
-    totalUsers,
-    totalCustomers,
-    totalBookings,
-    totalRevenue,
-    clinics: clinicStats,
-  }
+interface SuperAdminData {
+  totalClinics: number
+  totalUsers: number
+  totalCustomers: number
+  totalBookings: number
+  totalRevenue: number
+  clinics: Array<{
+    id: string
+    name: string
+    tier: string
+    status: string
+    isActive: boolean
+    users: number
+    customers: number
+    bookings: number
+    activeBookings: number
+    services: number
+    staff: number
+    revenue: number
+    trialEndsAt: Date | null
+    subscriptionEndsAt: Date | null
+    createdAt: Date
+  }>
 }
 
-export default async function SuperAdminPage() {
-  const session = await getServerSession(authOptions)
+export default function SuperAdminPage() {
+  const { data: session, status } = useSession() || {}
+  const [data, setData] = useState<SuperAdminData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [simulatedRole, setSimulatedRole] = useState<UserRole>(UserRole.SUPER_ADMIN)
   
-  // Check if user is SuperAdmin
-  if (!session || session.user.role !== UserRole.SUPER_ADMIN) {
-    redirect('/dashboard')
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session || session.user.role !== UserRole.SUPER_ADMIN) {
+      redirect('/dashboard')
+      return
+    }
+
+    // Fetch SuperAdmin data
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/superadmin/stats')
+        const result = await response.json()
+        setData(result)
+      } catch (error) {
+        console.error('Failed to fetch superadmin data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [session, status])
+
+  const handleRoleChange = (role: UserRole) => {
+    setSimulatedRole(role)
+    // Redirect based on role
+    if (role === UserRole.ADMIN) {
+      window.location.href = '/dashboard'
+    } else if (role === UserRole.STAFF) {
+      window.location.href = '/dashboard'
+    }
   }
 
-  const data = await getSuperAdminData()
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return <div>Error loading data</div>
+  }
 
   return (
     <div className="p-8 space-y-8">
@@ -100,12 +98,15 @@ export default async function SuperAdminPage() {
           <h1 className="text-3xl font-bold">SuperAdmin Dashboard</h1>
           <p className="text-muted-foreground">System overview and clinic management</p>
         </div>
-        <Link href="/superadmin/clinics/new">
-          <Button>
-            <Building2 className="mr-2 h-4 w-4" />
-            Add New Clinic
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <RoleToggle currentRole={simulatedRole} onRoleChange={handleRoleChange} />
+          <Link href="/superadmin/clinics/new">
+            <Button>
+              <Building2 className="mr-2 h-4 w-4" />
+              Add New Clinic
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* System-wide metrics */}
@@ -116,7 +117,7 @@ export default async function SuperAdminPage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalClinics}</div>
+            <div className="text-4xl font-bold">{data.totalClinics}</div>
             <p className="text-xs text-muted-foreground">Registered clinics</p>
           </CardContent>
         </Card>
@@ -127,7 +128,7 @@ export default async function SuperAdminPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalUsers}</div>
+            <div className="text-4xl font-bold">{data.totalUsers}</div>
             <p className="text-xs text-muted-foreground">Across all clinics</p>
           </CardContent>
         </Card>
@@ -138,7 +139,7 @@ export default async function SuperAdminPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalCustomers.toLocaleString()}</div>
+            <div className="text-4xl font-bold">{data.totalCustomers.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Unique customers</p>
           </CardContent>
         </Card>
@@ -149,7 +150,7 @@ export default async function SuperAdminPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalBookings.toLocaleString()}</div>
+            <div className="text-4xl font-bold">{data.totalBookings.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -160,7 +161,7 @@ export default async function SuperAdminPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalRevenue.toLocaleString()} kr</div>
+            <div className="text-4xl font-bold">{data.totalRevenue.toLocaleString()} kr</div>
             <p className="text-xs text-muted-foreground">Across all clinics</p>
           </CardContent>
         </Card>

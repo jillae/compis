@@ -56,7 +56,7 @@ export default function SignupPage() {
       if (result?.error) {
         setError('Account created but sign in failed. Please try logging in.')
       } else {
-        router.replace('/dashboard')
+        router.replace('/onboarding')
       }
     } catch (error) {
       setError('Something went wrong. Please try again.')
@@ -191,7 +191,7 @@ export default function SignupPage() {
                 variant="outline"
                 className="w-full"
                 disabled={loading}
-                onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+                onClick={() => signIn('google', { callbackUrl: '/onboarding' })}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path

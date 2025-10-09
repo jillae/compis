@@ -38,23 +38,25 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  firstName     String?
-  lastName      String?
-  companyName   String?
-  jobTitle      String?
-  role          UserRole  @default(CLINIC_STAFF)
-  clinicId      String?
-  clinic        Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                   String    @id @default(cuid())
+  name                 String?
+  email                String?   @unique
+  emailVerified        DateTime?
+  image                String?
+  password             String?
+  firstName            String?
+  lastName             String?
+  companyName          String?
+  jobTitle             String?
+  role                 UserRole  @default(STAFF)
+  clinicId             String?
+  onboardingStep       Int?      @default(0)
+  onboardingCompletedAt DateTime?
+  clinic               Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  accounts             Account[]
+  sessions             Session[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   @@index([clinicId])
   @@index([role])
@@ -255,8 +257,10 @@ model ImportLog {
 // Enums
 enum UserRole {
   SUPER_ADMIN      // System owner - can see all clinics
-  CLINIC_ADMIN     // Clinic owner - can see their clinic
-  CLINIC_STAFF     // Staff member - limited access
+  ADMIN            // Clinic owner - can see their clinic
+  STAFF            // Staff member - limited access
+  CLINIC_ADMIN     // Legacy - same as ADMIN
+  CLINIC_STAFF     // Legacy - same as STAFF
 }
 
 enum SubscriptionTier {
