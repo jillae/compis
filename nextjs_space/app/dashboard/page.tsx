@@ -8,6 +8,7 @@ import {
   DollarSign,
   CheckCircle,
   XCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { BookingPatternChart } from '@/components/dashboard/booking-pattern-chart';
@@ -70,9 +71,18 @@ interface AnalyticsData {
   }>;
 }
 
+interface AtRiskMetrics {
+  totalBookings: number;
+  highRiskBookings: number;
+  mediumRiskBookings: number;
+  lowRiskBookings: number;
+  potentialLoss: number;
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [atRiskMetrics, setAtRiskMetrics] = useState<AtRiskMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(30);
@@ -93,9 +103,14 @@ export default function DashboardPage() {
       const analyticsResponse = await fetch(`/api/dashboard/analytics?days=${days}`);
       const analyticsResult = await analyticsResponse.json();
 
+      // Fetch at-risk metrics
+      const atRiskResponse = await fetch(`/api/bookings/predict?action=revenue-at-risk&days=14`);
+      const atRiskResult = await atRiskResponse.json();
+
       if (overviewResult.success && analyticsResult.success) {
         setData(overviewResult.data);
         setAnalytics(analyticsResult.data);
+        setAtRiskMetrics(atRiskResult);
         setError(null);
       } else {
         setError(overviewResult.error || analyticsResult.error);
@@ -167,7 +182,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Total Bookings */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -225,6 +240,26 @@ export default function DashboardPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* At-Risk Bookings */}
+          {atRiskMetrics && (
+            <Link href="/dashboard/at-risk">
+              <Card className="cursor-pointer hover:border-destructive/50 transition-all border-destructive/30 bg-destructive/5">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">At-Risk Next 14d</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-destructive">
+                    {atRiskMetrics.highRiskBookings}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {atRiskMetrics.potentialLoss.toLocaleString()} kr at risk
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          )}
         </div>
 
         {/* Two Column Layout */}
@@ -317,13 +352,26 @@ export default function DashboardPage() {
         {/* Quick Links to Advanced Analytics */}
         <Card>
           <CardHeader>
-            <CardTitle>Advanced Analytics</CardTitle>
+            <CardTitle>Advanced Analytics & AI Tools</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Dive deeper into your business data with detailed analytics
+              AI-powered insights to optimize your clinic operations and revenue
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link
+                href="/dashboard/at-risk"
+                className="p-6 border-2 border-destructive/30 bg-destructive/5 rounded-lg hover:border-destructive hover:bg-destructive/10 transition-all"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  <h3 className="font-semibold">At-Risk Bookings</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  AI no-show prediction with actionable recommendations to protect revenue
+                </p>
+              </Link>
+
               <Link
                 href="/analytics/customers"
                 className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
