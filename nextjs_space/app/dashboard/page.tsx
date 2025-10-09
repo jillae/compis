@@ -127,7 +127,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-muted-foreground">Laddar dashboard...</p>
         </div>
       </div>
     );
@@ -138,15 +138,15 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="max-w-md">
           <CardHeader>
-            <CardTitle className="text-destructive">Error</CardTitle>
+            <CardTitle className="text-destructive">Fel</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>{error || 'No data available'}</p>
+            <p>{error || 'Ingen data tillgänglig'}</p>
             <button
               onClick={fetchDashboardData}
               className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >
-              Retry
+              Försök igen
             </button>
           </CardContent>
         </Card>
@@ -164,7 +164,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Flow Dashboard</h1>
             <p className="text-muted-foreground">
-              Revenue Intelligence for ArchClinic
+              Intäktsintelligens för ArchClinic
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -174,9 +174,9 @@ export default function DashboardPage() {
               onChange={(e) => setDays(parseInt(e.target.value))}
               className="px-4 py-2 border rounded-md bg-background"
             >
-              <option value={7}>Last 7 days</option>
-              <option value={30}>Last 30 days</option>
-              <option value={90}>Last 90 days</option>
+              <option value={7}>Senaste 7 dagarna</option>
+              <option value={30}>Senaste 30 dagarna</option>
+              <option value={90}>Senaste 90 dagarna</option>
             </select>
           </div>
         </div>
@@ -186,13 +186,13 @@ export default function DashboardPage() {
           {/* Total Bookings */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+              <CardTitle className="text-sm font-medium">Totalt Bokningar</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{overview.totalBookings}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {overview.onlineBookingPercentage}% online bookings
+                {overview.onlineBookingPercentage}% onlinebokningar
               </p>
             </CardContent>
           </Card>
@@ -200,7 +200,7 @@ export default function DashboardPage() {
           {/* Total Revenue */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Intäkt</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                 {overview.totalRevenue.toLocaleString('sv-SE')} kr
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                From {overview.completedBookings} completed bookings
+                Från {overview.completedBookings} genomförda bokningar
               </p>
             </CardContent>
           </Card>
@@ -216,13 +216,13 @@ export default function DashboardPage() {
           {/* Completion Rate */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">Genomförandegrad</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{overview.completionRate}%</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {overview.completedBookings} / {overview.totalBookings} bookings
+                {overview.completedBookings} / {overview.totalBookings} bokningar
               </p>
             </CardContent>
           </Card>
@@ -230,13 +230,13 @@ export default function DashboardPage() {
           {/* Cancellation Rate */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cancellation Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">Avbokningsgrad</CardTitle>
               <XCircle className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{overview.cancellationRate}%</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {overview.cancelledBookings} cancelled, {overview.noShowBookings} no-shows
+                {overview.cancelledBookings} avbokade, {overview.noShowBookings} uteblivna
               </p>
             </CardContent>
           </Card>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
             <Link href="/dashboard/at-risk">
               <Card className="cursor-pointer hover:border-destructive/50 transition-all border-destructive/30 bg-destructive/5">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">At-Risk Next 14d</CardTitle>
+                  <CardTitle className="text-sm font-medium">Risk Nästa 14d</CardTitle>
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                 </CardHeader>
                 <CardContent>
@@ -254,7 +254,7 @@ export default function DashboardPage() {
                     {atRiskMetrics.highRiskBookings}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {atRiskMetrics.potentialLoss.toLocaleString()} kr at risk
+                    {atRiskMetrics.potentialLoss.toLocaleString()} kr i riskzon
                   </p>
                 </CardContent>
               </Card>
@@ -267,7 +267,7 @@ export default function DashboardPage() {
           {/* Top Services */}
           <Card>
             <CardHeader>
-              <CardTitle>Top Services</CardTitle>
+              <CardTitle>Populäraste Tjänster</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">{service._count.id} bookings</p>
+                      <p className="font-semibold">{service._count.id} bokningar</p>
                       <p className="text-xs text-muted-foreground">
                         {(service._sum.price || 0).toLocaleString('sv-SE')} kr
                       </p>
@@ -292,7 +292,7 @@ export default function DashboardPage() {
                 ))}
                 {topServices.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
-                    No services data available
+                    Ingen tjänstedata tillgänglig
                   </p>
                 )}
               </div>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
           {/* Staff Performance */}
           <Card>
             <CardHeader>
-              <CardTitle>Staff Performance</CardTitle>
+              <CardTitle>Personalprestanda</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">{staff._count.id} bookings</p>
+                      <p className="font-semibold">{staff._count.id} bokningar</p>
                       <p className="text-xs text-muted-foreground">
                         {(staff._sum.price || 0).toLocaleString('sv-SE')} kr
                       </p>
@@ -327,7 +327,7 @@ export default function DashboardPage() {
                 ))}
                 {staffPerformance.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
-                    No staff data available
+                    Ingen personaldata tillgänglig
                   </p>
                 )}
               </div>
@@ -352,9 +352,9 @@ export default function DashboardPage() {
         {/* Quick Links to Advanced Analytics */}
         <Card>
           <CardHeader>
-            <CardTitle>Advanced Analytics & AI Tools</CardTitle>
+            <CardTitle>Avancerad Analys & AI-verktyg</CardTitle>
             <p className="text-sm text-muted-foreground">
-              AI-powered insights to optimize your clinic operations and revenue
+              AI-drivna insikter för att optimera din klinik och öka intäkterna
             </p>
           </CardHeader>
           <CardContent>
@@ -365,10 +365,10 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="h-5 w-5 text-destructive" />
-                  <h3 className="font-semibold">At-Risk Bookings</h3>
+                  <h3 className="font-semibold">Riskbokningar</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  AI no-show prediction with actionable recommendations to protect revenue
+                  AI-förutsägelse av uteblivna besök med åtgärdsrekommendationer för att skydda intäkter
                 </p>
               </Link>
 
@@ -376,9 +376,9 @@ export default function DashboardPage() {
                 href="/analytics/customers"
                 className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
               >
-                <h3 className="font-semibold mb-2">Customer Analytics</h3>
+                <h3 className="font-semibold mb-2">Kundanalys</h3>
                 <p className="text-sm text-muted-foreground">
-                  Lifetime value, churn rate, segmentation, and retention insights
+                  Livstidsvärde, churn-rate, segmentering och retentionsinsikter
                 </p>
               </Link>
               
@@ -386,9 +386,9 @@ export default function DashboardPage() {
                 href="/analytics/services"
                 className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
               >
-                <h3 className="font-semibold mb-2">Service Analytics</h3>
+                <h3 className="font-semibold mb-2">Tjänsteanalys</h3>
                 <p className="text-sm text-muted-foreground">
-                  Performance metrics, capacity utilization, and optimization recommendations
+                  Prestationsmätningar, kapacitetsutnyttjande och optimeringsrekommendationer
                 </p>
               </Link>
               
@@ -396,9 +396,9 @@ export default function DashboardPage() {
                 href="/analytics/forecast"
                 className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
               >
-                <h3 className="font-semibold mb-2">Revenue Forecast</h3>
+                <h3 className="font-semibold mb-2">Intäktsprognos</h3>
                 <p className="text-sm text-muted-foreground">
-                  AI-powered predictions for future revenue and booking trends
+                  AI-drivna förutsägelser för framtida intäkter och bokningstrender
                 </p>
               </Link>
             </div>

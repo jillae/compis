@@ -15,8 +15,8 @@ export function SyncButton() {
       setIsSyncing(true);
       
       toast({
-        title: 'Syncing...',
-        description: 'Fetching latest data from Bokadirekt',
+        title: 'Synkroniserar...',
+        description: 'Hämtar senaste data från Bokadirekt',
       });
 
       const response = await fetch('/api/sync', {
@@ -27,23 +27,23 @@ export function SyncButton() {
 
       if (result.success) {
         toast({
-          title: 'Sync Successful! 🎉',
-          description: `Updated: ${result.results.bookings.upserted} bookings, ${result.results.customers.upserted} customers, ${result.results.staff.upserted} staff, ${result.results.services.upserted} services`,
+          title: 'Synkronisering lyckades! 🎉',
+          description: `Uppdaterat: ${result.results.bookings.upserted} bokningar, ${result.results.customers.upserted} kunder, ${result.results.staff.upserted} personal, ${result.results.services.upserted} tjänster`,
         });
         
         // Reload the page to show updated data
         window.location.reload();
       } else {
         toast({
-          title: 'Sync Failed',
-          description: result.error || 'Failed to sync data',
+          title: 'Synkronisering misslyckades',
+          description: result.error || 'Kunde inte synkronisera data',
           variant: 'destructive',
         });
       }
     } catch (error) {
       toast({
-        title: 'Sync Error',
-        description: error instanceof Error ? error.message : 'An error occurred',
+        title: 'Synkroniseringsfel',
+        description: error instanceof Error ? error.message : 'Ett fel uppstod',
         variant: 'destructive',
       });
     } finally {
@@ -60,7 +60,7 @@ export function SyncButton() {
       className="gap-2"
     >
       <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-      {isSyncing ? 'Syncing...' : 'Sync Now'}
+      {isSyncing ? 'Synkroniserar...' : 'Synkronisera nu'}
     </Button>
   );
 }

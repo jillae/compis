@@ -20,9 +20,9 @@ interface AIInsightsProps {
 }
 
 const priorityConfig = {
-  high: { color: 'bg-red-500', icon: AlertCircle, label: 'High Priority' },
-  medium: { color: 'bg-yellow-500', icon: TrendingUp, label: 'Medium Priority' },
-  low: { color: 'bg-blue-500', icon: Lightbulb, label: 'Low Priority' },
+  high: { color: 'bg-red-500', icon: AlertCircle, label: 'Hög Prioritet' },
+  medium: { color: 'bg-yellow-500', icon: TrendingUp, label: 'Medel Prioritet' },
+  low: { color: 'bg-blue-500', icon: Lightbulb, label: 'Låg Prioritet' },
 };
 
 const insightIcons = {
@@ -62,7 +62,7 @@ export function AIInsightsSection({ days }: AIInsightsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            AI Insights
+            AI-insikter
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -83,7 +83,7 @@ export function AIInsightsSection({ days }: AIInsightsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-primary" />
-          AI-Driven Revenue Insights
+          AI-drivna Intäktsinsikter
         </CardTitle>
       </CardHeader>
       <CardContent>

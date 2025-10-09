@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         by: ['customerId'],
         where: {
           bookedAt: { gte: startDate },
-          status: 'completed',
+          status: 'COMPLETED',
         },
         having: {
           customerId: {
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       prisma.booking
         .aggregate({
           where: {
-            status: 'completed',
+            status: 'COMPLETED',
           },
           _avg: {
             price: true,
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         .groupBy({
           by: ['customerId'],
           where: {
-            status: 'completed',
+            status: 'COMPLETED',
           },
           _count: {
             customerId: true,
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
       by: ['customerId'],
       where: {
         bookedAt: { gte: startDate },
-        status: 'completed',
+        status: 'COMPLETED',
       },
       _count: {
         customerId: true,
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     };
 
     customerSegmentation.forEach((customer) => {
-      const bookingCount = customer._count.customerId;
+      const bookingCount = (customer._count as any).customerId || 0;
       if (bookingCount === 1) segments.oneTime++;
       else if (bookingCount <= 3) segments.occasional++;
       else if (bookingCount <= 6) segments.regular++;
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
       by: ['customerId'],
       where: {
         bookedAt: { gte: startDate },
-        status: 'completed',
+        status: 'COMPLETED',
       },
       _sum: {
         price: true,
