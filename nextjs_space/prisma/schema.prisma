@@ -144,6 +144,7 @@ model Staff {
   specializations String[]  @default([])
   specialization  String?
   hourlyRate      Decimal?  @db.Decimal(8, 2)
+  weeklyHours     Int?      // Antal arbetstimmar per vecka
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

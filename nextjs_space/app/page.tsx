@@ -47,20 +47,21 @@ export default async function LandingPage() {
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="inline-block">
             <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-              🚀 AI-driven intäktsintelligens för din klinik
+              💪 Din proaktiva affärscoach
             </span>
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-            Optimera intäkter med{' '}
+            Öka intäkter med{' '}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              AI-insikter
+              sporrad data
             </span>
           </h1>
           
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Flow analyserar din bokningsdata i realtid och ger dig actionable insikter som ökar intäkter, 
-            minskar no-shows och optimerar din kliniks resurser. Allt integrerat med Bokadirekt.
+            Flow är din affärsdrivna coach som proaktivt analyserar din bokningsdata och ger dig konkreta åtgärder 
+            som ökar intäkter direkt. Inte bara grafer – actionable insikter som driver tillväxt. 
+            Fullt integrerat med Bokadirekt.
           </p>
 
           <div className="flex items-center justify-center gap-4 pt-4">
@@ -122,7 +123,7 @@ export default async function LandingPage() {
       <section id="features" className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Allt du behöver för att växa</h2>
-          <p className="text-xl text-gray-600">AI-drivna verktyg som ger dig konkurrensfördelar</p>
+          <p className="text-xl text-gray-600">Proaktiva verktyg som driver affären framåt</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -131,9 +132,9 @@ export default async function LandingPage() {
               <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center">
                 <Sparkles className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold">AI-prediktioner</h3>
+              <h3 className="text-xl font-semibold">Risk-varningar</h3>
               <p className="text-gray-600">
-                Identifiera riskbokningar före de blir no-shows. AI analyserar mönster och varnar i tid.
+                Identifiera riskbokningar innan de blir no-shows. Få varningar i tid så du kan agera proaktivt.
               </p>
             </CardContent>
           </Card>

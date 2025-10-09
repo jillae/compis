@@ -19,6 +19,7 @@ import { AIInsightsSection } from '@/components/dashboard/ai-insights-section';
 import { SyncButton } from '@/components/dashboard/sync-button';
 import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
 import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
+import { TimePeriodSelector } from '@/components/time-period-selector';
 import Link from 'next/link';
 
 interface DashboardData {
@@ -89,23 +90,38 @@ export default function DashboardPage() {
   const [atRiskMetrics, setAtRiskMetrics] = useState<AtRiskMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [days, setDays] = useState(30);
+  const [timePeriod, setTimePeriod] = useState<string>('30');
   const [workdays, setWorkdays] = useState<'5' | '7'>('7');
+
+  // Helper function to convert timePeriod to days
+  const getDaysFromTimePeriod = (period: string): number => {
+    if (period === 'currentYear') {
+      return Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    } else if (period === 'previousYear') {
+      return 365;
+    } else if (period === 'all') {
+      return 3650; // 10 years as "all"
+    }
+    return parseInt(period) || 30;
+  };
 
   useEffect(() => {
     fetchDashboardData();
-  }, [days]);
+  }, [timePeriod]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       
+      // Convert timePeriod to days for API
+      const daysParam = getDaysFromTimePeriod(timePeriod);
+      
       // Fetch overview data
-      const overviewResponse = await fetch(`/api/dashboard/overview?days=${days}`);
+      const overviewResponse = await fetch(`/api/dashboard/overview?days=${daysParam}`);
       const overviewResult = await overviewResponse.json();
 
       // Fetch analytics data
-      const analyticsResponse = await fetch(`/api/dashboard/analytics?days=${days}`);
+      const analyticsResponse = await fetch(`/api/dashboard/analytics?days=${daysParam}`);
       const analyticsResult = await analyticsResponse.json();
 
       // Fetch at-risk metrics
@@ -182,18 +198,11 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <WorkdayToggle value={workdays} onChange={setWorkdays} />
                 <SyncButton />
-                <select
-                  value={days}
-                  onChange={(e) => setDays(parseInt(e.target.value))}
-                  className="px-4 py-2 border rounded-md bg-background text-sm"
-                >
-                  <option value={7}>Senaste 7 dagarna</option>
-                  <option value={30}>Senaste 30 dagarna</option>
-                  <option value={90}>Senaste 90 dagarna</option>
-                  <option value={180}>Senaste 180 dagarna</option>
-                  <option value={365}>Senaste 1 år</option>
-                  <option value={730}>Senaste 2 år</option>
-                </select>
+                <TimePeriodSelector 
+                  value={timePeriod} 
+                  onChange={setTimePeriod}
+                  className="w-[180px]"
+                />
               </div>
             </div>
           </div>
@@ -388,7 +397,7 @@ export default function DashboardPage() {
         )}
 
         {/* AI Insights Section */}
-        <AIInsightsSection days={days} />
+        <AIInsightsSection days={getDaysFromTimePeriod(timePeriod)} />
 
         {/* Quick Links to Advanced Analytics */}
         <Card>

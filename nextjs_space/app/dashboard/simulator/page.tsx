@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendingUp, DollarSign, Users, Calendar, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/ui/back-button';
 import {
   LineChart,
   Line,
@@ -146,13 +147,7 @@ export default function SimulatorPage() {
                 Justera parametrar och se direkt hur det påverkar dina intäkter kommande 12 månader
               </p>
             </div>
-            <Link 
-              href="/dashboard" 
-              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Tillbaka</span>
-            </Link>
+            <BackButton href="/dashboard" label="Tillbaka till översikt" />
           </div>
         </div>
       </div>

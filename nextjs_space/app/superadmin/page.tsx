@@ -95,15 +95,15 @@ export default function SuperAdminPage() {
     <div className="p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">SuperAdmin Dashboard</h1>
-          <p className="text-muted-foreground">System overview and clinic management</p>
+          <h1 className="text-3xl font-bold">⚙️ SuperAdmin Dashboard</h1>
+          <p className="text-muted-foreground">Systemöversikt och drifthantering</p>
         </div>
         <div className="flex items-center gap-3">
           <RoleToggle currentRole={simulatedRole} onRoleChange={handleRoleChange} />
           <Link href="/superadmin/clinics/new">
             <Button>
               <Building2 className="mr-2 h-4 w-4" />
-              Add New Clinic
+              Lägg till klinik
             </Button>
           </Link>
         </div>
@@ -113,56 +113,56 @@ export default function SuperAdminPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Clinics</CardTitle>
+            <CardTitle className="text-sm font-medium">Totalt Kliniker</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">{data.totalClinics}</div>
-            <p className="text-xs text-muted-foreground">Registered clinics</p>
+            <p className="text-xs text-muted-foreground">Registrerade kliniker</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Totalt Användare</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">{data.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Across all clinics</p>
+            <p className="text-xs text-muted-foreground">Över alla kliniker</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">Totalt Kunder</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">{data.totalCustomers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Unique customers</p>
+            <p className="text-xs text-muted-foreground">Unika kunder</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+            <CardTitle className="text-sm font-medium">Totalt Bokningar</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">{data.totalBookings.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
+            <p className="text-xs text-muted-foreground">Alla tider</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Omsättning</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">{data.totalRevenue.toLocaleString()} kr</div>
-            <p className="text-xs text-muted-foreground">Across all clinics</p>
+            <p className="text-xs text-muted-foreground">Över alla kliniker</p>
           </CardContent>
         </Card>
       </div>
