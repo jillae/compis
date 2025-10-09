@@ -48,12 +48,12 @@ async function calculateRevenueOpportunity(bookings: any[], days: number) {
   const cancelled = bookings.filter((b) => b.status === 'cancelled' || b.status === 'CANCELLED');
   const noShows = bookings.filter((b) => b.status === 'no_show' || b.status === 'NO_SHOW');
   
-  const cancelledRevenue = cancelled.reduce((sum, b) => sum + (b.price || 0), 0);
-  const noShowRevenue = noShows.reduce((sum, b) => sum + (b.price || 0), 0);
+  const cancelledRevenue = cancelled.reduce((sum, b) => sum + (Number(b.price) || 0), 0);
+  const noShowRevenue = noShows.reduce((sum, b) => sum + (Number(b.price) || 0), 0);
   
-  const totalLostRevenue = cancelledRevenue + noShowRevenue;
+  const totalLostRevenue = Math.round(cancelledRevenue + noShowRevenue);
   const recoverablePotential = totalLostRevenue * 0.35; // 35% recovery rate with reminders
-  const monthlyPotential = (recoverablePotential / days) * 30;
+  const monthlyPotential = Math.round((recoverablePotential / days) * 30);
 
   const cancellationRate = bookings.length > 0 ? (cancelled.length / bookings.length) * 100 : 0;
   const noShowRate = bookings.length > 0 ? (noShows.length / bookings.length) * 100 : 0;
@@ -63,12 +63,12 @@ async function calculateRevenueOpportunity(bookings: any[], days: number) {
     priority: 'high',
     impact: monthlyPotential,
     description: `Du har förlorat ${totalLostRevenue.toLocaleString('sv-SE')} kr på avbokningar och no-shows de senaste ${days} dagarna.`,
-    recommendation: `Implementera automatiska påminnelser 24h innan bokning. Detta kan minska avbokningar med 30-40% och potentiellt återvinna ${Math.round(monthlyPotential).toLocaleString('sv-SE')} kr per månad.`,
+    recommendation: `Implementera automatiska påminnelser 24h innan bokning. Detta kan minska avbokningar med 30-40% och potentiellt återvinna ${monthlyPotential.toLocaleString('sv-SE')} kr per månad.`,
     metrics: {
       cancellationRate: cancellationRate.toFixed(1) + '%',
       noShowRate: noShowRate.toFixed(1) + '%',
       lostRevenue: totalLostRevenue,
-      monthlyRecoveryPotential: Math.round(monthlyPotential),
+      monthlyRecoveryPotential: monthlyPotential,
     },
   };
 }
@@ -104,7 +104,7 @@ async function calculatePeakTimeOptimization(bookings: any[]) {
   const hourlyRevenue: Record<number, number> = {};
   bookings.forEach((booking) => {
     const hour = new Date(booking.scheduledTime).getHours();
-    hourlyRevenue[hour] = (hourlyRevenue[hour] || 0) + (Number(booking.price || 0));
+    hourlyRevenue[hour] = (hourlyRevenue[hour] || 0) + (Number(booking.price) || 0);
   });
 
   const topRevenueHour = Object.entries(hourlyRevenue)
@@ -117,8 +117,8 @@ async function calculatePeakTimeOptimization(bookings: any[]) {
     description: `Dina mest lönsamma tider är ${peakHours.join(', ')}:00 och mest bokade dagar är ${busiestDays.join(', ')}.`,
     recommendation: `Överväg att öka personalstyrkan under toppbelastning kl ${peakHours[0]}:00-${peakHours[0] + 2}:00 och erbjuda kampanjer under lågtrafik för att jämna ut kapacitetsutnyttjandet.`,
     metrics: {
-      peakHours: peakHours.map(h => `${h}:00`),
-      busiestDays,
+      peakHours: peakHours.map(h => `${h}:00`).join(', '),
+      busiestDays: busiestDays.join(', '),
       topRevenueHour: topRevenueHour ? `${topRevenueHour[0]}:00` : 'N/A',
     },
   };
@@ -157,17 +157,20 @@ async function calculateCustomerRetention(bookings: any[], startDate: Date) {
     return lastBooking && new Date(lastBooking.scheduledTime) < thirtyDaysAgo;
   });
 
+  const potentialImpact = Math.round(atRiskCustomers.length * 500); // Estimated average booking value
+  const potentialRevenue = Math.round(atRiskCustomers.length * 0.175 * 500);
+
   return {
     title: 'Customer Retention Strategy',
     priority: 'medium',
-    impact: atRiskCustomers.length * 500, // Estimated average booking value
+    impact: potentialImpact,
     description: `${atRiskCustomers.length} kunder har inte bokat på 30+ dagar. Din repeat rate är ${repeatRate.toFixed(0)}%.`,
-    recommendation: `Skicka personaliserade erbjudanden till inaktiva kunder. En win-back kampanj kan återaktivera 15-20% av dessa kunder och generera ca ${Math.round(atRiskCustomers.length * 0.175 * 500).toLocaleString('sv-SE')} kr i extra intäkter.`,
+    recommendation: `Skicka personaliserade erbjudanden till inaktiva kunder. En win-back kampanj kan återaktivera 15-20% av dessa kunder och generera ca ${potentialRevenue.toLocaleString('sv-SE')} kr i extra intäkter.`,
     metrics: {
       totalCustomers: customerIds.length,
       repeatRate: repeatRate.toFixed(1) + '%',
       atRiskCustomers: atRiskCustomers.length,
-      potentialRevenue: Math.round(atRiskCustomers.length * 0.175 * 500),
+      potentialRevenue: potentialRevenue,
     },
   };
 }
@@ -183,7 +186,7 @@ async function calculateServiceRecommendations(bookings: any[]) {
         serviceStats[serviceId] = { count: 0, revenue: 0, name: booking.service.name };
       }
       serviceStats[serviceId].count += 1;
-      serviceStats[serviceId].revenue += Number(booking.price || 0);
+      serviceStats[serviceId].revenue += Number(booking.price) || 0;
     }
   });
 
@@ -199,17 +202,19 @@ async function calculateServiceRecommendations(bookings: any[]) {
     .sort(([, a], [, b]) => b.revenue - a.revenue)
     .slice(0, 3);
 
+  const topServiceRevenue = Math.round(topPerformers[0]?.[1].revenue || 0);
+
   return {
     title: 'Service Portfolio Optimization',
     priority: 'low',
     impact: 0,
     description: `${underperforming.length} tjänster har låg efterfrågan. Fokusera på dina toppförsäljare för maximal lönsamhet.`,
     recommendation: topPerformers.length > 0 
-      ? `Dina mest lönsamma tjänster är "${topPerformers[0][1].name}" (${topPerformers[0][1].revenue.toLocaleString('sv-SE')} kr). Överväg att skapa paketlösningar runt dessa för att öka genomsnittligt ordervärde.`
+      ? `Dina mest lönsamma tjänster är "${topPerformers[0][1].name}" (${topServiceRevenue.toLocaleString('sv-SE')} kr). Överväg att skapa paketlösningar runt dessa för att öka genomsnittligt ordervärde.`
       : 'Analysera vilka tjänster som ger högst marginal och främja dessa mer aktivt.',
     metrics: {
       topService: topPerformers[0]?.[1].name || 'N/A',
-      topServiceRevenue: topPerformers[0]?.[1].revenue || 0,
+      topServiceRevenue: topServiceRevenue,
       underperformingCount: underperforming.length,
     },
   };
@@ -228,28 +233,31 @@ async function calculateStaffingEfficiency(bookings: any[]) {
           staffStats[staffId] = { count: 0, revenue: 0, name: booking.staff.name };
         }
         staffStats[staffId].count += 1;
-        staffStats[staffId].revenue += Number(booking.price || 0);
+        staffStats[staffId].revenue += Number(booking.price) || 0;
       }
     });
 
   const staffArray = Object.values(staffStats);
-  const avgRevenue = staffArray.reduce((sum, s) => sum + s.revenue, 0) / staffArray.length;
+  const avgRevenue = staffArray.length > 0 ? staffArray.reduce((sum, s) => sum + s.revenue, 0) / staffArray.length : 0;
   
   const topPerformer = staffArray.sort((a, b) => b.revenue - a.revenue)[0];
   const revenueGap = topPerformer ? topPerformer.revenue - avgRevenue : 0;
+  
+  const totalRevenue = Math.round(staffArray.reduce((sum, s) => sum + s.revenue, 0));
+  const topPerformerRevenue = Math.round(topPerformer?.revenue || 0);
 
   return {
     title: 'Staff Performance Insights',
     priority: 'low',
-    impact: revenueGap * 0.1, // Small impact from optimization
-    description: `${staffArray.length} medarbetare har genererat ${staffArray.reduce((sum, s) => sum + s.revenue, 0).toLocaleString('sv-SE')} kr totalt.`,
+    impact: Math.round(revenueGap * 0.1), // Small impact from optimization
+    description: `${staffArray.length} medarbetare har genererat ${totalRevenue.toLocaleString('sv-SE')} kr totalt.`,
     recommendation: topPerformer 
-      ? `${topPerformer.name} är din toppförsäljare med ${topPerformer.revenue.toLocaleString('sv-SE')} kr. Analysera deras metoder och dela best practices med teamet för att höja genomsnittet.`
+      ? `${topPerformer.name} är din toppförsäljare med ${topPerformerRevenue.toLocaleString('sv-SE')} kr. Analysera deras metoder och dela best practices med teamet för att höja genomsnittet.`
       : 'Följ upp individuell prestanda regelbundet för att identifiera förbättringsområden.',
     metrics: {
       totalStaff: staffArray.length,
       topPerformer: topPerformer?.name || 'N/A',
-      topPerformerRevenue: topPerformer?.revenue || 0,
+      topPerformerRevenue: topPerformerRevenue,
       averageRevenue: Math.round(avgRevenue),
     },
   };
