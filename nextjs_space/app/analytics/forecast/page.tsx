@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { TrendingUp, Calendar, DollarSign, Activity } from 'lucide-react';
+import { TrendingUp, Calendar, DollarSign, Activity, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import {
   LineChart,
@@ -50,7 +51,8 @@ export default function ForecastPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/analytics/forecast?days=${days}&forecastDays=${forecastDays}`);
+      const daysParam = days === 999999 ? 999999 : days;
+      const response = await fetch(`/api/analytics/forecast?days=${daysParam}&forecastDays=${forecastDays}`);
       const result = await response.json();
       if (result.success) {
         setData(result.data);
@@ -67,14 +69,16 @@ export default function ForecastPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading forecast...</p>
+          <p className="text-muted-foreground">Laddar prognosdata...</p>
         </div>
       </div>
     );
   }
 
   if (!data) {
-    return <div>No data available</div>;
+    return <div className="flex items-center justify-center min-h-screen">
+      <p className="text-muted-foreground">Ingen data tillgänglig</p>
+    </div>;
   }
 
   const { historical, forecast, summary } = data;
@@ -98,95 +102,106 @@ export default function ForecastPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50 dark:from-slate-950 dark:to-violet-950 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Revenue Forecast</h1>
-            <p className="text-muted-foreground">AI-powered predictions for your business</p>
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+              Intäktsprognos
+            </h1>
+            <p className="text-muted-foreground mt-1">AI-drivna förutsägelser för din verksamhet</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="px-4 py-2 border rounded-md hover:bg-accent">
-              ← Back to Dashboard
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link 
+              href="/dashboard" 
+              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Tillbaka</span>
             </Link>
             <select
               value={days}
               onChange={(e) => setDays(parseInt(e.target.value))}
-              className="px-4 py-2 border rounded-md bg-background"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium shadow-sm"
             >
-              <option value={7}>Last 7 days</option>
-              <option value={30}>Last 30 days</option>
-              <option value={90}>Last 90 days</option>
+              <option value={7}>Senaste 7 dagarna</option>
+              <option value={30}>Senaste 30 dagarna</option>
+              <option value={90}>Senaste 90 dagarna</option>
+              <option value={180}>Senaste 6 månaderna</option>
+              <option value={365}>Senaste året</option>
+              <option value={730}>Senaste 2 åren</option>
+              <option value={999999}>Hela perioden</option>
             </select>
             <select
               value={forecastDays}
               onChange={(e) => setForecastDays(parseInt(e.target.value))}
-              className="px-4 py-2 border rounded-md bg-background"
+              className="px-4 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium shadow-sm"
             >
-              <option value={7}>Forecast 7 days</option>
-              <option value={30}>Forecast 30 days</option>
-              <option value={60}>Forecast 60 days</option>
+              <option value={7}>Prognos 7 dagar</option>
+              <option value={30}>Prognos 30 dagar</option>
+              <option value={60}>Prognos 60 dagar</option>
+              <option value={90}>Prognos 90 dagar</option>
             </select>
           </div>
         </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="shadow-lg border-slate-200 dark:border-slate-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Forecast Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Förväntad Intäkt</CardTitle>
+              <DollarSign className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{(summary.totalForecastRevenue || 0).toLocaleString('sv-SE')} kr</div>
-              <p className="text-xs text-muted-foreground mt-1">Next {forecastDays} days</p>
+              <p className="text-xs text-muted-foreground mt-1">Nästa {forecastDays} dagar</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-lg border-slate-200 dark:border-slate-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Forecast Bookings</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Förväntade Bokningar</CardTitle>
+              <Calendar className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.totalForecastBookings || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">Next {forecastDays} days</p>
+              <p className="text-xs text-muted-foreground mt-1">Nästa {forecastDays} dagar</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-lg border-slate-200 dark:border-slate-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Growth Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">Tillväxttakt</CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{(summary.revenueGrowthRate || 0) > 0 ? '+' : ''}{(summary.revenueGrowthRate || 0)}%</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Trend: {summary.trendDirection}
+                Trend: {summary.trendDirection === 'increasing' ? 'ökande' : 'minskande'}
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-lg border-slate-200 dark:border-slate-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Confidence Score</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Säkerhetsnivå</CardTitle>
+              <Activity className="h-4 w-4 text-violet-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.confidenceScore || 0}%</div>
-              <p className="text-xs text-muted-foreground mt-1">Prediction accuracy</p>
+              <p className="text-xs text-muted-foreground mt-1">Prognosnoggrannhet</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Revenue Forecast Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue Forecast</CardTitle>
-            <CardDescription>Historical data (solid line) vs predicted values (dashed line)</CardDescription>
+        <Card className="shadow-lg border-slate-200 dark:border-slate-800">
+          <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950">
+            <CardTitle>Intäktsprognos</CardTitle>
+            <CardDescription>Historisk data (heldragen linje) vs prognostiserade värden (streckad linje)</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -195,7 +210,7 @@ export default function ForecastPage() {
                   tick={{ fontSize: 12 }}
                   tickFormatter={(value) => {
                     const date = new Date(value);
-                    return `${date.getMonth() + 1}/${date.getDate()}`;
+                    return `${date.getDate()}/${date.getMonth() + 1}`;
                   }}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
@@ -204,7 +219,7 @@ export default function ForecastPage() {
                     if (value === null || value === undefined) return 'N/A';
                     return `${Number(value).toLocaleString('sv-SE')} kr`;
                   }}
-                  labelFormatter={(label) => `Date: ${label}`}
+                  labelFormatter={(label) => `Datum: ${label}`}
                 />
                 <Legend />
                 <Line 
@@ -212,16 +227,16 @@ export default function ForecastPage() {
                   dataKey="actualRevenue" 
                   stroke="#3b82f6" 
                   strokeWidth={2}
-                  name="Actual Revenue"
+                  name="Faktisk Intäkt"
                   connectNulls={false}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="predictedRevenue" 
-                  stroke="#f59e0b" 
+                  stroke="#8b5cf6" 
                   strokeWidth={2}
                   strokeDasharray="5 5"
-                  name="Predicted Revenue"
+                  name="Prognostiserad Intäkt"
                   connectNulls={false}
                 />
               </LineChart>
@@ -230,12 +245,12 @@ export default function ForecastPage() {
         </Card>
 
         {/* Bookings Forecast Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Bookings Forecast</CardTitle>
-            <CardDescription>Historical bookings vs predicted bookings</CardDescription>
+        <Card className="shadow-lg border-slate-200 dark:border-slate-800">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950 dark:to-green-950">
+            <CardTitle>Bokningsprognos</CardTitle>
+            <CardDescription>Historiska bokningar vs prognostiserade bokningar</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -244,16 +259,16 @@ export default function ForecastPage() {
                   tick={{ fontSize: 12 }}
                   tickFormatter={(value) => {
                     const date = new Date(value);
-                    return `${date.getMonth() + 1}/${date.getDate()}`;
+                    return `${date.getDate()}/${date.getMonth() + 1}`;
                   }}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip 
                   formatter={(value: any) => {
                     if (value === null || value === undefined) return 'N/A';
-                    return `${Number(value)} bookings`;
+                    return `${Number(value)} bokningar`;
                   }}
-                  labelFormatter={(label) => `Date: ${label}`}
+                  labelFormatter={(label) => `Datum: ${label}`}
                 />
                 <Legend />
                 <Line 
@@ -261,16 +276,16 @@ export default function ForecastPage() {
                   dataKey="actualBookings" 
                   stroke="#10b981" 
                   strokeWidth={2}
-                  name="Actual Bookings"
+                  name="Faktiska Bokningar"
                   connectNulls={false}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="predictedBookings" 
-                  stroke="#f59e0b" 
+                  stroke="#8b5cf6" 
                   strokeWidth={2}
                   strokeDasharray="5 5"
-                  name="Predicted Bookings"
+                  name="Prognostiserade Bokningar"
                   connectNulls={false}
                 />
               </LineChart>
@@ -279,35 +294,35 @@ export default function ForecastPage() {
         </Card>
 
         {/* Insights */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Forecast Insights</CardTitle>
+        <Card className="shadow-lg border-slate-200 dark:border-slate-800">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+            <CardTitle>Prognosinsikter</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="space-y-4">
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Revenue Trend</h4>
+              <div className="p-4 border rounded-xl hover:shadow-md transition-shadow bg-gradient-to-r from-white to-blue-50 dark:from-slate-900 dark:to-blue-950">
+                <h4 className="font-semibold mb-2">📈 Intäktstrend</h4>
                 <p className="text-sm text-muted-foreground">
-                  Based on the last {days} days of data, revenue is trending{' '}
-                  <span className="font-semibold">{summary.trendDirection || 'stable'}</span> with a growth rate of{' '}
+                  Baserat på de senaste {days} dagarnas data är intäkten{' '}
+                  <span className="font-semibold">{summary.trendDirection === 'increasing' ? 'ökande' : 'minskande'}</span> med en tillväxttakt på{' '}
                   <span className="font-semibold">{(summary.revenueGrowthRate || 0)}%</span>.
                 </p>
               </div>
               
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Forecast Accuracy</h4>
+              <div className="p-4 border rounded-xl hover:shadow-md transition-shadow bg-gradient-to-r from-white to-violet-50 dark:from-slate-900 dark:to-violet-950">
+                <h4 className="font-semibold mb-2">🎯 Prognosnoggrannhet</h4>
                 <p className="text-sm text-muted-foreground">
-                  The forecast has a confidence score of <span className="font-semibold">{(summary.confidenceScore || 0)}%</span>.
-                  {(summary.confidenceScore || 0) >= 70 ? ' This indicates high reliability in the predictions.' : ' More historical data would improve accuracy.'}
+                  Prognosen har en säkerhetsnivå på <span className="font-semibold">{(summary.confidenceScore || 0)}%</span>.
+                  {(summary.confidenceScore || 0) >= 70 ? ' Detta indikerar hög tillförlitlighet i förutsägelserna.' : ' Mer historisk data skulle förbättra noggrannheten.'}
                 </p>
               </div>
               
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">Expected Performance</h4>
+              <div className="p-4 border rounded-xl hover:shadow-md transition-shadow bg-gradient-to-r from-white to-emerald-50 dark:from-slate-900 dark:to-emerald-950">
+                <h4 className="font-semibold mb-2">💰 Förväntad Prestation</h4>
                 <p className="text-sm text-muted-foreground">
-                  Over the next {forecastDays} days, we expect approximately{' '}
-                  <span className="font-semibold">{((summary.totalForecastRevenue || 0)).toLocaleString('sv-SE')} kr</span> in revenue from{' '}
-                  <span className="font-semibold">{(summary.totalForecastBookings || 0)} bookings</span>.
+                  Under de nästa {forecastDays} dagarna förväntar vi oss ungefär{' '}
+                  <span className="font-semibold">{((summary.totalForecastRevenue || 0)).toLocaleString('sv-SE')} kr</span> i intäkter från{' '}
+                  <span className="font-semibold">{(summary.totalForecastBookings || 0)} bokningar</span>.
                 </p>
               </div>
             </div>
@@ -317,3 +332,4 @@ export default function ForecastPage() {
     </div>
   );
 }
+
