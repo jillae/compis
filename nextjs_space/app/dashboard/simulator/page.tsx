@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, DollarSign, Users, Calendar, AlertCircle } from 'lucide-react';
+import { TrendingUp, DollarSign, Users, Calendar, AlertCircle, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import {
   LineChart,
   Line,
@@ -136,11 +137,20 @@ export default function SimulatorPage() {
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">📊 Intäktssimulator</h1>
-        <p className="text-muted-foreground mt-2">
-          Justera parametrar och se direkt hur det påverkar dina intäkter kommande 12 månader
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">📊 Intäktssimulator</h1>
+          <p className="text-muted-foreground mt-2">
+            Justera parametrar och se direkt hur det påverkar dina intäkter kommande 12 månader
+          </p>
+        </div>
+        <Link 
+          href="/dashboard" 
+          className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Tillbaka</span>
+        </Link>
       </div>
 
       {/* Summary Cards */}

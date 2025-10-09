@@ -142,14 +142,34 @@ export async function GET(request: NextRequest) {
       const revenueContribution = totalRevenue > 0 ? (service.totalRevenue / totalRevenue) * 100 : 0;
       
       let recommendation = '';
-      if (revenueContribution > 30) {
-        recommendation = 'High performer - consider expanding capacity or similar services';
-      } else if (service.cancellationRate > 25) {
-        recommendation = 'High cancellation rate - investigate reasons and improve';
-      } else if (service.capacityUtilization < 30 && service.totalBookings > 0) {
-        recommendation = 'Low utilization - consider promotions or bundling';
-      } else if (service.totalBookings === 0) {
-        recommendation = 'No bookings - evaluate demand and marketing';
+      
+      // Priority 1: High performers
+      if (revenueContribution > 25) {
+        recommendation = 'Toppresterande tjänst! Överväg att utöka kapacitet eller lansera liknande tjänster för att maximera intäkterna.';
+      } 
+      // Priority 2: High cancellation
+      else if (service.cancellationRate > 20) {
+        recommendation = 'Hög avbokningsgrad. Undersök orsaker - kan vara pris, tillgänglighet eller kundkommunikation som behöver förbättras.';
+      } 
+      // Priority 3: Good revenue but low completion
+      else if (service.totalRevenue > 0 && service.completionRate < 70) {
+        recommendation = 'Bra intäktspotential men låg genomförandegrad. Förbättra påminnelser och kundengagemang för att minska no-shows.';
+      }
+      // Priority 4: Low capacity utilization
+      else if (service.capacityUtilization < 40 && service.totalBookings > 0) {
+        recommendation = 'Låg kapacitetsutnyttjande. Testa kampanjer, paketpriser eller rabatterbjudanden för att öka efterfrågan.';
+      } 
+      // Priority 5: No bookings
+      else if (service.totalBookings === 0) {
+        recommendation = 'Inga bokningar ännu. Utvärdera efterfrågan, marknadsföring och synlighet. Överväg att justera pris eller tjänstebeskrivning.';
+      }
+      // Priority 6: Medium performers that could be optimized
+      else if (service.totalBookings > 5 && revenueContribution > 5 && revenueContribution < 15) {
+        recommendation = 'Stabil tjänst med potential. Små justeringar i pris eller marknadsföring kan ge stor effekt på intäkterna.';
+      }
+      // Priority 7: Low average booking value
+      else if (service.totalBookings > 0 && service.averageBookingValue < 500) {
+        recommendation = 'Lågt genomsnittsvärde per bokning. Överväg att höja priset eller erbjuda premium-alternativ för högre intäkter.';
       }
 
       return {

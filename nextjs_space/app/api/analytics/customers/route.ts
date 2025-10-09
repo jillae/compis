@@ -25,32 +25,36 @@ export async function GET(request: NextRequest) {
     // Get customer metrics
     const [
       totalCustomers,
-      newCustomers,
-      returningCustomers,
+      allCustomersWithFirstBooking,
+      returningCustomersInPeriod,
       atRiskCustomers,
       customerLifetimeValue,
-      repeatRate,
     ] = await Promise.all([
       // Total unique customers
       prisma.customer.count(),
 
-      // New customers (first booking in period)
-      prisma.customer.count({
-        where: {
+      // Get all customers with their first booking date
+      prisma.customer.findMany({
+        select: {
+          id: true,
           bookings: {
-            some: {
-              bookedAt: { gte: startDate },
+            select: {
+              bookedAt: true,
             },
+            orderBy: {
+              bookedAt: 'asc',
+            },
+            take: 1,
           },
         },
       }),
 
-      // Returning customers (multiple bookings)
+      // Returning customers (multiple bookings in period)
       prisma.booking.groupBy({
         by: ['customerId'],
         where: {
           bookedAt: { gte: startDate },
-          status: 'COMPLETED',
+          status: { in: ['COMPLETED', 'completed'] },
         },
         having: {
           customerId: {
@@ -64,7 +68,7 @@ export async function GET(request: NextRequest) {
         },
       }).then((result: any) => result.length),
 
-      // At-risk customers (no booking in last 30 days)
+      // At-risk customers (no booking in period)
       prisma.customer.count({
         where: {
           bookings: {
@@ -79,31 +83,38 @@ export async function GET(request: NextRequest) {
       prisma.booking
         .aggregate({
           where: {
-            status: 'COMPLETED',
+            status: { in: ['COMPLETED', 'completed'] },
           },
           _avg: {
             price: true,
           },
         })
         .then((result: any) => Number(result._avg.price) || 0),
-
-      // Repeat rate
-      prisma.booking
-        .groupBy({
-          by: ['customerId'],
-          where: {
-            status: 'COMPLETED',
-          },
-          _count: {
-            customerId: true,
-          },
-        })
-        .then((result: any) => {
-          const returningCount = result.filter((r: any) => r._count.customerId > 1).length;
-          const totalCount = result.length;
-          return totalCount > 0 ? (returningCount / totalCount) * 100 : 0;
-        }),
     ]);
+
+    // Count new customers (first ever booking in period)
+    const newCustomers = allCustomersWithFirstBooking.filter(
+      (customer) =>
+        customer.bookings.length > 0 &&
+        new Date(customer.bookings[0].bookedAt) >= startDate
+    ).length;
+
+    // Calculate repeat rate (customers with multiple bookings / total customers who booked in period)
+    const customersWhoBookedInPeriod = await prisma.booking.groupBy({
+      by: ['customerId'],
+      where: {
+        bookedAt: { gte: startDate },
+        status: { in: ['COMPLETED', 'completed'] },
+      },
+      _count: {
+        customerId: true,
+      },
+    });
+
+    const totalCustomersInPeriod = customersWhoBookedInPeriod.length;
+    const repeatRate = totalCustomersInPeriod > 0 
+      ? (returningCustomersInPeriod / totalCustomersInPeriod) * 100 
+      : 0;
 
     // Customer segmentation by booking frequency
     const customerSegmentation = await prisma.booking.groupBy({
@@ -199,7 +210,7 @@ export async function GET(request: NextRequest) {
         overview: {
           totalCustomers,
           newCustomers,
-          returningCustomers,
+          returningCustomers: returningCustomersInPeriod,
           atRiskCustomers,
           customerLifetimeValue: Math.round(customerLifetimeValue),
           repeatRate: Math.round(repeatRate * 10) / 10,
