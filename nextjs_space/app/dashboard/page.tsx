@@ -9,6 +9,8 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  TrendingUp,
+  ArrowRight,
 } from 'lucide-react';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { BookingPatternChart } from '@/components/dashboard/booking-pattern-chart';
@@ -180,6 +182,26 @@ export default function DashboardPage() {
             </select>
           </div>
         </div>
+
+        {/* Revenue Simulator CTA */}
+        <Link href="/dashboard/simulator">
+          <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all cursor-pointer border-0">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-6 w-6" />
+                    <h3 className="text-2xl font-bold">Intäktssimulator</h3>
+                  </div>
+                  <p className="text-blue-50">
+                    Testa "what-if" scenarion: Öka bokningar +2/dag → Se exakt vad det ger på 12 månader! 🚀
+                  </p>
+                </div>
+                <ArrowRight className="h-8 w-8 flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
