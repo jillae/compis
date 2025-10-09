@@ -135,23 +135,30 @@ export default function SimulatorPage() {
   }));
 
   return (
-    <div className="p-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">📊 Intäktssimulator</h1>
-          <p className="text-muted-foreground mt-2">
-            Justera parametrar och se direkt hur det påverkar dina intäkter kommande 12 månader
-          </p>
+    <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
+        <div className="p-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">📊 Intäktssimulator</h1>
+              <p className="text-muted-foreground mt-2">
+                Justera parametrar och se direkt hur det påverkar dina intäkter kommande 12 månader
+              </p>
+            </div>
+            <Link 
+              href="/dashboard" 
+              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Tillbaka</span>
+            </Link>
+          </div>
         </div>
-        <Link 
-          href="/dashboard" 
-          className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Tillbaka</span>
-        </Link>
       </div>
+      
+      {/* Content with padding */}
+      <div className="p-6 space-y-6">
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -437,6 +444,7 @@ export default function SimulatorPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

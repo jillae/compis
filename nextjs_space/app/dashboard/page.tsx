@@ -162,33 +162,45 @@ export default function DashboardPage() {
   const { overview, topServices, staffPerformance } = data;
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto">
         {/* Onboarding Banner */}
-        <OnboardingBanner />
+        <div className="p-6 pb-0">
+          <OnboardingBanner />
+        </div>
         
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Flow Dashboard</h1>
-            <p className="text-muted-foreground">
-              Intäktsintelligens för ArchClinic
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <WorkdayToggle value={workdays} onChange={setWorkdays} />
-            <SyncButton />
-            <select
-              value={days}
-              onChange={(e) => setDays(parseInt(e.target.value))}
-              className="px-4 py-2 border rounded-md bg-background text-sm"
-            >
-              <option value={7}>Senaste 7 dagarna</option>
-              <option value={30}>Senaste 30 dagarna</option>
-              <option value={90}>Senaste 90 dagarna</option>
-            </select>
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Flow Dashboard</h1>
+                <p className="text-muted-foreground">
+                  Intäktsintelligens för ArchClinic
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <WorkdayToggle value={workdays} onChange={setWorkdays} />
+                <SyncButton />
+                <select
+                  value={days}
+                  onChange={(e) => setDays(parseInt(e.target.value))}
+                  className="px-4 py-2 border rounded-md bg-background text-sm"
+                >
+                  <option value={7}>Senaste 7 dagarna</option>
+                  <option value={30}>Senaste 30 dagarna</option>
+                  <option value={90}>Senaste 90 dagarna</option>
+                  <option value={180}>Senaste 180 dagarna</option>
+                  <option value={365}>Senaste 1 år</option>
+                  <option value={730}>Senaste 2 år</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Content with padding */}
+        <div className="p-6 space-y-6">
 
         {/* Revenue Simulator CTA */}
         <Link href="/dashboard/simulator">
@@ -433,6 +445,7 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );

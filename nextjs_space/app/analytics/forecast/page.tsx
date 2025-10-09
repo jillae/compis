@@ -102,49 +102,55 @@ export default function ForecastPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50 dark:from-slate-950 dark:to-violet-950 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Intäktsprognos
-            </h1>
-            <p className="text-muted-foreground mt-1">AI-drivna förutsägelser för din verksamhet</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link 
-              href="/dashboard" 
-              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Tillbaka</span>
-            </Link>
-            <select
-              value={days}
-              onChange={(e) => setDays(parseInt(e.target.value))}
-              className="px-4 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium shadow-sm"
-            >
-              <option value={7}>Senaste 7 dagarna</option>
-              <option value={30}>Senaste 30 dagarna</option>
-              <option value={90}>Senaste 90 dagarna</option>
-              <option value={180}>Senaste 6 månaderna</option>
-              <option value={365}>Senaste året</option>
-              <option value={730}>Senaste 2 åren</option>
-              <option value={999999}>Hela perioden</option>
-            </select>
-            <select
-              value={forecastDays}
-              onChange={(e) => setForecastDays(parseInt(e.target.value))}
-              className="px-4 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium shadow-sm"
-            >
-              <option value={7}>Prognos 7 dagar</option>
-              <option value={30}>Prognos 30 dagar</option>
-              <option value={60}>Prognos 60 dagar</option>
-              <option value={90}>Prognos 90 dagar</option>
-            </select>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50 dark:from-slate-950 dark:to-violet-950">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                Intäktsprognos
+              </h1>
+              <p className="text-muted-foreground mt-1">AI-drivna förutsägelser för din verksamhet</p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link 
+                href="/dashboard" 
+                className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Tillbaka</span>
+              </Link>
+              <select
+                value={days}
+                onChange={(e) => setDays(parseInt(e.target.value))}
+                className="px-4 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium shadow-sm"
+              >
+                <option value={7}>Senaste 7 dagarna</option>
+                <option value={30}>Senaste 30 dagarna</option>
+                <option value={90}>Senaste 90 dagarna</option>
+                <option value={180}>Senaste 6 månaderna</option>
+                <option value={365}>Senaste året</option>
+                <option value={730}>Senaste 2 åren</option>
+                <option value={999999}>Hela perioden</option>
+              </select>
+              <select
+                value={forecastDays}
+                onChange={(e) => setForecastDays(parseInt(e.target.value))}
+                className="px-4 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium shadow-sm"
+              >
+                <option value={7}>Prognos 7 dagar</option>
+                <option value={30}>Prognos 30 dagar</option>
+                <option value={60}>Prognos 60 dagar</option>
+                <option value={90}>Prognos 90 dagar</option>
+              </select>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Content with padding */}
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

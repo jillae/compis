@@ -80,24 +80,25 @@ export default function CustomerAnalyticsPage() {
   const { overview, segmentation, topCustomers } = data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50 dark:from-slate-950 dark:to-emerald-950 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              Kundanalys
-            </h1>
-            <p className="text-muted-foreground mt-1">Djupdykning i kundbeteende och retention</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link 
-              href="/dashboard" 
-              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Tillbaka</span>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50 dark:from-slate-950 dark:to-emerald-950">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                Kundanalys
+              </h1>
+              <p className="text-muted-foreground mt-1">Djupdykning i kundbeteende och retention</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link 
+                href="/dashboard" 
+                className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors bg-white dark:bg-slate-900"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Tillbaka</span>
+              </Link>
             <select
               value={days}
               onChange={(e) => setDays(parseInt(e.target.value))}
@@ -111,8 +112,13 @@ export default function CustomerAnalyticsPage() {
               <option value={730}>Senaste 2 åren</option>
               <option value={999999}>Hela perioden</option>
             </select>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Content with padding */}
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
 
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -95,36 +95,43 @@ export default function AtRiskClient() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">At-Risk Bookings</h1>
-          <p className="text-muted-foreground mt-2">
-            AI-powered no-show prediction to protect your revenue
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={timeRange === 7 ? 'default' : 'outline'}
-            onClick={() => setTimeRange(7)}
-          >
-            7 Days
-          </Button>
-          <Button
-            variant={timeRange === 14 ? 'default' : 'outline'}
-            onClick={() => setTimeRange(14)}
-          >
-            14 Days
-          </Button>
-          <Button
-            variant={timeRange === 30 ? 'default' : 'outline'}
-            onClick={() => setTimeRange(30)}
-          >
-            30 Days
-          </Button>
+    <div className="min-h-screen bg-background">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">At-Risk Bookings</h1>
+              <p className="text-muted-foreground mt-2">
+                AI-powered no-show prediction to protect your revenue
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={timeRange === 7 ? 'default' : 'outline'}
+                onClick={() => setTimeRange(7)}
+              >
+                7 Days
+              </Button>
+              <Button
+                variant={timeRange === 14 ? 'default' : 'outline'}
+                onClick={() => setTimeRange(14)}
+              >
+                14 Days
+              </Button>
+              <Button
+                variant={timeRange === 30 ? 'default' : 'outline'}
+                onClick={() => setTimeRange(30)}
+              >
+                30 Days
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
+      
+      {/* Content with padding */}
+      <div className="container mx-auto p-6 space-y-6">
 
       {/* Metrics Overview */}
       {metrics && (
@@ -307,6 +314,7 @@ export default function AtRiskClient() {
           <p>• <strong>Strategic overbooking:</strong> Consider double-booking high-risk slots with backup customers</p>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }
