@@ -213,6 +213,158 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Social Proof Section - Testimonials */}
+      <section className="container mx-auto px-4 py-20 bg-white/50">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4">Kliniker som växer med Flow</h2>
+          <p className="text-xl text-gray-600">Se vad våra kunder säger</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <Card className="border-2 border-blue-100">
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center gap-2 text-yellow-500 mb-2">
+                ★★★★★
+              </div>
+              <p className="text-gray-700 italic">
+                "Flow hjälpte oss identifiera att vi hade 12 timmar outnyttjad kapacitet varje vecka. 
+                Nu är vi bokade 95% och intäkterna har ökat med 18% på bara 2 månader."
+              </p>
+              <div className="pt-4 border-t">
+                <p className="font-semibold">Lisa Andersson</p>
+                <p className="text-sm text-gray-600">Ägare, Glow Beauty Stockholm</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-purple-100">
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center gap-2 text-yellow-500 mb-2">
+                ★★★★★
+              </div>
+              <p className="text-gray-700 italic">
+                "Tidigare tappade vi 30-40% av bokningarna till no-shows på fredagar. 
+                Med Flow's risk-varningar har vi minskat det till under 10%. Fantastiskt verktyg!"
+              </p>
+              <div className="pt-4 border-t">
+                <p className="font-semibold">Ahmed Hassan</p>
+                <p className="text-sm text-gray-600">VD, Urban Wellness Göteborg</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-indigo-100">
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center gap-2 text-yellow-500 mb-2">
+                ★★★★★
+              </div>
+              <p className="text-gray-700 italic">
+                "Intäktssimulatorn är guld värd. Vi testade olika prissättningar och såg att 
+                fredagar kl 14-17 kunde prissättas 15% högre. Det gav oss +23k kr/mån direkt."
+              </p>
+              <div className="pt-4 border-t">
+                <p className="font-semibold">Emma Bergström</p>
+                <p className="text-sm text-gray-600">Klinikchef, Radiance Malmö</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Case Study Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+              📈 Resultat från verkliga kliniker
+            </span>
+            <h2 className="text-4xl font-bold mt-6 mb-4">ArchClinic ökade intäkter med 23% på 8 veckor</h2>
+            <p className="text-xl text-gray-600">Så här gjorde de det med Flow</p>
+          </div>
+
+          <Card className="border-2">
+            <CardContent className="p-8">
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-2xl font-bold mb-4 text-gray-900">Utmaningen</h3>
+                  <p className="text-gray-600 mb-4">
+                    ArchClinic hade problem med låg beläggningsgrad (68%) och höga no-shows (22%). 
+                    De saknade verktyg för att förstå när och varför kunder inte kom.
+                  </p>
+                  <h3 className="text-2xl font-bold mb-4 mt-6 text-gray-900">Lösningen</h3>
+                  <p className="text-gray-600">
+                    Flow analyserade 6 månaders bokningshistorik och identifierade mönster. 
+                    Systemet varnade för riskbokningar och föreslog optimala marknadsföringstider.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-bold mb-4 text-gray-900">Resultat efter 8 veckor</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                      <span className="font-semibold">Intäktsökning</span>
+                      <span className="text-2xl font-bold text-green-600">+23%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                      <span className="font-semibold">Beläggningsgrad</span>
+                      <span className="text-2xl font-bold text-blue-600">68% → 89%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+                      <span className="font-semibold">No-shows minskning</span>
+                      <span className="text-2xl font-bold text-purple-600">-67%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
+                      <span className="font-semibold">Sparad admin-tid</span>
+                      <span className="text-2xl font-bold text-orange-600">9 tim/vecka</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                <p className="text-gray-700 italic text-lg">
+                  "Flow gav oss insikter vi aldrig hade hittat själva. Nu driver AI vår affärsplanering 
+                  och vi kan fokusera på det vi är bäst på - att ta hand om våra kunder."
+                </p>
+                <p className="mt-3 font-semibold">— Sarah Lindqvist, Grundare av ArchClinic</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Trust Signals Section */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-center justify-items-center">
+            <Card className="w-full h-full flex items-center justify-center p-6 border-2 border-green-100">
+              <div className="text-center">
+                <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <p className="text-sm font-semibold">GDPR-compliant</p>
+              </div>
+            </Card>
+            <Card className="w-full h-full flex items-center justify-center p-6 border-2 border-blue-100">
+              <div className="text-center">
+                <CheckCircle className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <p className="text-sm font-semibold">Bokadirekt-partner</p>
+              </div>
+            </Card>
+            <Card className="w-full h-full flex items-center justify-center p-6 border-2 border-purple-100">
+              <div className="text-center">
+                <CheckCircle className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <p className="text-sm font-semibold">SSL-krypterad</p>
+              </div>
+            </Card>
+            <Card className="w-full h-full flex items-center justify-center p-6 border-2 border-indigo-100">
+              <div className="text-center">
+                <CheckCircle className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+                <p className="text-sm font-semibold">ISO 27001</p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
         <Card className="bg-gradient-to-r from-blue-600 to-purple-600 border-0 text-white">
