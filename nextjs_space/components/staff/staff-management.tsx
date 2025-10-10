@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog'
 import { Plus, Edit, Trash2, Calendar } from 'lucide-react'
 import { toast } from 'sonner'
+import { LeaveManagementDialog } from './leave-management-dialog'
 
 interface StaffMember {
   id: string
@@ -39,6 +40,8 @@ export function StaffManagement() {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null)
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false)
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null)
 
   useEffect(() => {
     fetchStaff()
@@ -196,6 +199,17 @@ export function StaffManagement() {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
+                            setSelectedStaff(member)
+                            setLeaveDialogOpen(true)
+                          }}
+                          title="Hantera semester & ledighet"
+                        >
+                          <Calendar className="h-4 w-4 text-blue-500" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
                             setEditingStaff(member)
                             setDialogOpen(true)
                           }}
@@ -218,6 +232,16 @@ export function StaffManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Leave Management Dialog */}
+      {selectedStaff && (
+        <LeaveManagementDialog
+          open={leaveDialogOpen}
+          onOpenChange={setLeaveDialogOpen}
+          staffId={selectedStaff.id}
+          staffName={selectedStaff.name}
+        />
+      )}
     </div>
   )
 }

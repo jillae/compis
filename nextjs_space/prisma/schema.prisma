@@ -151,6 +151,7 @@ model Staff {
   
   clinic          Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   bookings        Booking[]
+  leaves          StaffLeave[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -255,6 +256,41 @@ model ImportLog {
   @@index([createdAt])
 }
 
+// AI Insight Dismissals - tracks which insights users have acknowledged
+model InsightDismissal {
+  id         String   @id @default(cuid())
+  userId     String
+  clinicId   String
+  insightKey String   // E.g., "revenue_recovery_opportunity"
+  insightDate DateTime // Date the insight was generated for
+  dismissedAt DateTime @default(now())
+  notes      String?  // Optional notes from user
+  
+  @@unique([userId, clinicId, insightKey, insightDate])
+  @@index([userId])
+  @@index([clinicId])
+  @@index([insightKey])
+}
+
+// Staff Leave/Vacation tracking
+model StaffLeave {
+  id          String   @id @default(cuid())
+  staffId     String
+  startDate   DateTime
+  endDate     DateTime
+  leaveType   LeaveType
+  reason      String?
+  status      LeaveStatus @default(APPROVED) // Most clinics auto-approve
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  @@index([staffId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
 // Enums
 enum UserRole {
   SUPER_ADMIN      // System owner - can see all clinics
@@ -296,4 +332,20 @@ enum ImportStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+enum LeaveType {
+  VACATION      // Semester
+  SICK_LEAVE    // Sjukfrånvaro
+  PERSONAL      // Personlig ledighet
+  UNPAID        // Obetald ledighet
+  PARENTAL      // Föräldraledighet
+  OTHER         // Annat
+}
+
+enum LeaveStatus {
+  PENDING       // Väntar på godkännande
+  APPROVED      // Godkänd
+  REJECTED      // Avvisad
+  CANCELLED     // Avbruten
 }
