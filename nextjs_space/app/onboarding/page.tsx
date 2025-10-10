@@ -28,7 +28,7 @@ export default function OnboardingPage() {
         const response = await fetch('/api/user/onboarding-status')
         const data = await response.json()
         if (data.completed) {
-          router.push('/dashboard')
+          router.push('/dashboard/simulator')
         } else if (data.step === 2) {
           setStep(2)
         }
@@ -79,7 +79,7 @@ export default function OnboardingPage() {
       })
 
       if (response.ok) {
-        router.push('/dashboard')
+        router.push('/dashboard/simulator')
       } else {
         const data = await response.json()
         setError(data.error || 'Ogiltig API-nyckel. Kontrollera och försök igen.')
@@ -93,7 +93,7 @@ export default function OnboardingPage() {
 
   const handleSkipForNow = () => {
     // Allow user to skip and explore dashboard
-    router.push('/dashboard?onboarding=incomplete')
+    router.push('/dashboard/simulator?onboarding=incomplete')
   }
 
   const copyToClipboard = () => {

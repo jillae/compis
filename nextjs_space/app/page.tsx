@@ -7,13 +7,25 @@ import { TrendingUp, BarChart3, Users, Calendar, CheckCircle, ArrowRight, Sparkl
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { prisma } from "@/lib/db"
 
 export default async function LandingPage() {
   const session = await getServerSession(authOptions)
   
-  // If already logged in, redirect to simulator (main page)
-  if (session) {
-    redirect('/dashboard/simulator')
+  // If logged in, check onboarding status and redirect appropriately
+  if (session?.user?.id) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { clinicId: true }
+    })
+    
+    if (user?.clinicId) {
+      // Has clinic -> onboarding complete -> go to simulator (main page)
+      redirect('/dashboard/simulator')
+    } else {
+      // No clinic -> needs onboarding
+      redirect('/onboarding')
+    }
   }
 
   return (
