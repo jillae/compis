@@ -431,19 +431,19 @@ export default function ImportClient() {
                       <div className="text-2xl font-bold text-green-600">
                         {importResult.successCount}
                       </div>
-                      <div className="text-sm text-green-700">Successful</div>
+                      <div className="text-sm text-green-700">Lyckade</div>
                     </div>
                     <div className="text-center p-4 bg-red-50 rounded-lg">
                       <div className="text-2xl font-bold text-red-600">
                         {importResult.errorCount}
                       </div>
-                      <div className="text-sm text-red-700">Errors</div>
+                      <div className="text-sm text-red-700">Fel</div>
                     </div>
                   </div>
 
                   {importResult.errors && importResult.errors.length > 0 && (
                     <div>
-                      <h4 className="font-medium mb-2">Error Details</h4>
+                      <h4 className="font-medium mb-2">Feldetaljer</h4>
                       <div className="bg-red-50 p-4 rounded-lg max-h-40 overflow-y-auto">
                         {importResult.errors.map((error, index) => (
                           <div key={index} className="text-sm text-red-700">
