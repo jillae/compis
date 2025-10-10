@@ -343,6 +343,55 @@ export async function syncServices(): Promise<SyncResult> {
   }
 }
 
+// Recalculate customer totalSpent based on completed bookings
+async function recalculateCustomerTotalSpent(): Promise<void> {
+  try {
+    const startTime = Date.now();
+    
+    // Get all customers with their completed bookings
+    const customers = await prisma.customer.findMany({
+      select: {
+        id: true,
+        totalSpent: true,
+        bookings: {
+          where: {
+            status: { in: ['COMPLETED', 'completed'] }
+          },
+          select: {
+            price: true
+          }
+        }
+      }
+    });
+    
+    let updatedCount = 0;
+    
+    // Update each customer's totalSpent
+    for (const customer of customers) {
+      const correctTotalSpent = customer.bookings.reduce((sum, booking) => {
+        return sum + Number(booking.price);
+      }, 0);
+      
+      const oldTotal = Number(customer.totalSpent);
+      
+      // Only update if there's a difference
+      if (correctTotalSpent !== oldTotal) {
+        await prisma.customer.update({
+          where: { id: customer.id },
+          data: { totalSpent: correctTotalSpent }
+        });
+        updatedCount++;
+      }
+    }
+    
+    const duration = Date.now() - startTime;
+    console.log(`[SyncService] Recalculated totalSpent for ${updatedCount} customers in ${duration}ms`);
+  } catch (error) {
+    console.error('[SyncService] Failed to recalculate customer totalSpent:', error);
+    // Don't throw - this is non-critical
+  }
+}
+
 // Full sync (all entities)
 export async function syncAll(): Promise<{
   bookings: SyncResult;
@@ -391,6 +440,10 @@ export async function syncAll(): Promise<{
   const staffResult = await syncStaff({ startDate: options.startDate, endDate: options.endDate });
   const servicesResult = await syncServices();
   const bookingsResult = await syncBookings(options);
+  
+  // Recalculate customer totalSpent after syncing bookings
+  console.log('[SyncService] Recalculating customer totalSpent...');
+  await recalculateCustomerTotalSpent();
   
   // Update last sync timestamp
   await updateSyncTimestamp(now);
