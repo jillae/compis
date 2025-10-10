@@ -504,6 +504,39 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Staff Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Personalhantering</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Hantera personal, schema och ledighet
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link
+                href="/staff"
+                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
+              >
+                <h3 className="font-semibold mb-2">Personal</h3>
+                <p className="text-sm text-muted-foreground">
+                  Överskådlig lista över all personal och deras prestanda
+                </p>
+              </Link>
+              
+              <Link
+                href="/staff/leave"
+                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
+              >
+                <h3 className="font-semibold mb-2">Ledighetshantering</h3>
+                <p className="text-sm text-muted-foreground">
+                  Registrera och godkänn semester, sjukfrånvaro och annan ledighet
+                </p>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
         </div>
       </div>
     </div>
