@@ -2,6 +2,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { UserRole } from '@prisma/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Calendar, 
@@ -11,7 +13,11 @@ import {
   AlertTriangle,
   TrendingUp,
   ArrowRight,
+  ExternalLink,
+  LogOut,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { RoleToggle } from '@/components/dashboard/role-toggle';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { BookingPatternChart } from '@/components/dashboard/booking-pattern-chart';
 import { WeekdayChart } from '@/components/dashboard/weekday-chart';
@@ -21,6 +27,7 @@ import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
 import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
 import { TimePeriodSelector } from '@/components/time-period-selector';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 interface DashboardData {
   overview: {
@@ -85,6 +92,7 @@ interface AtRiskMetrics {
 }
 
 export default function DashboardPage() {
+  const { data: session } = useSession() || {};
   const [data, setData] = useState<DashboardData | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [atRiskMetrics, setAtRiskMetrics] = useState<AtRiskMetrics | null>(null);
@@ -92,6 +100,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<string>('30');
   const [workdays, setWorkdays] = useState<'5' | '7'>('7');
+  const [simulatedRole, setSimulatedRole] = useState<UserRole>(UserRole.ADMIN);
 
   // Helper function to convert timePeriod to days
   const getDaysFromTimePeriod = (period: string): number => {
@@ -195,7 +204,21 @@ export default function DashboardPage() {
                   Intäktsintelligens för ArchClinic
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <Link href="/">
+                  <Button variant="outline" size="sm">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Till landningssida
+                  </Button>
+                </Link>
+                
+                {session?.user?.role === UserRole.SUPER_ADMIN && (
+                  <RoleToggle 
+                    currentRole={simulatedRole} 
+                    onRoleChange={setSimulatedRole} 
+                  />
+                )}
+                
                 <WorkdayToggle value={workdays} onChange={setWorkdays} />
                 <SyncButton />
                 <TimePeriodSelector 
@@ -203,6 +226,15 @@ export default function DashboardPage() {
                   onChange={setTimePeriod}
                   className="w-[180px]"
                 />
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => signOut()}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logga ut
+                </Button>
               </div>
             </div>
           </div>

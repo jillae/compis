@@ -11,9 +11,9 @@ import { redirect } from "next/navigation"
 export default async function LandingPage() {
   const session = await getServerSession(authOptions)
   
-  // If already logged in, redirect to dashboard
+  // If already logged in, redirect to simulator (main page)
   if (session) {
-    redirect('/dashboard')
+    redirect('/dashboard/simulator')
   }
 
   return (

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { TrendingUp, DollarSign, Users, Calendar, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '@/components/ui/back-button';
@@ -147,7 +148,14 @@ export default function SimulatorPage() {
                 Justera parametrar och se direkt hur det påverkar dina intäkter kommande 12 månader
               </p>
             </div>
-            <BackButton href="/dashboard" label="Tillbaka till översikt" />
+            <div className="flex gap-2">
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm">
+                  Till översikt
+                </Button>
+              </Link>
+              <BackButton href="/dashboard" label="Tillbaka" />
+            </div>
           </div>
         </div>
       </div>
@@ -313,7 +321,20 @@ export default function SimulatorPage() {
               </p>
             </div>
 
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  setBookingsPerDay(parseFloat(data.currentMetrics.bookingsPerDay));
+                  setAvgBookingValue(parseFloat(data.currentMetrics.avgBookingValue));
+                  setNewCustomersPerMonth(parseInt(data.currentMetrics.customersPerMonth));
+                  setNoShowRate(parseFloat(data.currentMetrics.noShowRate));
+                  setRetentionRate(70);
+                }}
+              >
+                🔄 Återställ till nuläge/snitt
+              </Button>
               <div className="flex items-start space-x-2 text-sm text-muted-foreground">
                 <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <p>

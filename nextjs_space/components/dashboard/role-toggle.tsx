@@ -33,11 +33,11 @@ export function RoleToggle({ currentRole, onRoleChange }: RoleToggleProps) {
   const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case UserRole.SUPER_ADMIN:
-        return 'SuperAdmin'
+        return 'SuperAdmin (SA)'
       case UserRole.ADMIN:
-        return 'Admin'
+        return 'Admin (A)'
       case UserRole.STAFF:
-        return 'Staff'
+        return 'Personal (S)'
     }
   }
 
@@ -53,15 +53,15 @@ export function RoleToggle({ currentRole, onRoleChange }: RoleToggleProps) {
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => onRoleChange(UserRole.SUPER_ADMIN)}>
           <Shield className="mr-2 h-4 w-4" />
-          SuperAdmin
+          SuperAdmin (SA)
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onRoleChange(UserRole.ADMIN)}>
           <Users className="mr-2 h-4 w-4" />
-          Admin
+          Admin (A)
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onRoleChange(UserRole.STAFF)}>
           <User className="mr-2 h-4 w-4" />
-          Staff
+          Personal (S)
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
