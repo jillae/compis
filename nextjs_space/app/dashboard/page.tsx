@@ -196,19 +196,20 @@ export default function DashboardPage() {
         
         {/* Sticky Header */}
         <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
-          <div className="p-6">
-            <div className="flex items-center justify-between">
+          <div className="p-4 md:p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Flow Dashboard</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Flow Dashboard</h1>
+                <p className="text-sm md:text-base text-muted-foreground">
                   Intäktsintelligens för ArchClinic
                 </p>
               </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <Link href="/">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Link href="/" className="hidden md:block">
                   <Button variant="outline" size="sm">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    Till landningssida
+                    <span className="hidden lg:inline">Till landningssida</span>
+                    <span className="lg:hidden">Hem</span>
                   </Button>
                 </Link>
                 
@@ -224,16 +225,33 @@ export default function DashboardPage() {
                 <TimePeriodSelector 
                   value={timePeriod} 
                   onChange={setTimePeriod}
-                  className="w-[180px]"
+                  className="w-[140px] md:w-[180px]"
                 />
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={async () => {
+                    const res = await fetch('/api/email/weekly-report');
+                    if (res.ok) {
+                      alert('✅ Veckorapport skickad till din e-post!');
+                    } else {
+                      alert('❌ Kunde inte skicka rapport. Försök igen.');
+                    }
+                  }}
+                  title="Skicka veckorapport till din e-post"
+                  className="hidden sm:flex"
+                >
+                  📧 <span className="hidden lg:inline ml-1">Veckorapport</span>
+                </Button>
                 
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => signOut()}
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logga ut
+                  <LogOut className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Logga ut</span>
                 </Button>
               </div>
             </div>

@@ -6,8 +6,8 @@ import { redirect } from 'next/navigation'
 import AtRiskClient from './at-risk-client'
 
 export const metadata: Metadata = {
-  title: 'At-Risk Bookings | Flow',
-  description: 'Monitor and manage high-risk bookings to prevent no-shows'
+  title: 'Riskbokningar | Flow',
+  description: 'Övervaka och hantera riskfyllda bokningar för att förhindra uteblivna besök'
 }
 
 export const dynamic = 'force-dynamic'

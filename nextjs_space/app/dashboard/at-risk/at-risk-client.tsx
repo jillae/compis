@@ -87,7 +87,7 @@ export default function AtRiskClient() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Analyzing bookings...</p>
+            <p className="text-muted-foreground">Analyserar bokningar...</p>
           </div>
         </div>
       </div>
@@ -101,9 +101,9 @@ export default function AtRiskClient() {
         <div className="container mx-auto p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">At-Risk Bookings</h1>
+              <h1 className="text-3xl font-bold tracking-tight">⚠️ Riskbokningar</h1>
               <p className="text-muted-foreground mt-2">
-                AI-powered no-show prediction to protect your revenue
+                AI-driven förutsägelse av uteblivna besök för att skydda dina intäkter
               </p>
             </div>
             <div className="flex gap-2">
@@ -111,19 +111,19 @@ export default function AtRiskClient() {
                 variant={timeRange === 7 ? 'default' : 'outline'}
                 onClick={() => setTimeRange(7)}
               >
-                7 Days
+                7 dagar
               </Button>
               <Button
                 variant={timeRange === 14 ? 'default' : 'outline'}
                 onClick={() => setTimeRange(14)}
               >
-                14 Days
+                14 dagar
               </Button>
               <Button
                 variant={timeRange === 30 ? 'default' : 'outline'}
                 onClick={() => setTimeRange(30)}
               >
-                30 Days
+                30 dagar
               </Button>
             </div>
           </div>
@@ -138,20 +138,20 @@ export default function AtRiskClient() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+              <CardTitle className="text-sm font-medium">Totalt Bokningar</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.totalBookings}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Next {timeRange} days
+                Nästa {timeRange} dagar
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">High Risk</CardTitle>
+              <CardTitle className="text-sm font-medium">Hög Risk</CardTitle>
               <AlertCircle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
@@ -161,14 +161,14 @@ export default function AtRiskClient() {
               <p className="text-xs text-muted-foreground mt-1">
                 {metrics.totalBookings > 0 
                   ? ((metrics.highRiskBookings / metrics.totalBookings) * 100).toFixed(1)
-                  : 0}% of total
+                  : 0}% av totalt
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Medium Risk</CardTitle>
+              <CardTitle className="text-sm font-medium">Medel Risk</CardTitle>
               <AlertTriangle className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
@@ -178,14 +178,14 @@ export default function AtRiskClient() {
               <p className="text-xs text-muted-foreground mt-1">
                 {metrics.totalBookings > 0
                   ? ((metrics.mediumRiskBookings / metrics.totalBookings) * 100).toFixed(1)
-                  : 0}% of total
+                  : 0}% av totalt
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-destructive/50 bg-destructive/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revenue at Risk</CardTitle>
+              <CardTitle className="text-sm font-medium">Intäkt i Riskzonen</CardTitle>
               <TrendingDown className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
@@ -193,7 +193,7 @@ export default function AtRiskClient() {
                 {metrics.potentialLoss.toLocaleString()} kr
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Expected loss from no-shows
+                Förväntad förlust från uteblivna
               </p>
             </CardContent>
           </Card>
@@ -205,12 +205,12 @@ export default function AtRiskClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-destructive" />
-            High-Risk Bookings Requiring Action
+            Högrisikbokningar som Kräver Åtgärd
           </CardTitle>
           <CardDescription>
             {predictions.length === 0 
-              ? 'No high-risk bookings found for this period'
-              : `${predictions.length} booking${predictions.length !== 1 ? 's' : ''} flagged as high-risk`
+              ? 'Inga högriskbokningar hittades för denna period'
+              : `${predictions.length} bokning${predictions.length !== 1 ? 'ar' : ''} flaggade som högrisk`
             }
           </CardDescription>
         </CardHeader>
@@ -218,9 +218,9 @@ export default function AtRiskClient() {
           {predictions.length === 0 ? (
             <div className="text-center py-12">
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
-              <p className="text-lg font-medium">All bookings look good!</p>
+              <p className="text-lg font-medium">Alla bokningar ser bra ut! 🎉</p>
               <p className="text-muted-foreground mt-2">
-                No high-risk bookings detected for the next {timeRange} days
+                Inga högriskbokningar detekterade för de nästa {timeRange} dagarna
               </p>
             </div>
           ) : (
@@ -233,17 +233,17 @@ export default function AtRiskClient() {
                         <div className="flex items-center gap-3 mb-2">
                           <Badge variant={getRiskColor(prediction.riskLevel)} className="gap-1">
                             {getRiskIcon(prediction.riskLevel)}
-                            {prediction.riskLevel} RISK
+                            {prediction.riskLevel === 'HIGH' ? 'HÖG' : prediction.riskLevel === 'MEDIUM' ? 'MEDEL' : 'LÅG'} RISK
                           </Badge>
                           <span className="text-2xl font-bold text-destructive">
                             {prediction.riskScore}%
                           </span>
-                          <span className="text-sm text-muted-foreground">chance of no-show</span>
+                          <span className="text-sm text-muted-foreground">risk för uteblivet besök</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <DollarSign className="h-4 w-4" />
                           <span className="font-medium">
-                            {prediction.estimatedLoss.toLocaleString()} kr at risk
+                            {prediction.estimatedLoss.toLocaleString()} kr i riskzon
                           </span>
                         </div>
                       </div>

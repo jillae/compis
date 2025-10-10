@@ -58,15 +58,15 @@ export default function LoginPage() {
               <TrendingUp className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Welcome to Flow</h1>
-          <p className="text-gray-600 mt-2">Revenue Intelligence Platform for Clinics</p>
+          <h1 className="text-3xl font-bold text-gray-900">Välkommen till Flow</h1>
+          <p className="text-gray-600 mt-2">Intäktsintelligens för Skönhetskliniker</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
+            <CardTitle>Logga in</CardTitle>
             <CardDescription>
-              Access your clinic's revenue intelligence dashboard
+              Få tillgång till din klinikers intäktsintelligens
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -74,31 +74,37 @@ export default function LoginPage() {
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>
+                    {error === 'Invalid email or password' 
+                      ? 'Ogiltig e-post eller lösenord' 
+                      : error === 'Something went wrong. Please try again.'
+                      ? 'Något gick fel. Försök igen.'
+                      : error}
+                  </AlertDescription>
                 </Alert>
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-post</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="admin@flowclinic.com"
+                  placeholder="admin@minklinik.se"
                   required
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Lösenord</Label>
                 <Input
                   id="password"
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Enter your password"
+                  placeholder="Ange ditt lösenord"
                   required
                   disabled={loading}
                 />
@@ -109,7 +115,7 @@ export default function LoginPage() {
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? 'Loggar in...' : 'Logga in'}
               </Button>
 
               <div className="relative">
@@ -118,7 +124,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-white px-2 text-muted-foreground">
-                    Or continue with
+                    Eller fortsätt med
                   </span>
                 </div>
               </div>
@@ -148,14 +154,14 @@ export default function LoginPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign in with Google
+                Logga in med Google
               </Button>
 
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  Don't have an account?{' '}
+                  Har du inget konto?{' '}
                   <Link href="/auth/signup" className="text-blue-600 hover:underline">
-                    Sign up
+                    Skapa konto
                   </Link>
                 </p>
               </div>

@@ -74,15 +74,15 @@ export default function SignupPage() {
               <TrendingUp className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Join Flow</h1>
-          <p className="text-gray-600 mt-2">Start optimizing your clinic's revenue today</p>
+          <h1 className="text-3xl font-bold text-gray-900">Välkommen till Flow</h1>
+          <p className="text-gray-600 mt-2">Börja optimera din kliniks intäkter idag</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Create Account</CardTitle>
+            <CardTitle>Skapa konto</CardTitle>
             <CardDescription>
-              Set up your Flow account to access revenue intelligence
+              Skapa ditt Flow-konto för att komma åt intäktsintelligens
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -90,29 +90,35 @@ export default function SignupPage() {
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>
+                    {error === 'Something went wrong' || error === 'Something went wrong. Please try again.'
+                      ? 'Något gick fel. Försök igen.'
+                      : error === 'Account created but sign in failed. Please try logging in.'
+                      ? 'Konto skapat men inloggning misslyckades. Försök logga in.'
+                      : error}
+                  </AlertDescription>
                 </Alert>
               )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">Förnamn</Label>
                   <Input
                     id="firstName"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    placeholder="John"
+                    placeholder="Anna"
                     required
                     disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">Efternamn</Label>
                   <Input
                     id="lastName"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    placeholder="Doe"
+                    placeholder="Andersson"
                     required
                     disabled={loading}
                   />
@@ -120,49 +126,49 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-post</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="john@clinic.com"
+                  placeholder="anna@minklinik.se"
                   required
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Lösenord</Label>
                 <Input
                   id="password"
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Create a strong password"
+                  placeholder="Skapa ett starkt lösenord"
                   required
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="companyName">Clinic Name</Label>
+                <Label htmlFor="companyName">Kliniknamn</Label>
                 <Input
                   id="companyName"
                   value={formData.companyName}
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                  placeholder="Your Clinic Name"
+                  placeholder="Din klinikers namn"
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="jobTitle">Job Title</Label>
+                <Label htmlFor="jobTitle">Befattning</Label>
                 <Input
                   id="jobTitle"
                   value={formData.jobTitle}
                   onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
-                  placeholder="Operations Manager"
+                  placeholder="Verksamhetschef"
                   disabled={loading}
                 />
               </div>
@@ -172,7 +178,7 @@ export default function SignupPage() {
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {loading ? 'Skapar konto...' : 'Skapa konto'}
               </Button>
 
               <div className="relative">
@@ -181,7 +187,7 @@ export default function SignupPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-white px-2 text-muted-foreground">
-                    Or continue with
+                    Eller fortsätt med
                   </span>
                 </div>
               </div>
@@ -211,14 +217,14 @@ export default function SignupPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign up with Google
+                Skapa konto med Google
               </Button>
 
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  Already have an account?{' '}
+                  Har du redan ett konto?{' '}
                   <Link href="/auth/login" className="text-blue-600 hover:underline">
-                    Sign in
+                    Logga in
                   </Link>
                 </p>
               </div>

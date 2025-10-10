@@ -25,16 +25,16 @@ export default async function LandingPage() {
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Flow
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <Link href="/auth/login">
-              <Button variant="ghost">Logga in</Button>
+              <Button variant="ghost" size="sm" className="text-sm">Logga in</Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm">
                 Kom igång
               </Button>
             </Link>
@@ -43,52 +43,52 @@ export default async function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <section className="container mx-auto px-4 py-12 md:py-20 text-center">
+        <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
           <div className="inline-block">
-            <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+            <span className="px-3 py-2 md:px-4 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
               💪 Din proaktiva affärscoach
             </span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
             Öka intäkter med{' '}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               sporrad data
             </span>
           </h1>
           
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Flow är din affärsdrivna coach som proaktivt analyserar din bokningsdata och ger dig konkreta åtgärder 
             som ökar intäkter direkt. Inte bara grafer – actionable insikter som driver tillväxt. 
             Fullt integrerat med Bokadirekt.
           </p>
 
-          <div className="flex items-center justify-center gap-4 pt-4">
-            <Link href="/auth/signup">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4">
+            <Link href="/auth/signup" className="w-full sm:w-auto">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-base md:text-lg px-6 md:px-8 w-full sm:w-auto">
                 Starta gratis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="#features">
-              <Button size="lg" variant="outline" className="text-lg px-8">
+            <Link href="#features" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="text-base md:text-lg px-6 md:px-8 w-full sm:w-auto">
                 Se funktioner
               </Button>
             </Link>
           </div>
 
-          <div className="pt-8 flex items-center justify-center gap-8 text-sm text-gray-600">
+          <div className="pt-6 md:pt-8 flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 text-sm text-gray-600">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
               <span>Gratis 14-dagars prova-på</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
               <span>Inget kreditkort krävs</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
               <span>Enkelt att komma igång</span>
             </div>
           </div>
