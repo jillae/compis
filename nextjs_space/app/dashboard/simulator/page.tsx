@@ -7,9 +7,11 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, DollarSign, Users, Calendar, AlertCircle, ArrowLeft } from 'lucide-react';
+import { TrendingUp, DollarSign, Users, Calendar, AlertCircle, ArrowLeft, Target } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '@/components/ui/back-button';
+import { OptimalCorridorControls } from '@/components/dashboard/optimal-corridor-controls';
+import { CapacityUtilizationChart } from '@/components/dashboard/capacity-utilization-chart';
 import {
   LineChart,
   Line,
@@ -63,6 +65,22 @@ export default function SimulatorPage() {
   const [newCustomersPerMonth, setNewCustomersPerMonth] = useState<number>(0);
   const [retentionRate, setRetentionRate] = useState<number>(70);
   const [noShowRate, setNoShowRate] = useState<number>(0);
+  
+  // Optimal corridor states
+  const [optimalMinUtilization, setOptimalMinUtilization] = useState<number>(70);
+  const [optimalMaxUtilization, setOptimalMaxUtilization] = useState<number>(90);
+  const [optimalMinPlannedIntake, setOptimalMinPlannedIntake] = useState<number>(1);
+  const [optimalMaxPlannedIntake, setOptimalMaxPlannedIntake] = useState<number>(10);
+
+  const handleOptimalCorridorChange = (min: number, max: number) => {
+    setOptimalMinUtilization(min);
+    setOptimalMaxUtilization(max);
+  };
+
+  const handleOptimalPlannedIntakeChange = (min: number, max: number) => {
+    setOptimalMinPlannedIntake(min);
+    setOptimalMaxPlannedIntake(max);
+  };
 
   // Debounced fetch
   const fetchProjections = useCallback(async (params: any) => {
@@ -135,6 +153,20 @@ export default function SimulatorPage() {
     optimized: data.optimized[idx].revenue,
     gain: data.optimized[idx].revenue - b.revenue,
   }));
+
+  // Generate mock capacity utilization data for demonstration
+  const capacityData = data.baseline.map((b, idx) => {
+    // Calculate a utilization rate based on bookings and sliders
+    const baseUtilization = 60 + (bookingsPerDay / 40) * 30 + Math.random() * 10;
+    const utilization = Math.min(100, Math.max(40, baseUtilization + idx * 2));
+    
+    return {
+      week: `V${idx + 1}`,
+      utilization: Math.round(utilization * 10) / 10,
+      bookings: Math.round(bookingsPerDay * 7),
+      capacity: Math.round((bookingsPerDay * 7) / (utilization / 100))
+    };
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -355,9 +387,10 @@ export default function SimulatorPage() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="revenue" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="revenue">Intäkter</TabsTrigger>
                 <TabsTrigger value="comparison">Jämförelse</TabsTrigger>
+                <TabsTrigger value="capacity">Kapacitet</TabsTrigger>
               </TabsList>
 
               <TabsContent value="revenue" className="space-y-4">
@@ -404,7 +437,81 @@ export default function SimulatorPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
+
+              <TabsContent value="capacity" className="space-y-4">
+                <CapacityUtilizationChart
+                  data={capacityData}
+                  optimalMinUtilization={optimalMinUtilization}
+                  optimalMaxUtilization={optimalMaxUtilization}
+                  showOptimalZones={true}
+                  title=""
+                  description=""
+                />
+              </TabsContent>
             </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Optimal Corridor Controls */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <OptimalCorridorControls
+          minUtilization={optimalMinUtilization}
+          maxUtilization={optimalMaxUtilization}
+          onChange={handleOptimalCorridorChange}
+          minPlannedIntake={optimalMinPlannedIntake}
+          maxPlannedIntake={optimalMaxPlannedIntake}
+          onChangePlannedIntake={handleOptimalPlannedIntakeChange}
+        />
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Optimal Korridor Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Beläggningskorridor</span>
+                <span className="font-semibold text-green-600">
+                  {optimalMinUtilization}% - {optimalMaxUtilization}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Kundintag per period</span>
+                <span className="font-semibold text-blue-600">
+                  {optimalMinPlannedIntake} - {optimalMaxPlannedIntake} kunder
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t space-y-3">
+              <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                <h4 className="font-semibold text-green-800 text-sm mb-1">✓ Optimal Zon</h4>
+                <p className="text-xs text-green-700">
+                  När beläggningen ligger mellan {optimalMinUtilization}% och {optimalMaxUtilization}% är din klinik 
+                  i den gröna zonen med optimal kapacitetsutnyttjande.
+                </p>
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                <h4 className="font-semibold text-yellow-800 text-sm mb-1">⚠ Underutnyttjad</h4>
+                <p className="text-xs text-yellow-700">
+                  Under {optimalMinUtilization}% har du outnyttjad kapacitet - möjlighet att ta in fler kunder 
+                  och öka intäkterna.
+                </p>
+              </div>
+              
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <h4 className="font-semibold text-red-800 text-sm mb-1">🔴 Överbelastad</h4>
+                <p className="text-xs text-red-700">
+                  Över {optimalMaxUtilization}% riskerar du kvalitetsförsämring och personalutbrändhet - 
+                  överväg att utöka kapacitet eller begränsa intaget.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

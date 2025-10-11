@@ -248,7 +248,7 @@ export default function DashboardPage() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => signOut()}
+                  onClick={() => signOut({ callbackUrl: '/auth/login' })}
                 >
                   <LogOut className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Logga ut</span>

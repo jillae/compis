@@ -134,8 +134,8 @@ export default function InsightsClient() {
     }
   }
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: '/auth/login' })
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/auth/login' })
   }
 
   const getIcon = (type: string) => {
