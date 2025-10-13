@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { BackButton } from '@/components/ui/back-button';
 import { OptimalCorridorControls } from '@/components/dashboard/optimal-corridor-controls';
 import { CapacityUtilizationChart } from '@/components/dashboard/capacity-utilization-chart';
+import { ChartDisplayControls } from '@/components/dashboard/chart-display-controls';
 import {
   LineChart,
   Line,
@@ -72,6 +73,17 @@ export default function SimulatorPage() {
   const [optimalMinPlannedIntake, setOptimalMinPlannedIntake] = useState<number>(1);
   const [optimalMaxPlannedIntake, setOptimalMaxPlannedIntake] = useState<number>(10);
 
+  // Chart display controls
+  const [showUtilization, setShowUtilization] = useState<boolean>(true);
+  const [showActiveCustomers, setShowActiveCustomers] = useState<boolean>(false);
+  const [showSuggestedIntake, setShowSuggestedIntake] = useState<boolean>(false);
+  const [showIdleTime, setShowIdleTime] = useState<boolean>(false);
+  const [showPlannedIntake, setShowPlannedIntake] = useState<boolean>(false);
+  const [showOptimalUtilizationCorridor, setShowOptimalUtilizationCorridor] = useState<boolean>(true);
+  const [showOptimalIntakeCorridor, setShowOptimalIntakeCorridor] = useState<boolean>(false);
+  const [showBreakEvenLine, setShowBreakEvenLine] = useState<boolean>(false);
+  const [showMaxCapacityLevel, setShowMaxCapacityLevel] = useState<boolean>(false);
+
   const handleOptimalCorridorChange = (min: number, max: number) => {
     setOptimalMinUtilization(min);
     setOptimalMaxUtilization(max);
@@ -80,6 +92,43 @@ export default function SimulatorPage() {
   const handleOptimalPlannedIntakeChange = (min: number, max: number) => {
     setOptimalMinPlannedIntake(min);
     setOptimalMaxPlannedIntake(max);
+  };
+
+  const handleToggleMetric = (metric: string, enabled: boolean) => {
+    switch (metric) {
+      case 'utilization':
+        setShowUtilization(enabled);
+        break;
+      case 'activeCustomers':
+        setShowActiveCustomers(enabled);
+        break;
+      case 'suggestedIntake':
+        setShowSuggestedIntake(enabled);
+        break;
+      case 'idleTime':
+        setShowIdleTime(enabled);
+        break;
+      case 'plannedIntake':
+        setShowPlannedIntake(enabled);
+        break;
+    }
+  };
+
+  const handleToggleOverlay = (overlay: string, enabled: boolean) => {
+    switch (overlay) {
+      case 'optimalUtilizationCorridor':
+        setShowOptimalUtilizationCorridor(enabled);
+        break;
+      case 'optimalIntakeCorridor':
+        setShowOptimalIntakeCorridor(enabled);
+        break;
+      case 'breakEvenLine':
+        setShowBreakEvenLine(enabled);
+        break;
+      case 'maxCapacityLevel':
+        setShowMaxCapacityLevel(enabled);
+        break;
+    }
   };
 
   // Debounced fetch
@@ -174,19 +223,19 @@ export default function SimulatorPage() {
       <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
         <div className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">📊 Intäktssimulator</h1>
-              <p className="text-muted-foreground mt-2">
-                Justera parametrar och se direkt hur det påverkar dina intäkter kommande 12 månader
-              </p>
-            </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-4">
               <Link href="/dashboard">
-                <Button variant="outline" size="sm">
-                  Till översikt
+                <Button variant="outline" size="lg" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Tillbaka
                 </Button>
               </Link>
-              <BackButton href="/dashboard" label="Tillbaka" />
+              <div>
+                <h1 className="text-3xl font-bold">📊 Intäktssimulator</h1>
+                <p className="text-muted-foreground mt-1">
+                  Justera parametrar och se direkt hur det påverkar dina intäkter
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -443,7 +492,7 @@ export default function SimulatorPage() {
                   data={capacityData}
                   optimalMinUtilization={optimalMinUtilization}
                   optimalMaxUtilization={optimalMaxUtilization}
-                  showOptimalZones={true}
+                  showOptimalZones={showOptimalUtilizationCorridor}
                   title=""
                   description=""
                 />
@@ -451,6 +500,21 @@ export default function SimulatorPage() {
             </Tabs>
           </CardContent>
         </Card>
+
+        {/* Chart Display Controls - Right below the charts */}
+        <ChartDisplayControls
+          showUtilization={showUtilization}
+          showActiveCustomers={showActiveCustomers}
+          showSuggestedIntake={showSuggestedIntake}
+          showIdleTime={showIdleTime}
+          showPlannedIntake={showPlannedIntake}
+          onToggleMetric={handleToggleMetric}
+          showOptimalUtilizationCorridor={showOptimalUtilizationCorridor}
+          showOptimalIntakeCorridor={showOptimalIntakeCorridor}
+          showBreakEvenLine={showBreakEvenLine}
+          showMaxCapacityLevel={showMaxCapacityLevel}
+          onToggleOverlay={handleToggleOverlay}
+        />
       </div>
 
       {/* Optimal Corridor Controls */}
