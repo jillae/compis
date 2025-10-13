@@ -318,6 +318,27 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
+        {/* Marketing Intelligence CTA - TERTIARY (Professional+) */}
+        <Link href="/dashboard/marketing">
+          <Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all cursor-pointer border-0">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    <h3 className="text-xl font-bold">Marketing Intelligence</h3>
+                    <span className="text-xs bg-white/20 px-2 py-1 rounded">PRO+</span>
+                  </div>
+                  <p className="text-sm text-indigo-50">
+                    Meta kampanjoptimering & kapacitetsstyrning
+                  </p>
+                </div>
+                <ArrowRight className="h-6 w-6 flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Total Bookings */}

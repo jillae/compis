@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { CheckCircle, ArrowRight, Loader2, Copy, Check } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { CheckCircle, ArrowRight, Loader2, Copy, Check, Calendar, TrendingUp } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function OnboardingPage() {
@@ -19,7 +20,16 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
-  const [apiKey, setApiKey] = useState('')
+  
+  // Bokadirekt
+  const [bokadirektEnabled, setBokadirektEnabled] = useState(false)
+  const [bokadirektApiKey, setBokadirektApiKey] = useState('')
+  
+  // Meta API
+  const [metaEnabled, setMetaEnabled] = useState(false)
+  const [metaAccessToken, setMetaAccessToken] = useState('')
+  const [metaAdAccountId, setMetaAdAccountId] = useState('')
+  const [metaPixelId, setMetaPixelId] = useState('')
 
   useEffect(() => {
     // Check if user has already completed onboarding
@@ -63,8 +73,14 @@ export default function OnboardingPage() {
   }
 
   const handleStep2Complete = async () => {
-    if (!apiKey) {
+    // Validate based on what's enabled
+    if (bokadirektEnabled && !bokadirektApiKey) {
       setError('Vänligen ange din Bokadirekt API-nyckel')
+      return
+    }
+    
+    if (metaEnabled && (!metaAccessToken || !metaAdAccountId)) {
+      setError('Vänligen ange Meta Access Token och Ad Account ID')
       return
     }
 
@@ -75,14 +91,22 @@ export default function OnboardingPage() {
       const response = await fetch('/api/user/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ step: 2, apiKey }),
+        body: JSON.stringify({ 
+          step: 2, 
+          bokadirektEnabled,
+          bokadirektApiKey: bokadirektEnabled ? bokadirektApiKey : null,
+          metaEnabled,
+          metaAccessToken: metaEnabled ? metaAccessToken : null,
+          metaAdAccountId: metaEnabled ? metaAdAccountId : null,
+          metaPixelId: metaEnabled && metaPixelId ? metaPixelId : null,
+        }),
       })
 
       if (response.ok) {
         router.push('/dashboard/simulator')
       } else {
         const data = await response.json()
-        setError(data.error || 'Ogiltig API-nyckel. Kontrollera och försök igen.')
+        setError(data.error || 'Något gick fel. Kontrollera dina uppgifter och försök igen.')
       }
     } catch (err) {
       setError('Något gick fel. Försök igen.')
@@ -173,66 +197,154 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full">
+      <Card className="max-w-3xl w-full">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl">Anslut ditt Bokadirekt-konto</CardTitle>
+          <CardTitle className="text-3xl">Anslut dina system</CardTitle>
           <CardDescription className="text-lg">
-            Steg 2: Få tillgång till din riktiga bokningsdata
+            Steg 2: Välj vilka integrationer du vill aktivera
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Alert className="bg-amber-50 border-amber-200">
-            <AlertDescription className="text-amber-900">
-              <strong>Viktigt:</strong> För att Flow ska kunna hämta din bokningsdata behöver du en API-nyckel från Bokadirekt.
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertDescription className="text-blue-900">
+              <strong>Tips:</strong> Du kan hoppa över detta steg och aktivera integrationer senare under Inställningar.
             </AlertDescription>
           </Alert>
 
-          <div className="bg-blue-50 p-6 rounded-lg space-y-4">
-            <h3 className="font-semibold text-lg">Så här får du din API-nyckel:</h3>
-            <ol className="space-y-3 list-decimal list-inside text-gray-700">
-              <li>
-                <strong>Maila Bokadirekt:</strong> Skicka ett mail till{' '}
-                <button
-                  onClick={copyToClipboard}
-                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  support@bokadirekt.se
-                  {copied ? (
-                    <Check className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </button>
-                {' '}och be dem aktivera API för ditt konto.
-              </li>
-              <li>
-                <strong>Vänta på aktivering:</strong> Bokadirekt aktiverar API-tjänsten för ditt konto (brukar ta 1-2 arbetsdagar).
-              </li>
-              <li>
-                <strong>Hitta din nyckel:</strong> Logga in på Bokadirekt → Gå till <strong>Inställningar</strong> → <strong>Övrigt</strong> → <strong>API-tjänst</strong>
-              </li>
-              <li>
-                <strong>Aktivera tjänsten:</strong> Använd toggle-knappen för att aktivera API-tjänsten.
-              </li>
-              <li>
-                <strong>Kopiera nyckeln:</strong> Din API-nyckel visas nu. Kopiera den och klistra in nedan.
-              </li>
-            </ol>
+          {/* Bokadirekt Integration */}
+          <div className="border rounded-lg p-6 space-y-4 bg-white">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <Calendar className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">Bokadirekt Integration</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Synka bokningar, kunder och personal från Bokadirekt
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={bokadirektEnabled}
+                onCheckedChange={setBokadirektEnabled}
+                disabled={loading}
+              />
+            </div>
+
+            {bokadirektEnabled && (
+              <div className="pl-14 space-y-4 animate-in fade-in-50">
+                <div className="bg-blue-50 p-4 rounded-lg space-y-3">
+                  <h4 className="font-semibold text-sm">Så här får du din API-nyckel:</h4>
+                  <ol className="space-y-2 list-decimal list-inside text-sm text-gray-700">
+                    <li>
+                      Maila{' '}
+                      <button
+                        onClick={copyToClipboard}
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        support@bokadirekt.se
+                        {copied ? (
+                          <Check className="h-3 w-3 text-green-600" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </button>
+                      {' '}och be om API-aktivering
+                    </li>
+                    <li>Logga in på Bokadirekt → Inställningar → Övrigt → API-tjänst</li>
+                    <li>Aktivera API-tjänsten och kopiera nyckeln</li>
+                  </ol>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bokadirektApiKey">API-nyckel</Label>
+                  <Input
+                    id="bokadirektApiKey"
+                    type="password"
+                    placeholder="Din API-nyckel från Bokadirekt"
+                    value={bokadirektApiKey}
+                    onChange={(e) => setBokadirektApiKey(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="apiKey">Bokadirekt API-nyckel</Label>
-            <Input
-              id="apiKey"
-              type="password"
-              placeholder="Din API-nyckel från Bokadirekt"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              disabled={loading}
-            />
-            <p className="text-xs text-muted-foreground">
-              Vi lagrar din API-nyckel säkert och använder den endast för att synka bokningsdata.
-            </p>
+          {/* Meta API Integration */}
+          <div className="border rounded-lg p-6 space-y-4 bg-white">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="bg-indigo-100 p-3 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-indigo-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">Meta Marketing API</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Optimera kampanjer baserat på klinikkapacitet och bokningar
+                  </p>
+                  <span className="inline-block mt-2 px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded">
+                    PROFESSIONAL & ENTERPRISE
+                  </span>
+                </div>
+              </div>
+              <Switch
+                checked={metaEnabled}
+                onCheckedChange={setMetaEnabled}
+                disabled={loading}
+              />
+            </div>
+
+            {metaEnabled && (
+              <div className="pl-14 space-y-4 animate-in fade-in-50">
+                <div className="bg-indigo-50 p-4 rounded-lg space-y-3">
+                  <h4 className="font-semibold text-sm">Så här får du dina Meta-uppgifter:</h4>
+                  <ol className="space-y-2 list-decimal list-inside text-sm text-gray-700">
+                    <li>Gå till Meta Business Manager (business.facebook.com)</li>
+                    <li>Navigera till Business Settings → System Users</li>
+                    <li>Skapa en System User med Marketing API-åtkomst</li>
+                    <li>Generera Access Token med ads_read och ads_management scope</li>
+                    <li>Hitta ditt Ad Account ID under Ads Manager (format: act_XXXXXXXXX)</li>
+                  </ol>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="metaAccessToken">Access Token *</Label>
+                    <Input
+                      id="metaAccessToken"
+                      type="password"
+                      placeholder="EAAG..."
+                      value={metaAccessToken}
+                      onChange={(e) => setMetaAccessToken(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="metaAdAccountId">Ad Account ID *</Label>
+                    <Input
+                      id="metaAdAccountId"
+                      placeholder="act_123456789"
+                      value={metaAdAccountId}
+                      onChange={(e) => setMetaAdAccountId(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="metaPixelId">Pixel ID (valfritt)</Label>
+                    <Input
+                      id="metaPixelId"
+                      placeholder="123456789012345"
+                      value={metaPixelId}
+                      onChange={(e) => setMetaPixelId(e.target.value)}
+                      disabled={loading}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Krävs för Conversions API och lead-kvalitetsspårning
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -254,16 +366,16 @@ export default function OnboardingPage() {
               onClick={handleStep2Complete}
               className="flex-1"
               size="lg"
-              disabled={loading}
+              disabled={loading || (!bokadirektEnabled && !metaEnabled)}
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Ansluter...
+                  Sparar...
                 </>
               ) : (
                 <>
-                  Anslut & Kom igång
+                  Fortsätt
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </>
               )}
@@ -271,7 +383,7 @@ export default function OnboardingPage() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
-            Du kan alltid ansluta Bokadirekt senare under Inställningar
+            Du kan ändra dessa inställningar när som helst under Inställningar
           </p>
         </CardContent>
       </Card>

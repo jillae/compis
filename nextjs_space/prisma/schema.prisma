@@ -88,6 +88,24 @@ model Clinic {
   trialEndsAt       DateTime?
   subscriptionEndsAt DateTime?
   isActive          Boolean    @default(true)
+  
+  // Integration toggles
+  bokadirektEnabled Boolean    @default(false) // Toggle for Bokadirekt integration
+  metaEnabled       Boolean    @default(false) // Toggle for Meta API integration
+  
+  // Meta Marketing API credentials
+  metaAccessToken   String?    // Meta Marketing API access token
+  metaAdAccountId   String?    // Meta Ad Account ID (act_XXXXXXXXX)
+  metaPixelId       String?    // Meta Pixel ID for Conversions API
+  metaAppId         String?    // Meta App ID
+  metaAppSecret     String?    // Meta App Secret
+  
+  // Meta optimization settings
+  metaTargetCPL     Decimal?   @db.Decimal(8, 2) // Target Cost Per Lead
+  metaTargetROAS    Decimal?   @db.Decimal(5, 2) // Target Return on Ad Spend
+  metaCapacityMin   Int?       @default(75) // Min capacity % before reducing budget
+  metaCapacityMax   Int?       @default(90) // Max capacity % before increasing budget
+  
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
   
@@ -394,4 +412,44 @@ enum ActionStatus {
   IN_PROGRESS  // Användaren har påbörjat
   COMPLETED    // Alla steg är klara
   DISMISSED    // Användaren har valt att inte göra detta
+}
+
+// Meta Campaign Metrics - synced from Meta Marketing API
+model MetaCampaignMetric {
+  id                  String   @id @default(cuid())
+  clinicId            String
+  metaCampaignId      String   // Meta campaign ID
+  metaCampaignName    String
+  date                DateTime // Date for this metric snapshot
+  
+  // Core metrics
+  spend               Decimal  @db.Decimal(10, 2)
+  impressions         Int      @default(0)
+  clicks              Int      @default(0)
+  leads               Int      @default(0)
+  
+  // Calculated metrics
+  cpm                 Decimal  @db.Decimal(10, 2) // Cost per 1000 impressions
+  cpc                 Decimal  @db.Decimal(10, 2) // Cost per click
+  cpl                 Decimal  @db.Decimal(10, 2) // Cost per lead
+  ctr                 Decimal  @db.Decimal(5, 4)  // Click-through rate
+  
+  // Quality metrics
+  qualityRanking      String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  conversionRanking   String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  engagementRanking   String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  
+  // Lead quality (tracked via Conversions API)
+  qualityLeads        Int      @default(0) // Leads that became appointments
+  showUpRate          Decimal? @db.Decimal(5, 4) // % of appointments that showed up
+  revenue             Decimal  @db.Decimal(10, 2) // Revenue generated from these leads
+  roas                Decimal? @db.Decimal(5, 2) // Return on Ad Spend
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@unique([clinicId, metaCampaignId, date])
+  @@index([clinicId])
+  @@index([date])
+  @@index([metaCampaignId])
 }

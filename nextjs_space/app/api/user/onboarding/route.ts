@@ -12,7 +12,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { step, apiKey } = await req.json()
+    const { 
+      step, 
+      bokadirektEnabled,
+      bokadirektApiKey,
+      metaEnabled,
+      metaAccessToken,
+      metaAdAccountId,
+      metaPixelId,
+    } = await req.json()
 
     if (step === 1) {
       // Mark step 1 as complete (user has explored the dashboard)
@@ -28,14 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (step === 2) {
-      if (!apiKey) {
-        return NextResponse.json({ error: 'API key required' }, { status: 400 })
-      }
-
-      // Validate API key with Bokadirekt (simplified for now)
-      // In production, you'd want to make a test call to Bokadirekt API
-      
-      // Store API key in user's clinic
+      // Get user's clinic
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },
         include: { clinic: true },
@@ -45,9 +46,47 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'No clinic associated' }, { status: 400 })
       }
 
+      // Prepare update data
+      const updateData: any = {}
+
+      // Handle Bokadirekt integration
+      if (bokadirektEnabled) {
+        if (!bokadirektApiKey) {
+          return NextResponse.json({ error: 'Bokadirekt API key required when enabled' }, { status: 400 })
+        }
+        updateData.bokadirektEnabled = true
+        updateData.bokadirektApiKey = bokadirektApiKey
+      } else {
+        updateData.bokadirektEnabled = false
+      }
+
+      // Handle Meta API integration
+      if (metaEnabled) {
+        if (!metaAccessToken || !metaAdAccountId) {
+          return NextResponse.json({ error: 'Meta Access Token and Ad Account ID required when enabled' }, { status: 400 })
+        }
+        
+        // Check tier - Meta API is only available for PROFESSIONAL and ENTERPRISE
+        if (user.clinic?.tier === 'BASIC') {
+          return NextResponse.json({ 
+            error: 'Meta API integration is only available for Professional and Enterprise plans' 
+          }, { status: 403 })
+        }
+        
+        updateData.metaEnabled = true
+        updateData.metaAccessToken = metaAccessToken
+        updateData.metaAdAccountId = metaAdAccountId
+        if (metaPixelId) {
+          updateData.metaPixelId = metaPixelId
+        }
+      } else {
+        updateData.metaEnabled = false
+      }
+
+      // Update clinic with integration settings
       await prisma.clinic.update({
         where: { id: user.clinicId },
-        data: { bokadirektApiKey: apiKey },
+        data: updateData,
       })
 
       // Mark onboarding as complete
@@ -59,14 +98,28 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      // Trigger initial sync (optional)
-      try {
-        await fetch(`${process.env.NEXTAUTH_URL}/api/sync`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        })
-      } catch (err) {
-        console.error('Failed to trigger initial sync:', err)
+      // Trigger initial Bokadirekt sync if enabled
+      if (bokadirektEnabled) {
+        try {
+          await fetch(`${process.env.NEXTAUTH_URL}/api/sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          })
+        } catch (err) {
+          console.error('Failed to trigger initial Bokadirekt sync:', err)
+        }
+      }
+
+      // Trigger initial Meta sync if enabled
+      if (metaEnabled) {
+        try {
+          await fetch(`${process.env.NEXTAUTH_URL}/api/meta/sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          })
+        } catch (err) {
+          console.error('Failed to trigger initial Meta sync:', err)
+        }
       }
 
       return NextResponse.json({ success: true })
