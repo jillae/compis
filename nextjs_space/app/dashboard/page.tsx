@@ -19,10 +19,11 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RoleToggle } from '@/components/dashboard/role-toggle';
-import { RevenueChart } from '@/components/dashboard/revenue-chart';
+import { EnhancedRevenueChart } from '@/components/dashboard/enhanced-revenue-chart';
 import { BookingPatternChart } from '@/components/dashboard/booking-pattern-chart';
 import { WeekdayChart } from '@/components/dashboard/weekday-chart';
 import { AIInsightsSection } from '@/components/dashboard/ai-insights-section';
+import { MetaAlerts } from '@/components/dashboard/meta-alerts';
 import { SyncButton } from '@/components/dashboard/sync-button';
 import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
 import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
@@ -471,14 +472,17 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Analytics Charts */}
+        {/* META Ads Intelligence - PROACTIVE ALERTS */}
+        <MetaAlerts />
+
+        {/* Enhanced Analytics Charts with Toggle */}
         {analytics && (
           <>
+            <EnhancedRevenueChart data={analytics.revenueTrend} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <RevenueChart data={analytics.revenueTrend} />
               <WeekdayChart data={analytics.weekdayDistribution} />
+              <BookingPatternChart data={analytics.bookingPattern} />
             </div>
-            <BookingPatternChart data={analytics.bookingPattern} />
           </>
         )}
 
