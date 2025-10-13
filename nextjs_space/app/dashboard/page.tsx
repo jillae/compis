@@ -15,6 +15,7 @@ import {
   ArrowRight,
   ExternalLink,
   LogOut,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RoleToggle } from '@/components/dashboard/role-toggle';
@@ -261,21 +262,56 @@ export default function DashboardPage() {
         {/* Content with padding */}
         <div className="p-6 space-y-6">
 
-        {/* Revenue Simulator CTA */}
-        <Link href="/dashboard/simulator">
-          <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all cursor-pointer border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-6 w-6" />
-                    <h3 className="text-2xl font-bold">Intäktssimulator</h3>
+        {/* AI Action Dashboard CTA - PRIMARY */}
+        <Link href="/dashboard/actions">
+          <Card className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all cursor-pointer border-0 shadow-xl">
+            <CardContent className="p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-3 flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                      <TrendingUp className="h-7 w-7" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-2xl md:text-3xl font-bold">Veckans AI-Rekommendationer</h3>
+                        <span className="text-2xl">✨</span>
+                      </div>
+                      <p className="text-sm text-white/80 mt-1">
+                        NYA DENNA VECKA
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-blue-50">
-                    Testa "what-if" scenarion: Öka bokningar +2/dag → Se exakt vad det ger på 12 månader! 🚀
+                  <p className="text-base md:text-lg text-white/95">
+                    <strong>3 konkreta åtgärder</strong> för att öka intäkter denna vecka. 
+                    AI har analyserat din data och hittat optimeringsmöjligheter värda tiotusentals kr! 🚀
+                  </p>
+                  <div className="flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 w-fit">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Klicka för att se dina personliga rekommendationer</span>
+                  </div>
+                </div>
+                <ArrowRight className="h-10 w-10 flex-shrink-0 hidden md:block" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Revenue Simulator CTA - SECONDARY */}
+        <Link href="/dashboard/simulator">
+          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all cursor-pointer border-0">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    <h3 className="text-xl font-bold">Intäktssimulator</h3>
+                  </div>
+                  <p className="text-sm text-blue-50">
+                    Testa "what-if" scenarion och se 12-månaders impact
                   </p>
                 </div>
-                <ArrowRight className="h-8 w-8 flex-shrink-0" />
+                <ArrowRight className="h-6 w-6 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>

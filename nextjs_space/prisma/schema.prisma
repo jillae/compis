@@ -349,3 +349,49 @@ enum LeaveStatus {
   REJECTED      // Avvisad
   CANCELLED     // Avbruten
 }
+
+// Weekly Action - AI-generated proactive recommendations
+model WeeklyAction {
+  id              String       @id @default(cuid())
+  clinicId        String
+  weekStartDate   DateTime     // Monday of the week this action is for
+  priority        Int          // 1 = highest, 2 = medium, 3 = low
+  title           String
+  category        ActionCategory
+  expectedImpact  Decimal      @db.Decimal(10, 2) // Expected revenue impact in kr
+  description     String       @db.Text
+  reasoning       String       @db.Text // Why this is important
+  status          ActionStatus @default(PENDING)
+  completedAt     DateTime?
+  dismissedAt     DateTime?
+  dismissReason   String?
+  
+  // JSON arrays for steps and evidence
+  steps           Json         // Array of {description: string, completed: boolean}
+  evidence        Json         // Array of {metric: string, currentValue: number, targetValue: number}
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([clinicId])
+  @@index([weekStartDate])
+  @@index([priority])
+  @@index([status])
+  @@index([category])
+}
+
+enum ActionCategory {
+  CAPACITY_OPTIMIZATION  // E.g., "Öka kapacitet torsdagar"
+  PRICING               // E.g., "Justera priser på underpresterande tjänster"
+  MARKETING             // E.g., "Kampanj för att fylla lediga tider"
+  SERVICE_MIX           // E.g., "Öka laser, minska basbehandling"
+  CUSTOMER_RETENTION    // E.g., "Win-back campaign för inaktiva kunder"
+  STAFFING              // E.g., "Optimera schemaläggning"
+}
+
+enum ActionStatus {
+  PENDING      // Väntar på att användaren ska agera
+  IN_PROGRESS  // Användaren har påbörjat
+  COMPLETED    // Alla steg är klara
+  DISMISSED    // Användaren har valt att inte göra detta
+}
