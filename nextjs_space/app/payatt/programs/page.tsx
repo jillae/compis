@@ -5,12 +5,15 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import LoyaltyProgramForm from '@/components/loyalty-program-form';
-import { Plus, Users, Calendar, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Users, Calendar, ToggleLeft, ToggleRight, Monitor, Copy, Check, ExternalLink } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProgramsPage() {
   const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const fetchPrograms = async () => {
     try {
@@ -42,6 +45,36 @@ export default function ProgramsPage() {
     } catch (error) {
       console.error('Failed to toggle program:', error);
     }
+  };
+
+  const copyKioskUrl = async (programId: string) => {
+    const kioskUrl = `${window.location.origin}/kiosk/${programId}`;
+    
+    try {
+      await navigator.clipboard.writeText(kioskUrl);
+      setCopiedId(programId);
+      
+      toast({
+        title: 'Kiosk-URL kopierad!',
+        description: 'Öppna denna URL på din display-skärm',
+      });
+
+      setTimeout(() => {
+        setCopiedId(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      toast({
+        title: 'Kunde inte kopiera',
+        description: 'Försök igen',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const openKiosk = (programId: string) => {
+    const kioskUrl = `/kiosk/${programId}`;
+    window.open(kioskUrl, '_blank', 'fullscreen=yes,toolbar=no,menubar=no,scrollbars=no,resizable=no');
   };
 
   if (loading) {
@@ -124,6 +157,42 @@ export default function ProgramsPage() {
                       <p className="font-semibold text-yellow-800">Belöning:</p>
                       <p className="text-yellow-700">{rewardDescription}</p>
                     </div>
+
+                    {/* Kiosk Mode Section */}
+                    <div className="border-t pt-4 space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <Monitor className="w-4 h-4" />
+                        <span>Kiosk Display</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => copyKioskUrl(program.id)}
+                        >
+                          {copiedId === program.id ? (
+                            <>
+                              <Check className="w-4 h-4 mr-2 text-green-600" />
+                              Kopierad!
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-4 h-4 mr-2" />
+                              Kopiera URL
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openKiosk(program.id)}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
                     {program.isDraft && (
                       <div className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
                         Utkast
