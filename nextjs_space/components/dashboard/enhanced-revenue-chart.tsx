@@ -34,7 +34,7 @@ interface EnhancedRevenueChartProps {
 }
 
 export function EnhancedRevenueChart({ data, compareData, showComparison = false }: EnhancedRevenueChartProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true); // Open by default
   const [viewMode, setViewMode] = useState<'revenue' | 'bookings' | 'both'>('both');
 
   // Calculate metrics

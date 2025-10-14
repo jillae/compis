@@ -16,6 +16,7 @@ import {
   ExternalLink,
   LogOut,
   Sparkles,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RoleToggle } from '@/components/dashboard/role-toggle';
@@ -28,6 +29,7 @@ import { SyncButton } from '@/components/dashboard/sync-button';
 import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
 import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
 import { TimePeriodSelector } from '@/components/time-period-selector';
+import { HamburgerMenu } from '@/components/dashboard/hamburger-menu';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 
@@ -199,62 +201,38 @@ export default function DashboardPage() {
         {/* Sticky Header */}
         <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
           <div className="p-4 md:p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Flow Dashboard</h1>
-                <p className="text-sm md:text-base text-muted-foreground">
-                  Intäktsintelligens för ArchClinic
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Link href="/" className="hidden md:block">
-                  <Button variant="outline" size="sm">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    <span className="hidden lg:inline">Till landningssida</span>
-                    <span className="lg:hidden">Hem</span>
-                  </Button>
-                </Link>
-                
-                {session?.user?.role === UserRole.SUPER_ADMIN && (
-                  <RoleToggle 
-                    currentRole={simulatedRole} 
-                    onRoleChange={setSimulatedRole} 
-                  />
-                )}
-                
+            <div className="flex items-center justify-between gap-4">
+              {/* Clickable Logo/Title */}
+              <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Flow
+                  </h1>
+                  <p className="text-xs text-muted-foreground hidden sm:block">
+                    Intäktsintelligens för ArchClinic
+                  </p>
+                </div>
+              </Link>
+
+              {/* Right side controls */}
+              <div className="flex items-center gap-2">
                 <WorkdayToggle value={workdays} onChange={setWorkdays} />
                 <SyncButton />
                 <TimePeriodSelector 
                   value={timePeriod} 
                   onChange={setTimePeriod}
-                  className="w-[140px] md:w-[180px]"
+                  className="w-[120px] md:w-[160px]"
                 />
                 
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={async () => {
-                    const res = await fetch('/api/email/weekly-report');
-                    if (res.ok) {
-                      alert('✅ Veckorapport skickad till din e-post!');
-                    } else {
-                      alert('❌ Kunde inte skicka rapport. Försök igen.');
-                    }
-                  }}
-                  title="Skicka veckorapport till din e-post"
-                  className="hidden sm:flex"
-                >
-                  📧 <span className="hidden lg:inline ml-1">Veckorapport</span>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => signOut({ callbackUrl: '/auth/login' })}
-                >
-                  <LogOut className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Logga ut</span>
-                </Button>
+                {/* Hamburger Menu */}
+                <HamburgerMenu 
+                  userRole={session?.user?.role}
+                  simulatedRole={simulatedRole}
+                  onRoleChange={setSimulatedRole}
+                />
               </div>
             </div>
           </div>
@@ -345,79 +323,89 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        {/* Overview Cards */}
+        {/* Overview Cards - Colorful & Clear */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Total Bookings */}
-          <Card>
+          {/* Total Bookings - Blue */}
+          <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Totalt Bokningar</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">{overview.totalBookings}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {overview.onlineBookingPercentage}% onlinebokningar
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Total Revenue */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Intäkt</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">
-                {overview.totalRevenue.toLocaleString('sv-SE')} kr
+              <CardTitle className="text-sm font-medium text-blue-900">Bokningar</CardTitle>
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <Calendar className="h-4 w-4 text-white" />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Från {overview.completedBookings} genomförda bokningar
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold text-blue-700">{overview.totalBookings}</div>
+              <p className="text-xs text-blue-600 mt-1 font-medium">
+                {overview.onlineBookingPercentage}% online
               </p>
             </CardContent>
           </Card>
 
-          {/* Completion Rate */}
-          <Card>
+          {/* Total Revenue - Green */}
+          <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Genomförandegrad</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CardTitle className="text-sm font-medium text-green-900">Intäkt (kr)</CardTitle>
+              <div className="p-2 bg-green-500 rounded-lg">
+                <DollarSign className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{overview.completionRate}%</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="text-4xl font-bold text-green-700">
+                {overview.totalRevenue.toLocaleString('sv-SE')}
+              </div>
+              <p className="text-xs text-green-600 mt-1 font-medium">
+                Från {overview.completedBookings} klara
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Completion Rate - Emerald */}
+          <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-emerald-900">Genomfört</CardTitle>
+              <div className="p-2 bg-emerald-500 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-white" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold text-emerald-700">{overview.completionRate}%</div>
+              <p className="text-xs text-emerald-600 mt-1 font-medium">
                 {overview.completedBookings} / {overview.totalBookings} bokningar
               </p>
             </CardContent>
           </Card>
 
-          {/* Cancellation Rate */}
-          <Card>
+          {/* Cancellation Rate - Orange */}
+          <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avbokningsgrad</CardTitle>
-              <XCircle className="h-4 w-4 text-red-600" />
+              <CardTitle className="text-sm font-medium text-orange-900">Avbokningar</CardTitle>
+              <div className="p-2 bg-orange-500 rounded-lg">
+                <XCircle className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{overview.cancellationRate}%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {overview.cancelledBookings} avbokade, {overview.noShowBookings} uteblivna
+              <div className="text-4xl font-bold text-orange-700">{overview.cancellationRate}%</div>
+              <p className="text-xs text-orange-600 mt-1 font-medium">
+                {overview.cancelledBookings} avbokade, {overview.noShowBookings} no-show
               </p>
             </CardContent>
           </Card>
 
-          {/* At-Risk Bookings */}
+          {/* At-Risk Bookings - Red */}
           {atRiskMetrics && (
             <Link href="/dashboard/at-risk">
-              <Card className="cursor-pointer hover:border-destructive/50 transition-all border-destructive/30 bg-destructive/5">
+              <Card className="cursor-pointer hover:shadow-lg transition-all border-red-200 bg-gradient-to-br from-red-50 to-red-100/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Risk Nästa 14d</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  <CardTitle className="text-sm font-medium text-red-900">Risk 14d</CardTitle>
+                  <div className="p-2 bg-red-500 rounded-lg">
+                    <AlertTriangle className="h-4 w-4 text-white" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-4xl font-bold text-destructive">
+                  <div className="text-4xl font-bold text-red-700">
                     {atRiskMetrics.highRiskBookings}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-red-600 mt-1 font-medium">
                     {atRiskMetrics.potentialLoss.toLocaleString()} kr i riskzon
                   </p>
                 </CardContent>
@@ -426,34 +414,46 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Two Column Layout */}
+        {/* Two Column Layout - Colorful Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Services */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Populäraste Tjänster</CardTitle>
+          <Card className="border-purple-200 bg-gradient-to-br from-purple-50/50 to-white">
+            <CardHeader className="border-b bg-gradient-to-r from-purple-100/50 to-pink-100/50">
+              <CardTitle className="flex items-center gap-2 text-purple-900">
+                <Sparkles className="h-5 w-5 text-purple-600" />
+                Populäraste Tjänster
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {topServices.map((service, index) => (
-                  <div key={service.serviceId} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm">
-                        {index + 1}
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                {topServices.map((service, index) => {
+                  const colors = [
+                    'from-purple-500 to-pink-500',
+                    'from-blue-500 to-cyan-500',
+                    'from-green-500 to-emerald-500',
+                    'from-orange-500 to-red-500',
+                    'from-indigo-500 to-purple-500'
+                  ];
+                  return (
+                    <div key={service.serviceId} className="flex items-center justify-between p-3 rounded-lg bg-white border border-purple-100 hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3">
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br ${colors[index % colors.length]} text-white font-bold text-sm shadow-md`}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{service.name}</p>
+                          <p className="text-xs text-purple-600 font-medium">{service.category}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{service.name}</p>
-                        <p className="text-xs text-muted-foreground">{service.category}</p>
+                      <div className="text-right">
+                        <p className="font-bold text-purple-700">{service._count.id} <span className="text-xs font-normal">bok</span></p>
+                        <p className="text-sm font-semibold text-green-600">
+                          {(service._sum.price || 0).toLocaleString('sv-SE')} kr
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{service._count.id} bokningar</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(service._sum.price || 0).toLocaleString('sv-SE')} kr
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {topServices.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
                     Ingen tjänstedata tillgänglig
@@ -464,31 +464,43 @@ export default function DashboardPage() {
           </Card>
 
           {/* Staff Performance */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Personalprestanda</CardTitle>
+          <Card className="border-blue-200 bg-gradient-to-br from-blue-50/50 to-white">
+            <CardHeader className="border-b bg-gradient-to-r from-blue-100/50 to-indigo-100/50">
+              <CardTitle className="flex items-center gap-2 text-blue-900">
+                <Users className="h-5 w-5 text-blue-600" />
+                Personalprestanda
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {staffPerformance.map((staff, index) => (
-                  <div key={staff.staffId} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-secondary-foreground font-semibold text-sm">
-                        {index + 1}
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                {staffPerformance.map((staff, index) => {
+                  const colors = [
+                    'from-blue-500 to-indigo-500',
+                    'from-cyan-500 to-blue-500',
+                    'from-teal-500 to-cyan-500',
+                    'from-indigo-500 to-blue-500',
+                    'from-sky-500 to-blue-500'
+                  ];
+                  return (
+                    <div key={staff.staffId} className="flex items-center justify-between p-3 rounded-lg bg-white border border-blue-100 hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3">
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br ${colors[index % colors.length]} text-white font-bold text-sm shadow-md`}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{staff.name}</p>
+                          <p className="text-xs text-blue-600 font-medium">{staff.role}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{staff.name}</p>
-                        <p className="text-xs text-muted-foreground">{staff.role}</p>
+                      <div className="text-right">
+                        <p className="font-bold text-blue-700">{staff._count.id} <span className="text-xs font-normal">bok</span></p>
+                        <p className="text-sm font-semibold text-green-600">
+                          {(staff._sum.price || 0).toLocaleString('sv-SE')} kr
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{staff._count.id} bokningar</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(staff._sum.price || 0).toLocaleString('sv-SE')} kr
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {staffPerformance.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
                     Ingen personaldata tillgänglig
