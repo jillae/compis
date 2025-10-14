@@ -1,0 +1,455 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/flow/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// NextAuth tables
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                   String    @id @default(cuid())
+  name                 String?
+  email                String?   @unique
+  emailVerified        DateTime?
+  image                String?
+  password             String?
+  firstName            String?
+  lastName             String?
+  companyName          String?
+  jobTitle             String?
+  role                 UserRole  @default(STAFF)
+  clinicId             String?
+  onboardingStep       Int?      @default(0)
+  onboardingCompletedAt DateTime?
+  clinic               Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  accounts             Account[]
+  sessions             Session[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([clinicId])
+  @@index([role])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Flow Revenue Intelligence Platform Schema
+
+// Clinic (Salon) - represents a beauty/health clinic using Bokadirekt
+model Clinic {
+  id                String     @id @default(cuid())
+  bokadirektId      String?    @unique // Bokadirekt salon ID
+  bokadirektApiKey  String?    // Each clinic has their own API key
+  name              String
+  description       String?
+  address           String?
+  phone             String?
+  email             String?
+  website           String?
+  tier              SubscriptionTier @default(BASIC)
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  trialEndsAt       DateTime?
+  subscriptionEndsAt DateTime?
+  isActive          Boolean    @default(true)
+  
+  // Integration toggles
+  bokadirektEnabled Boolean    @default(false) // Toggle for Bokadirekt integration
+  metaEnabled       Boolean    @default(false) // Toggle for Meta API integration
+  
+  // Meta Marketing API credentials
+  metaAccessToken   String?    // Meta Marketing API access token
+  metaAdAccountId   String?    // Meta Ad Account ID (act_XXXXXXXXX)
+  metaPixelId       String?    // Meta Pixel ID for Conversions API
+  metaAppId         String?    // Meta App ID
+  metaAppSecret     String?    // Meta App Secret
+  
+  // Meta optimization settings
+  metaTargetCPL     Decimal?   @db.Decimal(8, 2) // Target Cost Per Lead
+  metaTargetROAS    Decimal?   @db.Decimal(5, 2) // Target Return on Ad Spend
+  metaCapacityMin   Int?       @default(75) // Min capacity % before reducing budget
+  metaCapacityMax   Int?       @default(90) // Max capacity % before increasing budget
+  
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  users             User[]
+  customers         Customer[]
+  staff             Staff[]
+  services          Service[]
+  bookings          Booking[]
+
+  @@index([bokadirektId])
+  @@index([name])
+  @@index([tier])
+  @@index([subscriptionStatus])
+}
+
+model Customer {
+  id             String    @id @default(cuid())
+  bokadirektId   String?   @unique // Bokadirekt customer ID
+  clinicId       String?
+  name           String?
+  phone          String?
+  email          String?
+  tags           String[]  @default([])
+  dateOfBirth    DateTime?
+  city           String?
+  postalCode     String?
+  firstName      String?
+  lastName       String?
+  firstVisit     DateTime?
+  totalBookings  Int       @default(0)
+  noShowCount    Int       @default(0)
+  totalSpent     Decimal   @default(0) @db.Decimal(10, 2)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  clinic         Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  bookings       Booking[]
+
+  @@index([bokadirektId])
+  @@index([clinicId])
+  @@index([email])
+  @@index([phone])
+  @@index([name])
+}
+
+model Staff {
+  id              String    @id @default(cuid())
+  bokadirektId    String?   @unique // Bokadirekt resource ID
+  clinicId        String?
+  name            String
+  email           String?
+  phone           String?
+  role            String?   // E.g., "Hudterapeut", "Massageterapeut"
+  specializations String[]  @default([])
+  specialization  String?
+  hourlyRate      Decimal?  @db.Decimal(8, 2)
+  weeklyHours     Int?      // Antal arbetstimmar per vecka
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  clinic          Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  bookings        Booking[]
+  leaves          StaffLeave[]
+
+  @@index([bokadirektId])
+  @@index([clinicId])
+  @@index([name])
+  @@index([specialization])
+}
+
+model Room {
+  id            String    @id @default(cuid())
+  name          String
+  equipmentType String?
+  available     Boolean   @default(true)
+  capacity      Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookings      Booking[]
+
+  @@index([name])
+  @@index([equipmentType])
+}
+
+model Service {
+  id           String    @id @default(cuid())
+  bokadirektId String?   @unique // Bokadirekt service ID
+  clinicId     String?
+  name         String
+  description  String?
+  category     String    @default("general")
+  price        Decimal   @default(0) @db.Decimal(10, 2)
+  duration     Int       @default(60) // Duration in minutes
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  clinic       Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  bookings     Booking[]
+
+  @@index([bokadirektId])
+  @@index([clinicId])
+  @@index([name])
+  @@index([category])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  bokadirektId    String?       @unique // Bokadirekt booking ID
+  clinicId        String?
+  customerId      String
+  staffId         String?
+  serviceId       String?
+  roomId          String?
+  treatmentType   String        @default("")
+  scheduledTime   DateTime
+  startTime       DateTime?
+  endTime         DateTime?
+  duration        Int?          // Duration in minutes
+  price           Decimal       @db.Decimal(8, 2)
+  revenue         Decimal       @default(0) @db.Decimal(10, 2)
+  cost            Decimal       @default(0) @db.Decimal(10, 2)
+  source          String?       // 'bokadirekt', 'bokadirekt_online', 'manual', etc.
+  bookingChannel  String?       // 'online', 'phone', 'walk-in', etc.
+  bookedAt        DateTime      @default(now())
+  status          BookingStatus @default(SCHEDULED)
+  isOnlineBooking Boolean       @default(false)
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  clinic   Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  staff    Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  service  Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  room     Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  @@index([bokadirektId])
+  @@index([clinicId])
+  @@index([customerId])
+  @@index([staffId])
+  @@index([serviceId])
+  @@index([roomId])
+  @@index([scheduledTime])
+  @@index([startTime])
+  @@index([status])
+  @@index([source])
+  @@index([treatmentType])
+  @@index([bookingChannel])
+}
+
+model ImportLog {
+  id           String            @id @default(cuid())
+  filename     String
+  status       ImportStatus      @default(PROCESSING)
+  totalRows    Int               @default(0)
+  successRows  Int               @default(0)
+  errorRows    Int               @default(0)
+  errors       String?           @db.Text
+  metadata     Json?             // Store column mappings, import settings
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// AI Insight Dismissals - tracks which insights users have acknowledged
+model InsightDismissal {
+  id         String   @id @default(cuid())
+  userId     String
+  clinicId   String
+  insightKey String   // E.g., "revenue_recovery_opportunity"
+  insightDate DateTime // Date the insight was generated for
+  dismissedAt DateTime @default(now())
+  notes      String?  // Optional notes from user
+  
+  @@unique([userId, clinicId, insightKey, insightDate])
+  @@index([userId])
+  @@index([clinicId])
+  @@index([insightKey])
+}
+
+// Staff Leave/Vacation tracking
+model StaffLeave {
+  id          String   @id @default(cuid())
+  staffId     String
+  startDate   DateTime
+  endDate     DateTime
+  leaveType   LeaveType
+  reason      String?
+  status      LeaveStatus @default(APPROVED) // Most clinics auto-approve
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  @@index([staffId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+// Enums
+enum UserRole {
+  SUPER_ADMIN      // System owner - can see all clinics
+  ADMIN            // Clinic owner - can see their clinic
+  STAFF            // Staff member - limited access
+  CLINIC_ADMIN     // Legacy - same as ADMIN
+  CLINIC_STAFF     // Legacy - same as STAFF
+}
+
+enum SubscriptionTier {
+  BASIC            // 499 SEK/month
+  PROFESSIONAL     // 1499 SEK/month
+  ENTERPRISE       // 2999+ SEK/month
+}
+
+enum SubscriptionStatus {
+  TRIAL            // 14-day free trial
+  ACTIVE           // Paying customer
+  PAST_DUE         // Payment failed
+  CANCELLED        // Subscription cancelled
+  EXPIRED          // Trial/subscription expired
+}
+
+enum BookingStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+  RESCHEDULED
+  completed    // lowercase for Bokadirekt compatibility
+  cancelled    // lowercase for Bokadirekt compatibility
+  no_show      // lowercase for Bokadirekt compatibility
+}
+
+enum ImportStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum LeaveType {
+  VACATION      // Semester
+  SICK_LEAVE    // Sjukfrånvaro
+  PERSONAL      // Personlig ledighet
+  UNPAID        // Obetald ledighet
+  PARENTAL      // Föräldraledighet
+  OTHER         // Annat
+}
+
+enum LeaveStatus {
+  PENDING       // Väntar på godkännande
+  APPROVED      // Godkänd
+  REJECTED      // Avvisad
+  CANCELLED     // Avbruten
+}
+
+// Weekly Action - AI-generated proactive recommendations
+model WeeklyAction {
+  id              String       @id @default(cuid())
+  clinicId        String
+  weekStartDate   DateTime     // Monday of the week this action is for
+  priority        Int          // 1 = highest, 2 = medium, 3 = low
+  title           String
+  category        ActionCategory
+  expectedImpact  Decimal      @db.Decimal(10, 2) // Expected revenue impact in kr
+  description     String       @db.Text
+  reasoning       String       @db.Text // Why this is important
+  status          ActionStatus @default(PENDING)
+  completedAt     DateTime?
+  dismissedAt     DateTime?
+  dismissReason   String?
+  
+  // JSON arrays for steps and evidence
+  steps           Json         // Array of {description: string, completed: boolean}
+  evidence        Json         // Array of {metric: string, currentValue: number, targetValue: number}
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([clinicId])
+  @@index([weekStartDate])
+  @@index([priority])
+  @@index([status])
+  @@index([category])
+}
+
+enum ActionCategory {
+  CAPACITY_OPTIMIZATION  // E.g., "Öka kapacitet torsdagar"
+  PRICING               // E.g., "Justera priser på underpresterande tjänster"
+  MARKETING             // E.g., "Kampanj för att fylla lediga tider"
+  SERVICE_MIX           // E.g., "Öka laser, minska basbehandling"
+  CUSTOMER_RETENTION    // E.g., "Win-back campaign för inaktiva kunder"
+  STAFFING              // E.g., "Optimera schemaläggning"
+}
+
+enum ActionStatus {
+  PENDING      // Väntar på att användaren ska agera
+  IN_PROGRESS  // Användaren har påbörjat
+  COMPLETED    // Alla steg är klara
+  DISMISSED    // Användaren har valt att inte göra detta
+}
+
+// Meta Campaign Metrics - synced from Meta Marketing API
+model MetaCampaignMetric {
+  id                  String   @id @default(cuid())
+  clinicId            String
+  metaCampaignId      String   // Meta campaign ID
+  metaCampaignName    String
+  date                DateTime // Date for this metric snapshot
+  
+  // Core metrics
+  spend               Decimal  @db.Decimal(10, 2)
+  impressions         Int      @default(0)
+  clicks              Int      @default(0)
+  leads               Int      @default(0)
+  
+  // Calculated metrics
+  cpm                 Decimal  @db.Decimal(10, 2) // Cost per 1000 impressions
+  cpc                 Decimal  @db.Decimal(10, 2) // Cost per click
+  cpl                 Decimal  @db.Decimal(10, 2) // Cost per lead
+  ctr                 Decimal  @db.Decimal(5, 4)  // Click-through rate
+  
+  // Quality metrics
+  qualityRanking      String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  conversionRanking   String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  engagementRanking   String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  
+  // Lead quality (tracked via Conversions API)
+  qualityLeads        Int      @default(0) // Leads that became appointments
+  showUpRate          Decimal? @db.Decimal(5, 4) // % of appointments that showed up
+  revenue             Decimal  @db.Decimal(10, 2) // Revenue generated from these leads
+  roas                Decimal? @db.Decimal(5, 2) // Return on Ad Spend
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@unique([clinicId, metaCampaignId, date])
+  @@index([clinicId])
+  @@index([date])
+  @@index([metaCampaignId])
+}

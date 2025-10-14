@@ -106,6 +106,17 @@ model Clinic {
   metaCapacityMin   Int?       @default(75) // Min capacity % before reducing budget
   metaCapacityMax   Int?       @default(90) // Max capacity % before increasing budget
   
+
+  loyaltyPrograms       LoyaltyProgram[]
+  customerStatuses      CustomerStatus[]
+  campaigns             Campaign[]
+  messages              Message[]
+  redemptions           Redemption[]
+  events                Event[]
+  optOuts               OptOut[]
+  importJobs            ImportJob[]
+  smsProviderConfigs    SMSProviderConfig[]
+
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
   
@@ -138,6 +149,44 @@ model Customer {
   totalBookings  Int       @default(0)
   noShowCount    Int       @default(0)
   totalSpent     Decimal   @default(0) @db.Decimal(10, 2)
+
+  // PayAtt additions
+  source            String          @default("bokadirekt")
+  sourceId          String?
+  importedAt        DateTime?
+  lastSyncAt        DateTime?
+  customerStatusId  String?
+  customerStatus    CustomerStatus? @relation(fields: [customerStatusId], references: [id])
+  roles             String[]        @default([])
+  consentSms        Boolean         @default(false)
+  consentEmail      Boolean         @default(false)
+  consentMarketing  Boolean         @default(false)
+  consentedAt       DateTime?
+  paidBy            String?
+  canBookFor        String[]        @default([])
+  hasResponsible    String?
+  isResponsibleFor  String[]        @default([])
+  isCompany         Boolean         @default(false)
+  companyName       String?
+  profileImage      String?
+  notes             String?         @db.Text
+  totalVisits       Int             @default(0)
+  firstVisitAt      DateTime?
+  lastVisitAt       DateTime?
+  averageSpend      Decimal?        @db.Decimal(10, 2)
+  lifetimeValue     Decimal         @default(0) @db.Decimal(10, 2)
+  churnRisk         String?
+  churnScore        Decimal?        @db.Decimal(3, 2)
+  predictedChurnDate DateTime?
+  isActive          Boolean         @default(true)
+  deactivatedAt     DateTime?
+  deactivationReason String?
+  loyaltyCards      LoyaltyCard[]
+  messages          Message[]
+  redemptions       Redemption[]
+  events            Event[]
+  optOuts           OptOut[]
+
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   
@@ -452,4 +501,442 @@ model MetaCampaignMetric {
   @@index([clinicId])
   @@index([date])
   @@index([metaCampaignId])
+}
+
+
+// ============================================================================
+// PAYATT-MODULEN: LOYALTY, SMS, CAMPAIGNS (additions)
+// ============================================================================
+
+// ============================================================================
+// PAYATT-MODULEN: LOYALTY, SMS, CAMPAIGNS
+// ============================================================================
+
+// CustomerStatus - från Zoezi (Stammis, Terminare, Dansare)
+model CustomerStatus {
+  id          String     @id @default(cuid())
+  sourceId    String?    // Original ID från Zoezi (2, 3, 4)
+  name        String     // "Stammis", "Terminare", "Dansare"
+  description String?
+  color       String?    // Hex color för UI
+  isActive    Boolean    @default(true)
+  
+  clinicId    String
+  clinic      Clinic     @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  customers   Customer[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  @@index([clinicId])
+  @@unique([clinicId, sourceId])
+}
+
+// LoyaltyProgram - Stämpelkortsprogram
+model LoyaltyProgram {
+  id              String          @id @default(cuid())
+  name            String
+  description     String?         @db.Text
+  code            String?         // Hemlig kod för kunder att registrera sig
+  
+  // Rules (JSON för flexibilitet)
+  earnRule        Json            // { type: "per_booking", value: 1, minSpend: 500 }
+  redeemRule      Json            // { 10: "free_addon", 20: "discount_20pct" }
+  tierRules       Json?           // { bronze: 0, silver: 50, gold: 100 }
+  
+  // Validity
+  startDate       DateTime?
+  endDate         DateTime?
+  validDays       Int[]          // [1,2,3,4,5] = Mon-Fri
+  validHours      String?         // "09:00-17:00"
+  isRecurring     Boolean         @default(true) // Engångskort vs pågående
+  
+  // Expiry
+  stampsExpireDays Int?           // Stämplar går ut efter X dagar
+  pointsExpireDays Int?
+  
+  // Design
+  backgroundColor String?
+  logoUrl         String?
+  
+  // Settings
+  welcomeSms      String?         @db.Text
+  reminderSms     String?         @db.Text
+  sendWelcomeSms  Boolean         @default(false)
+  
+  // Social media
+  facebookUrl     String?
+  instagramUrl    String?
+  
+  // Status
+  isActive        Boolean         @default(true)
+  isDraft         Boolean         @default(true)
+  
+  // Relations
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  loyaltyCards    LoyaltyCard[]
+  rewards         Reward[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([isActive])
+  @@unique([clinicId, code])
+}
+
+// LoyaltyCard - Kundspecifikt stämpelkort
+model LoyaltyCard {
+  id              String          @id @default(cuid())
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  programId       String
+  program         LoyaltyProgram  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  
+  // Points & stamps
+  stamps          Int             @default(0)
+  points          Int             @default(0)
+  level           String          @default("bronze") // "bronze" | "silver" | "gold"
+  
+  // Expiry
+  expiresAt       DateTime?
+  lastEarnedAt    DateTime?
+  
+  // Status
+  isActive        Boolean         @default(true)
+  activatedAt     DateTime        @default(now())
+  deactivatedAt   DateTime?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([customerId])
+  @@index([programId])
+  @@index([isActive])
+  @@unique([customerId, programId])
+}
+
+// Campaign - SMS/Email-kampanjer
+model Campaign {
+  id                String          @id @default(cuid())
+  name              String
+  description       String?         @db.Text
+  
+  // Channel
+  channel           String          @default("sms") // "sms" | "email" | "push" | "whatsapp"
+  
+  // Template
+  templateId        String?
+  subject           String?         // För email
+  body              String          @db.Text
+  
+  // Segmentation
+  segmentQuery      Json            // { tags: ["high-ltv"], stampsMin: 5, churnRisk: "high" }
+  estimatedReach    Int?            // Antal mottagare vid skapande
+  actualReach       Int?            // Faktiskt antal skickade
+  
+  // Scheduling
+  scheduleType      String          @default("immediate") // "immediate" | "scheduled" | "recurring"
+  scheduleAt        DateTime?
+  recurringRule     Json?           // { frequency: "weekly", dayOfWeek: 4, hour: 18 }
+  
+  // Goal
+  goal              String?         // "retention" | "reactivation" | "promotion" | "capacity_fill"
+  category          String?         // "Uppmuntra återbesök", "Reaktivera inaktiva", etc.
+  
+  // Status
+  status            String          @default("draft") // "draft" | "scheduled" | "sending" | "sent" | "cancelled" | "failed"
+  
+  // Stats
+  sentCount         Int             @default(0)
+  deliveredCount    Int             @default(0)
+  failedCount       Int             @default(0)
+  clickedCount      Int             @default(0)
+  redeemedCount     Int             @default(0)
+  optOutCount       Int             @default(0)
+  
+  // Cost & ROI
+  costSEK           Float?
+  revenueSEK        Float?          // Tracked incremental revenue
+  roas              Float?          // Return on Ad Spend
+  
+  // AI-generated
+  isAiGenerated     Boolean         @default(false)
+  aiPrompt          String?         @db.Text
+  aiVariants        Json?           // Array av AI-genererade varianter
+  
+  // Relations
+  clinicId          String
+  clinic            Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  messages          Message[]
+  
+  // Timestamps
+  sentAt            DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([status])
+  @@index([scheduleAt])
+  @@index([channel])
+}
+
+// Message - Individuellt meddelande till kund
+model Message {
+  id              String          @id @default(cuid())
+  campaignId      String?
+  campaign        Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  // Content
+  channel         String          // "sms" | "email"
+  subject         String?
+  body            String          @db.Text
+  
+  // Delivery
+  status          String          @default("pending") // "pending" | "sent" | "delivered" | "failed" | "clicked" | "redeemed"
+  to              String          // Phone or email
+  from            String?         // Sender
+  
+  // Provider tracking
+  providerId      String?         // External provider message ID
+  providerName    String?         // "46elks" | "Twilio"
+  errorMessage    String?         @db.Text
+  
+  // Engagement tracking
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  clickedAt       DateTime?
+  redeemedAt      DateTime?
+  
+  // Cost
+  costSEK         Float?
+  
+  // Relations
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([campaignId])
+  @@index([customerId])
+  @@index([status])
+  @@index([sentAt])
+}
+
+// Reward - Belöningar i lojalitetsprogram
+model Reward {
+  id              String          @id @default(cuid())
+  programId       String
+  program         LoyaltyProgram  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  
+  name            String
+  description     String?         @db.Text
+  
+  // Requirements
+  requiredStamps  Int?
+  requiredPoints  Int?
+  
+  // Value
+  valueSEK        Float
+  discountPercent Float?
+  freeProduct     String?
+  freeService     String?
+  
+  // Validity
+  expiresDays     Int?            // Går ut X dagar efter inlösen
+  
+  // Limits
+  maxRedemptions  Int?            // Max antal inlösningar per kund
+  totalAvailable  Int?            // Totalt antal tillgängliga
+  totalRedeemed   Int             @default(0)
+  
+  // Status
+  isActive        Boolean         @default(true)
+  
+  redemptions     Redemption[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([programId])
+  @@index([isActive])
+}
+
+// Redemption - Inlösen av belöning
+model Redemption {
+  id              String          @id @default(cuid())
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  rewardId        String
+  reward          Reward          @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  
+  campaignId      String?         // Om inlösen kom från kampanj
+  
+  // Value
+  valueSEK        Float
+  
+  // Verification
+  verifiedBy      String?         // Staff user ID eller QR code
+  verificationCode String?
+  qrCode          String?
+  
+  // Status
+  status          String          @default("pending") // "pending" | "verified" | "used" | "expired" | "cancelled"
+  
+  // Timestamps
+  redeemedAt      DateTime        @default(now())
+  verifiedAt      DateTime?
+  usedAt          DateTime?
+  expiresAt       DateTime?
+  
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([customerId])
+  @@index([rewardId])
+  @@index([status])
+}
+
+// Event - Tracking av kundaktiviteter
+model Event {
+  id              String          @id @default(cuid())
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  type            String          // "stamp_earned" | "booking_created" | "no_show" | "ad_click" | "sms_sent" | "sms_clicked"
+  
+  // Metadata
+  meta            Json?           // { booking_id, amount, service, etc. }
+  
+  // Source
+  source          String?         // "bokadirekt" | "zoezi" | "manual" | "campaign"
+  sourceId        String?
+  
+  // Value
+  valueSEK        Float?
+  
+  occurredAt      DateTime        @default(now())
+  
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([clinicId])
+  @@index([customerId])
+  @@index([type])
+  @@index([occurredAt])
+}
+
+// OptOut - GDPR opt-out tracking
+model OptOut {
+  id              String          @id @default(cuid())
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  channel         String          // "sms" | "email" | "all"
+  reason          String?
+  
+  optedOutAt      DateTime        @default(now())
+  
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([clinicId])
+  @@index([customerId])
+  @@index([channel])
+}
+
+// ImportJob - Tracking av data-importer (Zoezi, manuella filer)
+model ImportJob {
+  id              String          @id @default(cuid())
+  source          String          // "zoezi" | "manual" | "bokadirekt" | "excel"
+  fileName        String?
+  fileUrl         String?
+  
+  // Status
+  status          String          @default("pending") // "pending" | "processing" | "completed" | "failed"
+  
+  // Progress
+  totalRows       Int?
+  processedRows   Int             @default(0)
+  successfulRows  Int             @default(0)
+  failedRows      Int             @default(0)
+  
+  // Errors
+  errors          Json?           // Array av fel-meddelanden
+  errorLog        String?         @db.Text
+  
+  // Results
+  customersCreated Int            @default(0)
+  customersUpdated Int            @default(0)
+  customersSkipped Int            @default(0)
+  
+  // Timestamps
+  startedAt       DateTime?
+  completedAt     DateTime?
+  
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([status])
+  @@index([source])
+}
+
+// SMSProviderConfig - Modulär SMS-provider konfiguration
+model SMSProviderConfig {
+  id              String          @id @default(cuid())
+  provider        String          // "46elks" | "Twilio" | "Sinch"
+  isPrimary       Boolean         @default(false)
+  isActive        Boolean         @default(true)
+  
+  // Credentials (encrypted)
+  apiKey          String
+  apiSecret       String?
+  fromNumber      String          // +46701234567
+  
+  // Settings
+  config          Json?           // Provider-specific settings
+  
+  // Stats
+  messagesSent    Int             @default(0)
+  messagesDelivered Int           @default(0)
+  messagesFailed  Int             @default(0)
+  totalCostSEK    Float           @default(0)
+  
+  // Rate limits
+  rateLimitPerHour Int?
+  rateLimitPerDay Int?
+  
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([provider])
+  @@index([isPrimary])
 }
