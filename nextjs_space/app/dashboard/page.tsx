@@ -241,87 +241,95 @@ export default function DashboardPage() {
         {/* Content with padding */}
         <div className="p-6 space-y-6">
 
-        {/* Flow Action Dashboard CTA - PRIMARY */}
-        <Link href="/dashboard/actions">
-          <Card className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all cursor-pointer border-0 shadow-xl">
-            <CardContent className="p-6 md:p-8">
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-3 flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                      <TrendingUp className="h-7 w-7" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-2xl md:text-3xl font-bold">Veckans Rekommendationer</h3>
-                        <span className="text-2xl">✨</span>
+        {/* Vertical CTA Cards - Main Action Cards */}
+        <div className="space-y-4">
+          {/* 1. Veckans Rekommendationer - PRIMARY */}
+          <Link href="/dashboard/actions">
+            <Card className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all duration-300 cursor-pointer border-0 shadow-xl hover:shadow-2xl">
+              <CardContent className="p-6 md:p-8">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                        <TrendingUp className="h-6 w-6" />
                       </div>
-                      <p className="text-sm text-white/80 mt-1">
-                        NYA DENNA VECKA • V{(() => {
-                          const now = new Date();
-                          const start = new Date(now.getFullYear(), 0, 1);
-                          const diff = now.getTime() - start.getTime();
-                          const oneWeek = 1000 * 60 * 60 * 24 * 7;
-                          return Math.ceil(diff / oneWeek);
-                        })()}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-2xl font-bold">Veckans Rekommendationer</h3>
+                          <span className="text-xl">✨</span>
+                        </div>
+                        <p className="text-xs text-white/70 mt-0.5 tracking-wide">
+                          NYA DENNA VECKA • V{(() => {
+                            const now = new Date();
+                            const start = new Date(now.getFullYear(), 0, 1);
+                            const diff = now.getTime() - start.getTime();
+                            const oneWeek = 1000 * 60 * 60 * 24 * 7;
+                            return Math.ceil(diff / oneWeek);
+                          })()}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-base leading-relaxed text-white/95">
+                      <strong className="font-semibold">3 konkreta åtgärder</strong> för att öka intäkter denna vecka. Flow har analyserat din data och hittat optimeringsmöjligheter värda tiotusentals kr! 🚀
+                    </p>
+                    <div className="inline-flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2.5 mt-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span className="font-medium">Klicka för att se dina personliga rekommendationer</span>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-8 w-8 flex-shrink-0 mt-2" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* 2. Intäktssimulator - SECONDARY */}
+          <Link href="/dashboard/simulator">
+            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl">
+              <CardContent className="p-5 md:p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                      <TrendingUp className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold mb-1">Intäktssimulator</h3>
+                      <p className="text-sm text-blue-50/90">
+                        Testa "what-if" scenarion och se 12-månaders impact
                       </p>
                     </div>
                   </div>
-                  <p className="text-base md:text-lg text-white/95">
-                    <strong>3 konkreta åtgärder</strong> för att öka intäkter denna vecka. 
-                    Flow har analyserat din data och hittat optimeringsmöjligheter värda tiotusentals kr! 🚀
-                  </p>
-                  <div className="flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 w-fit">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Klicka för att se dina personliga rekommendationer</span>
-                  </div>
+                  <ArrowRight className="h-7 w-7 flex-shrink-0" />
                 </div>
-                <ArrowRight className="h-10 w-10 flex-shrink-0 hidden md:block" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+              </CardContent>
+            </Card>
+          </Link>
 
-        {/* Revenue Simulator CTA - SECONDARY */}
-        <Link href="/dashboard/simulator">
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all cursor-pointer border-0">
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    <h3 className="text-xl font-bold">Intäktssimulator</h3>
+          {/* 3. Marketing Intelligence - TERTIARY (PRO+) */}
+          <Link href="/dashboard/marketing">
+            <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl">
+              <CardContent className="p-5 md:p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                      <TrendingUp className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-xl font-bold">Marketing Intelligence</h3>
+                        <span className="text-xs bg-white/30 px-2 py-0.5 rounded font-semibold">PRO+</span>
+                      </div>
+                      <p className="text-sm text-purple-50/90">
+                        Meta kampanjoptimering & kapacitetsstyrning
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-blue-50">
-                    Testa "what-if" scenarion och se 12-månaders impact
-                  </p>
+                  <ArrowRight className="h-7 w-7 flex-shrink-0" />
                 </div>
-                <ArrowRight className="h-6 w-6 flex-shrink-0" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Marketing Intelligence CTA - TERTIARY (Professional+) */}
-        <Link href="/dashboard/marketing">
-          <Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-all cursor-pointer border-0">
-            <CardContent className="p-4 md:p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    <h3 className="text-xl font-bold">Marketing Intelligence</h3>
-                    <span className="text-xs bg-white/20 px-2 py-1 rounded">PRO+</span>
-                  </div>
-                  <p className="text-sm text-indigo-50">
-                    Meta kampanjoptimering & kapacitetsstyrning
-                  </p>
-                </div>
-                <ArrowRight className="h-6 w-6 flex-shrink-0" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
 
         {/* Overview Cards - Colorful & Clear */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
