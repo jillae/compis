@@ -9,10 +9,19 @@ import { authOptions } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    // SECURITY: Get clinicId from session for multi-tenant isolation
+    const clinicId = (session.user as any).clinicId;
+    if (!clinicId) {
+      return NextResponse.json(
+        { success: false, error: 'No clinic associated with user' },
+        { status: 403 }
       );
     }
 
@@ -22,7 +31,7 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Get customer metrics
+    // Get customer metrics - ALL FILTERED BY CLINICID
     const [
       totalCustomers,
       allCustomersWithFirstBooking,
@@ -30,14 +39,18 @@ export async function GET(request: NextRequest) {
       atRiskCustomers,
       customerLifetimeValue,
     ] = await Promise.all([
-      // Total unique customers
-      prisma.customer.count(),
+      // Total unique customers - FILTERED
+      prisma.customer.count({
+        where: { clinicId: clinicId }, // SECURITY: Multi-tenant isolation
+      }),
 
-      // Get all customers with their first booking date
+      // Get all customers with their first booking date - FILTERED
       prisma.customer.findMany({
+        where: { clinicId: clinicId }, // SECURITY: Multi-tenant isolation
         select: {
           id: true,
           bookings: {
+            where: { clinicId: clinicId }, // SECURITY: Multi-tenant isolation
             select: {
               bookedAt: true,
             },
@@ -49,10 +62,11 @@ export async function GET(request: NextRequest) {
         },
       }),
 
-      // Returning customers (multiple bookings in period)
+      // Returning customers (multiple bookings in period) - FILTERED
       prisma.booking.groupBy({
         by: ['customerId'],
         where: {
+          clinicId: clinicId, // SECURITY: Multi-tenant isolation
           bookedAt: { gte: startDate },
           status: { in: ['COMPLETED', 'completed'] },
         },
@@ -68,21 +82,24 @@ export async function GET(request: NextRequest) {
         },
       }).then((result: any) => result.length),
 
-      // At-risk customers (no booking in period)
+      // At-risk customers (no booking in period) - FILTERED
       prisma.customer.count({
         where: {
+          clinicId: clinicId, // SECURITY: Multi-tenant isolation
           bookings: {
             none: {
               bookedAt: { gte: startDate },
+              clinicId: clinicId, // SECURITY: Multi-tenant isolation
             },
           },
         },
       }),
 
-      // Customer lifetime value (average revenue per customer)
+      // Customer lifetime value (average revenue per customer) - FILTERED
       prisma.booking
         .aggregate({
           where: {
+            clinicId: clinicId, // SECURITY: Multi-tenant isolation
             status: { in: ['COMPLETED', 'completed'] },
           },
           _avg: {
@@ -99,10 +116,11 @@ export async function GET(request: NextRequest) {
         new Date(customer.bookings[0].bookedAt) >= startDate
     ).length;
 
-    // Calculate repeat rate (customers with multiple bookings / total customers who booked in period)
+    // Calculate repeat rate (customers with multiple bookings / total customers who booked in period) - FILTERED
     const customersWhoBookedInPeriod = await prisma.booking.groupBy({
       by: ['customerId'],
       where: {
+        clinicId: clinicId, // SECURITY: Multi-tenant isolation
         bookedAt: { gte: startDate },
         status: { in: ['COMPLETED', 'completed'] },
       },
@@ -116,10 +134,11 @@ export async function GET(request: NextRequest) {
       ? (returningCustomersInPeriod / totalCustomersInPeriod) * 100 
       : 0;
 
-    // Customer segmentation by booking frequency
+    // Customer segmentation by booking frequency - FILTERED
     const customerSegmentation = await prisma.booking.groupBy({
       by: ['customerId'],
       where: {
+        clinicId: clinicId, // SECURITY: Multi-tenant isolation
         bookedAt: { gte: startDate },
         status: 'COMPLETED',
       },
@@ -143,10 +162,11 @@ export async function GET(request: NextRequest) {
       else segments.loyal++;
     });
 
-    // Top customers by revenue
+    // Top customers by revenue - FILTERED
     const topCustomers = await prisma.booking.groupBy({
       by: ['customerId'],
       where: {
+        clinicId: clinicId, // SECURITY: Multi-tenant isolation
         bookedAt: { gte: startDate },
         status: 'COMPLETED',
       },
@@ -164,11 +184,14 @@ export async function GET(request: NextRequest) {
       take: 10,
     });
 
-    // Get customer details
+    // Get customer details - FILTERED
     const topCustomersWithDetails = await Promise.all(
       topCustomers.map(async (customer) => {
         const customerData = await prisma.customer.findUnique({
-          where: { id: customer.customerId },
+          where: { 
+            id: customer.customerId,
+            clinicId: clinicId, // SECURITY: Multi-tenant isolation
+          },
           select: {
             id: true,
             name: true,
@@ -185,15 +208,17 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    // Churn analysis - customers who haven't booked in 60 days
+    // Churn analysis - customers who haven't booked in 60 days - FILTERED
     const sixtyDaysAgo = new Date();
     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
     const churnedCustomers = await prisma.customer.count({
       where: {
+        clinicId: clinicId, // SECURITY: Multi-tenant isolation
         bookings: {
           every: {
             bookedAt: { lt: sixtyDaysAgo },
+            clinicId: clinicId, // SECURITY: Multi-tenant isolation
           },
         },
       },

@@ -18,6 +18,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { translations, chartColors, formatters, formatSwedishDate } from '@/lib/translations';
 
 interface EnhancedRevenueChartProps {
   data: Array<{
@@ -51,7 +52,7 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
   // Format data for display
   const formattedData = data.map((item, index) => ({
     ...item,
-    date: new Date(item.date).toLocaleDateString('sv-SE', { month: 'short', day: 'numeric' }),
+    date: formatSwedishDate(item.date),
     avgRevenue: avgRevenue,
     avgBookings: avgBookings,
     compareRevenue: compareData?.[index]?.revenue || 0,
@@ -65,19 +66,19 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
           <p className="font-semibold mb-2">{label}</p>
           {viewMode !== 'bookings' && (
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-3 h-3 rounded-full bg-primary"></div>
-              <span className="text-sm">Intäkt: <strong>{payload[0]?.value?.toLocaleString('sv-SE')} kr</strong></span>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: chartColors.revenue }}></div>
+              <span className="text-sm">{translations.charts.revenue}: <strong>{formatters.currency(payload[0]?.value || 0)}</strong></span>
             </div>
           )}
           {viewMode !== 'revenue' && (
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-chart-2"></div>
-              <span className="text-sm">Bokningar: <strong>{payload[viewMode === 'bookings' ? 0 : 1]?.value}</strong></span>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: chartColors.bookings }}></div>
+              <span className="text-sm">{translations.charts.bookings}: <strong>{formatters.number(payload[viewMode === 'bookings' ? 0 : 1]?.value || 0)}</strong></span>
             </div>
           )}
           {showComparison && compareData && (
             <div className="mt-2 pt-2 border-t border-border text-xs text-muted-foreground">
-              <p>Jämförelse: {payload[2]?.value?.toLocaleString('sv-SE')} kr</p>
+              <p>{translations.charts.comparison}: {formatters.currency(payload[2]?.value || 0)}</p>
             </div>
           )}
         </div>
@@ -127,18 +128,18 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
           </Button>
         </div>
 
-        {/* Metrics Summary */}
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        {/* Metrics Summary - Mobile Responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
           <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1">Total Intäkt</p>
-            <p className="text-lg font-bold">{totalRevenue.toLocaleString('sv-SE')} kr</p>
+            <p className="text-xs text-muted-foreground mb-1">{translations.charts.totalRevenue}</p>
+            <p className="text-lg font-bold">{formatters.currency(totalRevenue)}</p>
           </div>
           <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1">Totalt Bokningar</p>
-            <p className="text-lg font-bold">{totalBookings}</p>
+            <p className="text-xs text-muted-foreground mb-1">{translations.charts.totalBookings}</p>
+            <p className="text-lg font-bold">{formatters.number(totalBookings)}</p>
           </div>
           <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1">7-dagars Trend</p>
+            <p className="text-xs text-muted-foreground mb-1">{translations.charts.trend7day}</p>
             <div className="flex items-center gap-2">
               {revenueTrend > 0 ? (
                 <TrendingUp className="h-4 w-4 text-green-600" />
@@ -146,27 +147,27 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
                 <TrendingDown className="h-4 w-4 text-red-600" />
               )}
               <p className={`text-lg font-bold ${revenueTrend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {Math.abs(revenueTrend).toFixed(1)}%
+                {formatters.percentage(Math.abs(revenueTrend))}
               </p>
             </div>
           </div>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex gap-2 mt-4">
+        {/* View Mode Toggle - Mobile Responsive */}
+        <div className="flex flex-wrap gap-2 mt-4">
           <Button
             variant={viewMode === 'revenue' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setViewMode('revenue')}
           >
-            Intäkt
+            {translations.charts.revenue}
           </Button>
           <Button
             variant={viewMode === 'bookings' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setViewMode('bookings')}
           >
-            Bokningar
+            {translations.charts.bookings}
           </Button>
           <Button
             variant={viewMode === 'both' ? 'default' : 'outline'}
@@ -212,21 +213,21 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
               <ReferenceLine
                 yAxisId="left"
                 y={avgRevenue}
-                stroke="hsl(var(--primary))"
+                stroke={chartColors.average}
                 strokeDasharray="5 5"
-                label={{ value: 'Snitt', position: 'right', fill: 'hsl(var(--primary))' }}
+                label={{ value: translations.charts.average, position: 'right', fill: chartColors.average }}
                 opacity={0.5}
               />
             )}
 
-            {/* Main Lines */}
+            {/* Main Lines - DISTINCT COLORS */}
             {viewMode !== 'bookings' && (
               <>
                 <Area
                   yAxisId="left"
                   type="monotone"
                   dataKey="revenue"
-                  fill="hsl(var(--primary))"
+                  fill={chartColors.revenue}
                   fillOpacity={0.1}
                   stroke="none"
                 />
@@ -234,11 +235,11 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
                   yAxisId="left"
                   type="monotone"
                   dataKey="revenue"
-                  stroke="hsl(var(--primary))"
+                  stroke={chartColors.revenue}
                   strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                  dot={{ fill: chartColors.revenue, r: 4 }}
                   activeDot={{ r: 6 }}
-                  name="Intäkt (kr)"
+                  name={translations.charts.revenueKr}
                 />
               </>
             )}
@@ -248,11 +249,11 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
                 yAxisId="right"
                 type="monotone"
                 dataKey="bookings"
-                stroke="hsl(var(--chart-2))"
+                stroke={chartColors.bookings}
                 strokeWidth={3}
-                dot={{ fill: 'hsl(var(--chart-2))', r: 4 }}
+                dot={{ fill: chartColors.bookings, r: 4 }}
                 activeDot={{ r: 6 }}
-                name="Bokningar"
+                name={translations.charts.bookings}
               />
             )}
 
@@ -262,11 +263,11 @@ export function EnhancedRevenueChart({ data, compareData, showComparison = false
                 yAxisId="left"
                 type="monotone"
                 dataKey="compareRevenue"
-                stroke="hsl(var(--muted-foreground))"
+                stroke={chartColors.comparison}
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
-                name="Jämförelse"
+                name={translations.charts.comparison}
                 opacity={0.5}
               />
             )}
