@@ -241,13 +241,13 @@ export default function DashboardPage() {
         {/* Content with padding */}
         <div className="p-6 space-y-6">
 
-        {/* Vertical CTA Cards - Main Action Cards */}
-        <div className="space-y-4">
+        {/* Horizontal CTA Cards - Main Action Cards (1+1+1) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* 1. Veckans Rekommendationer - PRIMARY */}
           <Link href="/dashboard/actions">
-            <Card className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all duration-300 cursor-pointer border-0 shadow-xl hover:shadow-2xl">
-              <CardContent className="p-6 md:p-8">
-                <div className="flex items-start justify-between gap-4">
+            <Card className="bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all duration-300 cursor-pointer border-0 shadow-xl hover:shadow-2xl h-full">
+              <CardContent className="p-6">
+                <div className="flex flex-col h-full">
                   <div className="space-y-3 flex-1">
                     <div className="flex items-center gap-3">
                       <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
@@ -255,11 +255,11 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-2xl font-bold">Veckans Rekommendationer</h3>
-                          <span className="text-xl">✨</span>
+                          <h3 className="text-xl font-bold">Veckans Rekommendationer</h3>
+                          <span className="text-lg">✨</span>
                         </div>
                         <p className="text-xs text-white/70 mt-0.5 tracking-wide">
-                          NYA DENNA VECKA • V{(() => {
+                          NYA V{(() => {
                             const now = new Date();
                             const start = new Date(now.getFullYear(), 0, 1);
                             const diff = now.getTime() - start.getTime();
@@ -269,15 +269,14 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <p className="text-base leading-relaxed text-white/95">
-                      <strong className="font-semibold">3 konkreta åtgärder</strong> för att öka intäkter denna vecka. Flow har analyserat din data och hittat optimeringsmöjligheter värda tiotusentals kr! 🚀
+                    <p className="text-sm leading-relaxed text-white/95">
+                      <strong className="font-semibold">3 konkreta åtgärder</strong> för att öka intäkter. Flow har analyserat din data! 🚀
                     </p>
-                    <div className="inline-flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2.5 mt-2">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="font-medium">Klicka för att se dina personliga rekommendationer</span>
-                    </div>
                   </div>
-                  <ArrowRight className="h-8 w-8 flex-shrink-0 mt-2" />
+                  <div className="flex items-center gap-2 text-xs bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mt-3">
+                    <ArrowRight className="h-4 w-4" />
+                    <span className="font-medium">Se rekommendationer</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -285,21 +284,24 @@ export default function DashboardPage() {
 
           {/* 2. Intäktssimulator - SECONDARY */}
           <Link href="/dashboard/simulator">
-            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl">
-              <CardContent className="p-5 md:p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                      <TrendingUp className="h-5 w-5" />
+            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
+              <CardContent className="p-6">
+                <div className="flex flex-col h-full">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                        <TrendingUp className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-xl font-bold flex-1">Intäktssimulator</h3>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold mb-1">Intäktssimulator</h3>
-                      <p className="text-sm text-blue-50/90">
-                        Testa "what-if" scenarion och se 12-månaders impact
-                      </p>
-                    </div>
+                    <p className="text-sm text-blue-50/90 leading-relaxed">
+                      Testa "what-if" scenarion och se 12-månaders impact på din verksamhet
+                    </p>
                   </div>
-                  <ArrowRight className="h-7 w-7 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-xs bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mt-3">
+                    <ArrowRight className="h-4 w-4" />
+                    <span className="font-medium">Öppna simulator</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -307,24 +309,29 @@ export default function DashboardPage() {
 
           {/* 3. Marketing Intelligence - TERTIARY (PRO+) */}
           <Link href="/dashboard/marketing">
-            <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl">
-              <CardContent className="p-5 md:p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                      <TrendingUp className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-xl font-bold">Marketing Intelligence</h3>
-                        <span className="text-xs bg-white/30 px-2 py-0.5 rounded font-semibold">PRO+</span>
+            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
+              <CardContent className="p-6">
+                <div className="flex flex-col h-full">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+                        <TrendingUp className="h-6 w-6" />
                       </div>
-                      <p className="text-sm text-purple-50/90">
-                        Meta kampanjoptimering & kapacitetsstyrning
-                      </p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xl font-bold">Marketing Intelligence</h3>
+                        </div>
+                        <span className="text-xs bg-white/30 px-2 py-0.5 rounded font-semibold inline-block mt-1">PRO+</span>
+                      </div>
                     </div>
+                    <p className="text-sm text-purple-50/90 leading-relaxed">
+                      Meta kampanjoptimering & kapacitetsstyrning för maximala intäkter
+                    </p>
                   </div>
-                  <ArrowRight className="h-7 w-7 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-xs bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mt-3">
+                    <ArrowRight className="h-4 w-4" />
+                    <span className="font-medium">Gå till Marketing</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
