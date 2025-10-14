@@ -116,6 +116,8 @@ model Clinic {
   optOuts               OptOut[]
   importJobs            ImportJob[]
   smsProviderConfigs    SMSProviderConfig[]
+  smsCampaigns          SMSCampaign[]
+  loyaltyTransactions   LoyaltyTransaction[]
 
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
@@ -182,6 +184,7 @@ model Customer {
   deactivatedAt     DateTime?
   deactivationReason String?
   loyaltyCards      LoyaltyCard[]
+  loyaltyTransactions LoyaltyTransaction[]
   messages          Message[]
   redemptions       Redemption[]
   events            Event[]
@@ -939,4 +942,55 @@ model SMSProviderConfig {
   @@index([clinicId])
   @@index([provider])
   @@index([isPrimary])
+}
+
+// SMSCampaign - Track SMS campaigns and messages
+model SMSCampaign {
+  id              String          @id @default(cuid())
+  name            String
+  message         String          @db.Text
+  templateId      String?
+  
+  // Recipients
+  recipientCount  Int             @default(0)
+  successCount    Int             @default(0)
+  failedCount     Int             @default(0)
+  
+  // Scheduling
+  scheduledAt     DateTime?
+  sentAt          DateTime?
+  
+  // Cost tracking
+  totalCost       Float?
+  
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([sentAt])
+}
+
+// LoyaltyTransaction - Track stamp and point transactions
+model LoyaltyTransaction {
+  id              String          @id @default(cuid())
+  customerId      String
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  type            String          // "stamp_earned" | "points_earned" | "reward_redeemed"
+  stamps          Int             @default(0)
+  points          Int             @default(0)
+  description     String?         @db.Text
+  
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([customerId])
+  @@index([clinicId])
+  @@index([type])
+  @@index([createdAt])
 }
