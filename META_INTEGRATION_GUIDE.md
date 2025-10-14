@@ -1,311 +1,536 @@
 
-# META Marketing Integration - Setup Guide
+# META Marketing API Integration Guide
 
-## 🎯 Vision: Proaktiv Annonsövervakning
+## Översikt
 
-Flow's META-integration löser ett kritiskt problem för kliniker:
-
-### Problemet vi löser:
-- **Klassisk fälla:** Fullbokad → sänker ads → plötsligt tom kalender
-- **Tröghet i systemet:** Resultat idag kommer från beslut för X veckor sedan
-- **Stress & negativ kultur:** Tom kalender → stress → dålig konvertering → ännu sämre resultat
-- **Reaktivt istället för proaktivt:** Upptäcker problem när det redan är för sent
-
-### Flow's Lösning:
-✅ **Varningar INNAN kalendern blir tom** (baserat på mätbar tröghet)  
-✅ **Realtidsövervakning av lead-kvalitet** (inte bara ROAS)  
-✅ **Automatiska budgetrekommendationer** baserat på historisk data  
-✅ **Creative fatigue-detektering** innan prestandan sjunker  
-✅ **Proaktiva signaler** som förhindrar negativ spiral
+Flow's META Marketing API-integration ger proaktiv optimering av annonseringskampanjer baserat på klinikens kapacitet och bokningsdata. Systemet håller automatiskt kapacitetsutnyttjandet i optimal zon (75-90%) genom intelligenta varningar och rekommendationer.
 
 ---
 
-## 📊 Vad META-Integration Ger Dig
+## Vad löser vi?
 
-### 1. Bokningströghet-Analys
-Flow analyserar historisk data för att **exakt** veta hur lång tid det tar från att någon ser din annons till att de bokar. Detta är grunden för alla proaktiva varningar.
+### Problem
+- **Klassisk fälla**: Fullt bokad → sänker annonsbudget → plötsligt tom kalender
+- **Stress och dålig kultur**: När kalendern blir tom uppstår panik
+- **För sent att reagera**: När man märker problemet har skadan redan skett
+- **Ineffektiv annonsering**: Fortsätter annonsera vid 95% beläggning
 
-**Exempel:**
-- Tröghet: 14 dagar
-- Du sänker annonseringen idag
-- Flow varnar: "Om 14 dagar kommer kalendern vara tom"
+### Lösning
+- **Prediktiva varningar**: Baserat på historisk bokningströghet (lag)
+- **Lead-kvalitetsövervakning**: Inte bara ROAS, utan faktisk konvertering till bokningar
+- **Proaktiva budgetrekommendationer**: Automatiska förslag baserat på kapacitet
+- **Creative fatigue-detektering**: Innan prestandan sjunker
 
-### 2. Proaktiva Varningar (4 typer)
+---
 
-#### 🚨 CRITICAL: Budget-varning
-**Utlöses när:** Annonsbudget sjunker >50% under normal nivå
-```
-"VARNING: Låg annonsering kommer orsaka tom kalender"
-Annonsering har minskat med 60%. Baserat på 14 dagars tröghet 
-kommer detta påverka bokningar om 14 dagar.
+## Funktioner
 
-Rekommendation: Öka annonsbudget till minst 3,500 kr/dag 
-OMEDELBART för att undvika tomma luckor.
+### 1. Bokningströghet-analys
+- Beräknar tiden mellan annonsexponering och faktisk bokning
+- Använder korskorrelation mellan annonsdata och bokningsserier
+- Typiskt lag: 7-14 dagar för skönhetskliniker
 
-Potentiell förlust: 45,000 kr
-```
+### 2. Proaktiva Varningar
 
-#### ⚠️ WARNING: Lead-kvalitet
-**Utlöses när:** Konverteringsgrad sjunker >20%
-```
-"Försämrad lead-kvalitet"
-Konverteringsgraden har sjunkit från 12.5% till 8.2%. 
-Detta indikerar sämre kvalitet på leadsen.
+#### Critical Alerts (Röd)
+- **Låg annonsering + bokningströghet = tom kalender snart**
+  - Triggas när: Annonsspend < 50% av normalperiod
+  - Dagar till påverkan: Baserat på bokningströghet
+  - Åtgärd: Öka budget OMEDELBART
 
-Rekommendation: Granska målgruppsval, annonskreativ och 
-landningssida. Testa nya målgruppssegment.
+#### Warning Alerts (Orange)
+- **Försämrad lead-kvalitet**
+  - Triggas när: Konverteringsgrad sjunker >20% vs baseline
+  - Åtgärd: Granska målgrupp och kreativ
+  
+- **ROAS nedgång**
+  - Triggas när: ROAS < 70% av historiskt snitt
+  - Åtgärd: Pausa underpresterande kampanjer
 
-Potentiell påverkan: 12,000 kr
-```
-
-#### 💡 INFO: Creative Fatigue
-**Utlöses när:** Genomsnittlig frekvens >3.5
-```
-"Creative fatigue - samma personer ser annonsen för ofta"
-Genomsnittlig frekvens är 4.2, vilket kan leda till 
-annonstrotthet och minskad effektivitet.
-
-Rekommendation: Rotera annonskreativ eller expandera 
-målgruppen. Testa nya budskap och visuella element.
-```
-
-#### ⚠️ WARNING: ROAS-nedgång
-**Utlöses när:** ROAS sjunker >30%
-```
-"ROAS har sjunkit betydligt"
-ROAS har minskat från 4.2 till 2.5. Detta indikerar 
-ineffektiv annonsering.
-
-Rekommendation: Pausa underpresterande kampanjer. 
-Fokusera budget på kampanjer med bäst ROAS.
-```
+#### Info Alerts (Blå)
+- **Creative fatigue**
+  - Triggas när: Frekvens > 3.5
+  - Åtgärd: Rotera kreativa eller expandera målgrupp
 
 ### 3. Budgetoptimering
-Flow rekommenderar optimal daglig budget baserat på:
-- Historisk kostnad per bokning
-- Önskad antal bokningar
-- Säsongsvariationer
-- ROAS-trends
+- Rekommenderad daglig budget baserat på:
+  - Historisk kostnad per bokning
+  - Önskat bokningsmål
+  - Säsongsfaktorer
+  - Aktuellt kapacitetsutnyttjande
 
-**Exempel:**
-```
-Nuvarande budget: 2,500 kr/dag
-Rekommenderad budget: 3,800 kr/dag
-Förväntade bokningar: 12/dag (vs 8/dag nu)
-Säkerhet: 85%
-```
-
----
-
-## 🔧 Setup: Konfigurera META Marketing API
-
-### Steg 1: Skapa META Developer App
-
-1. Gå till https://developers.facebook.com/
-2. Klicka "My Apps" → "Create App"
-3. Välj app-typ: "Business"
-4. Fyll i appinformation:
-   - App Name: "Flow Klinik Integration"
-   - Contact Email: din@email.com
-5. Välj "Business Portfolio" (eller skapa ny)
-
-### Steg 2: Lägg till Marketing API
-
-1. I din app, gå till "Add Product"
-2. Hitta "Marketing API" och klicka "Set Up"
-3. Följ instruktionerna för att koppla ditt Ad Account
-
-### Steg 3: Generera Access Token
-
-#### Kort Access Token (för testning):
-1. Gå till "Tools" → "Graph API Explorer"
-2. Välj din app
-3. Välj permissions:
-   - `ads_read` ✅
-   - `ads_management` ✅
-4. Klicka "Generate Access Token"
-5. Kopiera token
-
-#### Långvarig Access Token (för produktion):
-1. Ta din short-lived token från ovan
-2. Använd Token Debugger: https://developers.facebook.com/tools/debug/accesstoken/
-3. Klicka "Extend Access Token"
-4. Kopiera den nya token (giltig i 60 dagar)
-
-**⚠️ VIKTIGT:** För permanent access, använd System User Access Token:
-https://developers.facebook.com/docs/marketing-api/system-users
-
-### Steg 4: Hitta ditt Ad Account ID
-
-1. Gå till https://business.facebook.com/
-2. Välj ditt Business Manager
-3. Gå till "Business Settings" → "Ad Accounts"
-4. Kopiera "Ad Account ID" (ex: `act_1234567890`)
-5. **Använd ENDAST siffrorna** (ex: `1234567890`)
-
-### Steg 5: Konfigurera Flow
-
-Lägg till följande i din `.env` fil:
-
-```bash
-# META Marketing API Configuration
-META_ACCESS_TOKEN=ditt_access_token_här
-META_AD_ACCOUNT_ID=1234567890  # BARA siffror, INTE "act_"
-```
-
-### Steg 6: Verifiera Integration
-
-1. Logga in på Flow
-2. Gå till Dashboard
-3. Scrolla ner till "META Ads Intelligence"
-4. Om konfigurerat korrekt ser du:
-   - Bokningströghet (dagar)
-   - Aktuell ROAS
-   - Rekommenderad budget
-   - Aktiva varningar (om några)
+### 4. Real-time Övervakning
+- ROAS (Return on Ad Spend)
+- CPL (Cost Per Lead)
+- CTR (Click-Through Rate)
+- Konverteringsgrad
+- Frekvens och Reach
+- Lead-kvalitet
 
 ---
 
-## 🧪 Test-Scenarion
+## Setup Guide
 
-### Test 1: Setup-meddelande (INNAN konfiguration)
-1. Gå till Dashboard
-2. Du ska se en orange setup-banner
-3. Klicka "Läs Setup-guide" → öppnar Facebook docs
+### Steg 1: Skaffa META Marketing API Access Token
 
-### Test 2: Fungerade Integration
-1. Konfigurera `.env` enligt ovan
-2. Starta om servern: `yarn dev`
-3. Gå till Dashboard
-4. Du ska se META Ads Intelligence-kortet med:
-   - Bokningströghet (ex: 14 dagar)
-   - ROAS-data
-   - Eventuella varningar
+#### A. Skapa Meta Business Manager
+1. Gå till [business.facebook.com](https://business.facebook.com)
+2. Skapa ett Business Manager-konto om du inte har ett
+3. Lägg till ditt Facebook-annonserad konto
 
-### Test 3: Collapsed/Expanded View
-1. Kortet börjar **expanded** (visar alla detaljer)
-2. Klicka "collapse" knappen (uppe till höger)
-3. Kortet visar endast sammanfattning
-4. Klicka "Visa Detaljer" för att expandera igen
+#### B. Skapa System User (Rekommenderad för produktion)
+1. Gå till Business Settings → Users → System Users
+2. Klicka "Add" och skapa en ny System User
+3. Ge den namnet "Flow API Integration"
+4. Ge behörigheter:
+   - **Ads Management** (ads_management) - För att läsa och hantera kampanjer
+   - **Ads Read** (ads_read) - För att läsa insights
+   - **Business Management** (business_management) - För att hantera resurser
+
+#### C. Generera Access Token
+1. Välj din System User
+2. Klicka "Generate New Token"
+3. Välj din App (eller skapa en ny Meta App)
+4. Välj permissions:
+   - `ads_read` (obligatorisk)
+   - `ads_management` (valfri, för framtida automation)
+5. Välj "Never expire" för System User tokens
+6. Kopiera token (du ser den bara EN gång!)
+
+#### D. Hitta ditt Ad Account ID
+1. Gå till [facebook.com/adsmanager](https://facebook.com/adsmanager)
+2. Öppna Account Settings (kugghjul)
+3. Kopiera "Account ID" (format: `act_1234567890`)
+4. **OBS**: I .env använder vi BARA siffrorna (utan `act_` prefix)
+
+### Steg 2: Konfigurera Flow
+
+#### Lägg till i `.env`
+```env
+# META Marketing API
+META_ACCESS_TOKEN="EAAxxxxxxxxxxxxx..."
+META_AD_ACCOUNT_ID="1234567890"  # UTAN act_ prefix
+
+# Valfria - för Conversions API
+META_PIXEL_ID="1234567890"
+META_APP_ID="1234567890"
+META_APP_SECRET="xxxxxxxxxxxxx"
+```
+
+#### Aktivera i klinikens inställningar
+```sql
+-- Kör i din databas eller via Prisma Studio
+UPDATE "Clinic" 
+SET 
+  "metaEnabled" = true,
+  "metaAccessToken" = 'DIN_TOKEN',
+  "metaAdAccountId" = 'DITT_AD_ACCOUNT_ID',
+  "metaTargetCPL" = 250.00,  -- Önskad Cost Per Lead i SEK
+  "metaTargetROAS" = 3.00,   -- Önskad Return on Ad Spend
+  "metaCapacityMin" = 75,    -- Min kapacitet innan budget ökas
+  "metaCapacityMax" = 90     -- Max kapacitet innan budget sänks
+WHERE id = 'din-clinic-id';
+```
+
+### Steg 3: Verifiera Integration
+
+1. **Test API Connection**
+   ```bash
+   curl "https://graph.facebook.com/v18.0/act_YOUR_AD_ACCOUNT_ID/insights?access_token=YOUR_TOKEN&fields=spend,impressions"
+   ```
+
+2. **Synka kampanjdata i Flow**
+   - Gå till Dashboard → Marketing
+   - Klicka "Synka kampanjdata"
+   - Vänta 10-30 sekunder
+   - Du bör se kampanjmetrik visas
+
+3. **Verifiera Alerts**
+   - Navigera till Dashboard
+   - Du bör se "META Ads Intelligence" kortet
+   - Om varningar finns visas de med severity-badges
 
 ---
 
-## 📈 Data Flow
+## API Dokumentation
 
-```
-META API → Flow Backend → Analys → Proaktiva Varningar
-   ↓                           ↓              ↓
-Kampanjer                 Tröghet        Dashboard
-   ↓                           ↓              ↓
-ROAS, CTR              Prediktion    Email-notiser
-   ↓                           ↓              ↓
-Spend                    Rekomm.      Åtgärder
-```
+### GET /api/marketing/meta/alerts
 
-### API Endpoints
+Returnerar proaktiva varningar baserat på annons- och bokningsdata.
 
-**GET `/api/marketing/meta/alerts?days=30`**
-```typescript
-Response: {
-  success: true,
-  data: {
-    alerts: MetaAlert[],        // Proaktiva varningar
-    bookingLag: {               // Tröghet-analys
-      days: 14,
-      description: "Det tar i genomsnitt 14 dagar..."
+#### Query Parameters
+- `days` (optional): Antal dagar att analysera (default: 30)
+
+#### Response Format
+```json
+{
+  "success": true,
+  "data": {
+    "alerts": [
+      {
+        "severity": "critical",
+        "type": "budget",
+        "title": "VARNING: Låg annonsering kommer orsaka tom kalender",
+        "description": "Annonseringen har minskat med 60%. Baserat på 7 dagars tröghet kommer detta påverka bokningar om 7 dagar.",
+        "recommendation": "Öka annonsbudgeten till minst 1,500 kr/dag OMEDELBART",
+        "impactEstimate": 45000,
+        "daysUntilImpact": 7
+      }
+    ],
+    "bookingLag": {
+      "days": 7,
+      "description": "Det tar i genomsnitt 7 dagar från att någon ser din annons till att de bokar"
     },
-    budgetRecommendation: {     // Budget-optimering
-      recommendedDailyBudget: 3800,
-      currentBudget: 2500,
-      expectedBookings: 12,
-      confidence: 0.85
+    "budgetRecommendation": {
+      "recommendedDailyBudget": 1800,
+      "currentBudget": 500,
+      "expectedBookings": 12,
+      "confidence": 0.85
     },
-    metrics: {                  // Nyckeltal
-      current: { totalSpend, avgROAS, totalConversions },
-      historical: { ... }
+    "metrics": {
+      "current": {
+        "totalSpend": 3500,
+        "avgROAS": 2.8,
+        "totalConversions": 45
+      },
+      "historical": {
+        "totalSpend": 8750,
+        "avgROAS": 3.2,
+        "totalConversions": 112
+      }
     }
+  }
+}
+```
+
+#### Error Response (Setup Required)
+```json
+{
+  "success": false,
+  "error": "META Marketing API not configured",
+  "setupRequired": true,
+  "setupInstructions": {
+    "message": "För att aktivera META-integrationen, konfigurera följande i dina miljövariabler:",
+    "required": [
+      "META_ACCESS_TOKEN - Din META Marketing API access token",
+      "META_AD_ACCOUNT_ID - Ditt META ad account ID"
+    ],
+    "guide": "https://developers.facebook.com/docs/marketing-api/get-started"
+  }
+}
+```
+
+### POST /api/meta/sync
+
+Synkroniserar kampanjdata från META Marketing API till lokal databas.
+
+#### Response
+```json
+{
+  "success": true,
+  "message": "Meta sync complete",
+  "campaigns": 5
+}
+```
+
+### GET /api/meta/metrics
+
+Returnerar aggregerad kampanjdata för kliniken.
+
+#### Query Parameters
+- `days` (optional): Antal dagar (default: 30)
+
+#### Response
+```json
+{
+  "summary": {
+    "totalSpend": 15000,
+    "totalRevenue": 48000,
+    "roas": 3.2,
+    "totalLeads": 145,
+    "qualityLeads": 87,
+    "leadQualityRate": 60,
+    "avgCPL": 103.45,
+    "impressions": 250000,
+    "clicks": 1850
+  },
+  "budgetRecommendation": {
+    "currentUtilization": 82,
+    "recommendation": "MAINTAIN",
+    "reason": "Kapacitet inom optimal zon (75-90%)",
+    "targetCPL": 120
   }
 }
 ```
 
 ---
 
-## 🔐 Säkerhet & Best Practices
+## Beräkningar & Logik
 
-### Access Token Management
-- ✅ Använd `.env` filer (aldrig commit tokens till Git)
-- ✅ Rotera tokens regelbundet (var 60:e dag minimum)
-- ✅ Använd System User tokens för produktion
-- ❌ Dela aldrig tokens i slack/email
+### Bokningströghet (Booking Lag)
+Använder korskorrelation mellan annonsdata och bokningsserier:
 
-### Rate Limiting
-META Marketing API har följande gränser:
-- **200 requests per hour** per access token
-- Flow cachar data i **5 minuter** för att minimera requests
+```typescript
+function analyzeBookingLag(
+  adData: MetaCampaignMetrics[],
+  bookingData: Array<{date: string, count: number}>
+): number {
+  let bestCorrelation = 0;
+  let optimalLag = 7; // Default
+  
+  for (let lag = 1; lag <= 30; lag++) {
+    const correlation = calculateCorrelation(adData, bookingData, lag);
+    if (correlation > bestCorrelation) {
+      bestCorrelation = correlation;
+      optimalLag = lag;
+    }
+  }
+  
+  return optimalLag;
+}
+```
 
-### Permissions
-Minimala permissions som krävs:
-- `ads_read` - Läsa kampanjdata och nyckeltal
-- `ads_management` - (optional) För framtida automation
+### Creative Fatigue
+```typescript
+const avgFrequency = currentMetrics.reduce((sum, m) => sum + m.frequency, 0) 
+                    / currentMetrics.length;
 
----
+if (avgFrequency > 3.5) {
+  // Alert: Creative fatigue detected
+}
+```
 
-## 🚀 Framtida Funktioner
+### Lead Quality Drop
+```typescript
+const currentConversionRate = totalConversions / totalClicks;
+const historicalConversionRate = historicalConversions / historicalClicks;
 
-### Fas 2: Automatisk Budgetjustering
-- Auto-pausa underpresterande kampanjer
-- Auto-öka budget på high-ROAS kampanjer
-- Smart scheduling baserat på peak-times
+if (currentConversionRate < historicalConversionRate * 0.8) {
+  // Alert: 20% drop in conversion rate
+}
+```
 
-### Fas 3: Predictive Analytics
-- ML-modeller för lead quality prediction
-- Seasonal trend forecasting
-- Competition analysis
+### ROAS Drop
+```typescript
+const currentROAS = totalRevenue / totalSpend;
+const historicalROAS = historicalRevenue / historicalSpend;
 
-### Fas 4: Multi-Channel
-- Google Ads integration
-- TikTok Ads
-- LinkedIn Ads
-- Unified dashboard för alla kanaler
+if (currentROAS < historicalROAS * 0.7) {
+  // Alert: 30% drop in ROAS
+}
+```
 
----
-
-## ❓ Troubleshooting
-
-### Problem: "META Marketing API not configured"
-**Lösning:** 
-1. Kontrollera att `.env` innehåller `META_ACCESS_TOKEN`
-2. Starta om servern
-3. Verifiera token är giltig i Facebook Token Debugger
-
-### Problem: "Invalid access token"
-**Lösning:**
-1. Token har förfallit (max 60 dagar)
-2. Generera ny token enligt Steg 3 ovan
-3. Uppdatera `.env` och starta om
-
-### Problem: "Ad Account not found"
-**Lösning:**
-1. Kontrollera `META_AD_ACCOUNT_ID` är BARA siffror
-2. Verifiera att appen har access till Ad Account
-3. Gå till Business Settings → Ad Accounts → säkerställ appen är listad
-
-### Problem: "No alerts showing"
-**Detta är NORMALT!** 
-- Om allt går bra, finns inga varningar
-- Du ser då "Allt ser bra ut! ✅"
-- Varningar visas ENDAST när något behöver åtgärdas
+### Budget Warning
+```typescript
+if (currentSpend < avgHistoricalSpend * 0.5) {
+  // Alert: Spend down >50% from normal
+  const estimatedLoss = avgHistoricalSpend * 0.3 * 10;
+  // Assume 30% of spend becomes bookings
+}
+```
 
 ---
 
-## 📞 Support
+## Test Scenarios
 
-- **META Developer Docs:** https://developers.facebook.com/docs/marketing-api
-- **Graph API Explorer:** https://developers.facebook.com/tools/explorer/
-- **Token Debugger:** https://developers.facebook.com/tools/debug/accesstoken/
+### 1. Ingen Konfiguration
+**Input**: META_ACCESS_TOKEN och META_AD_ACCOUNT_ID saknas i .env
+
+**Förväntat beteende**:
+- Dashboard visar setup-banner med instruktioner
+- API returnerar `setupRequired: true`
+- Inga fel kastas
+
+### 2. Normal Drift (Inga Varningar)
+**Input**:
+- Spend: 1500 kr/dag (stabilt)
+- ROAS: 3.2
+- Konverteringsgrad: 8%
+- Frekvens: 2.5
+- Kapacitet: 82%
+
+**Förväntat beteende**:
+- Inga alerts genereras
+- budgetRecommendation: "MAINTAIN"
+- Grön statusindikator
+
+### 3. Kritisk Budget-varning
+**Input**:
+- Current spend: 300 kr/dag
+- Historical avg: 1500 kr/dag
+- Booking lag: 7 dagar
+- Upcoming bookings: Lågt
+
+**Förväntat beteende**:
+- Critical alert med severity "critical"
+- Rekommendation: Öka budget omedelbart
+- impactEstimate: ~40,000 kr
+- daysUntilImpact: 7
+
+### 4. Lead Quality Drop
+**Input**:
+- Current conversion rate: 4%
+- Historical conversion rate: 10%
+
+**Förväntat beteende**:
+- Warning alert
+- Rekommendation: Granska målgrupp och kreativ
+- impactEstimate: Baserat på current spend
+
+### 5. Creative Fatigue
+**Input**:
+- Average frequency: 4.2
+
+**Förväntat beteende**:
+- Info alert
+- Rekommendation: Rotera kreativa eller expandera målgrupp
 
 ---
 
-**Skapad:** 2025-10-13  
-**Version:** 1.0  
-**Status:** Production Ready 🚀
+## Troubleshooting
+
+### Problem: "Invalid Access Token"
+**Lösning**:
+1. Verifiera att token är giltig: [developers.facebook.com/tools/debug/accesstoken](https://developers.facebook.com/tools/debug/accesstoken/)
+2. Kontrollera att token har `ads_read` permission
+3. Om token har gått ut: Generera ny token (System User tokens går inte ut)
+
+### Problem: "Ad Account Not Found"
+**Lösning**:
+1. Kontrollera att AD_ACCOUNT_ID är korrekt (UTAN `act_` prefix)
+2. Verifiera att System User har access till Ad Account:
+   - Business Settings → Ad Accounts → [Ditt konto]
+   - Kontrollera att System User finns i listan
+
+### Problem: "Insufficient Permissions"
+**Lösning**:
+1. Lägg till `ads_read` permission till din token
+2. Om du vill ha automation: lägg till `ads_management`
+3. Regenerera token efter att ha lagt till permissions
+
+### Problem: "Rate Limited"
+**Lösning**:
+- Flow har inbyggd 5 min cache för META API-anrop
+- Om problemet kvarstår: Vänta 1 timme och försök igen
+- Kontakta Meta support om återkommande problem
+
+### Problem: Inga kampanjer synkas
+**Lösning**:
+1. Kontrollera att kampanjerna är aktiva i Ads Manager
+2. Verifiera att kampanjerna körs under det Ad Account ID som konfigurerats
+3. Kolla console logs för detaljer: `docker logs flow-web`
+
+---
+
+## Performance & Caching
+
+### API Rate Limits
+- **Cache duration**: 5 minuter
+- **Max requests/hour**: 200 (Meta standard tier)
+- **Recommended sync frequency**: Var 30:e minut
+
+### Database Impact
+- **MetaCampaignMetric** table växer med ~30 rows/dag per kampanj
+- **Cleanup recommendation**: Radera data äldre än 90 dagar månadsvis
+
+```sql
+-- Cleanup query (kör månadsvis via cron)
+DELETE FROM "MetaCampaignMetric" 
+WHERE date < NOW() - INTERVAL '90 days';
+```
+
+---
+
+## Säkerhet
+
+### Token Management
+- **Använd System User tokens**: Går inte ut automatiskt
+- **Lagra säkert**: Använd environment variables, ALDRIG i kod
+- **Rotera tokens**: Vid misstanke om läckage, rotera omedelbart
+- **Minimal permissions**: Ge endast nödvändiga permissions (`ads_read`)
+
+### Data Privacy
+- **Ingen PII lagras**: Flow lagrar aldrig personuppgifter från Meta
+- **Aggregerad data**: Endast kampanjmetrik på kampanjnivå
+- **GDPR-compliant**: Användare kan begära radering av all kampanjdata
+
+---
+
+## Agency Handoff
+
+### Vad behöver agency veta?
+
+1. **Access Requirements**
+   - System User token med `ads_read` permission
+   - Ad Account ID
+   - Business Manager admin access (för setup)
+
+2. **Kampanjstruktur**
+   - Använd tydliga kampanjnamn (Flow visar dessa i dashboarden)
+   - Tagga kampanjer med UTM för bättre spårning
+   - Rekommenderad struktur: `[Klinik]_[Tjänst]_[Målgrupp]_[Månad]`
+
+3. **Optimization Best Practices**
+   - Reagera på Flow's alerts inom 24 timmar
+   - Fokusera på lead-kvalitet, inte bara volym
+   - Använd creative rotation för att undvika fatigue
+   - Håll kapacitet i 75-90% zonen
+
+4. **Reporting**
+   - Flow genererar veckovisa insights automatiskt
+   - Dashboard uppdateras real-time
+   - Export-funktion kommer i nästa release
+
+---
+
+## Roadmap & Framtida Funktioner
+
+### Q1 2025
+- [ ] Automatisk budget-justering (utan manuell godkännande)
+- [ ] SMS/Email alerts för kritiska varningar
+- [ ] Conversions API full integration (lead quality tracking)
+- [ ] A/B test recommendations
+
+### Q2 2025
+- [ ] Multi-kampanj optimization (föreslå budget-shift mellan kampanjer)
+- [ ] Predictive booking model (ML-baserad prognos)
+- [ ] Competitor analysis integration
+- [ ] Creative performance scoring
+
+### Q3 2025
+- [ ] Auto-pause underperforming ads
+- [ ] Dynamic ad copy generation (AI)
+- [ ] Integration med Google Ads
+- [ ] Advanced attribution modeling
+
+---
+
+## Support
+
+### Tekniska Frågor
+- **Dokumentation**: [Flow Developer Docs](https://flow.klinik.se/docs)
+- **GitHub Issues**: [github.com/klinik-flow/meta-integration](https://github.com/klinik-flow/meta-integration)
+- **Email**: dev@klinikflow.se
+
+### Affärsfrågor
+- **Email**: support@klinikflow.se
+- **Telefon**: +46 8 123 456 78
+- **Live Chat**: Tillgänglig måndag-fredag 09:00-17:00
+
+---
+
+## Credits
+
+Utvecklat av Klinik Flow Control Team
+- Lead Developer: [Namn]
+- Product Manager: [Namn]
+- Data Scientist: [Namn]
+
+Med inspiration från:
+- Meta Marketing API Best Practices
+- Lovable's Flow Strategy Document
+- Real clinic owner feedback
+
+**Version**: 1.0.0
+**Senast uppdaterad**: 2025-10-14
+
