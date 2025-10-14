@@ -95,7 +95,7 @@ export default function MarketingPage() {
                   <li>Real-time ROAS och CPL-tracking</li>
                   <li>Lead-kvalitetsbedömning med Conversions API</li>
                   <li>Smart budget-allokering (75-90% kapacitetszon)</li>
-                  <li>AI-drivna rekommendationer för kampanjjusteringar</li>
+                  <li>Datadrivna rekommendationer för kampanjjusteringar</li>
                 </ul>
                 <p className="mt-4 text-sm">
                   Kontakta support för att uppgradera till Professional (1499 kr/mån) eller Enterprise (2999+ kr/mån)

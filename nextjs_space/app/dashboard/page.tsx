@@ -22,7 +22,7 @@ import { RoleToggle } from '@/components/dashboard/role-toggle';
 import { EnhancedRevenueChart } from '@/components/dashboard/enhanced-revenue-chart';
 import { BookingPatternChart } from '@/components/dashboard/booking-pattern-chart';
 import { WeekdayChart } from '@/components/dashboard/weekday-chart';
-import { AIInsightsSection } from '@/components/dashboard/ai-insights-section';
+import { InsightsSection } from '@/components/dashboard/insights-section';
 import { MetaAlerts } from '@/components/dashboard/meta-alerts';
 import { SyncButton } from '@/components/dashboard/sync-button';
 import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
@@ -263,7 +263,7 @@ export default function DashboardPage() {
         {/* Content with padding */}
         <div className="p-6 space-y-6">
 
-        {/* AI Action Dashboard CTA - PRIMARY */}
+        {/* Flow Action Dashboard CTA - PRIMARY */}
         <Link href="/dashboard/actions">
           <Card className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all cursor-pointer border-0 shadow-xl">
             <CardContent className="p-6 md:p-8">
@@ -275,17 +275,23 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-2xl md:text-3xl font-bold">Veckans AI-Rekommendationer</h3>
+                        <h3 className="text-2xl md:text-3xl font-bold">Veckans Rekommendationer</h3>
                         <span className="text-2xl">✨</span>
                       </div>
                       <p className="text-sm text-white/80 mt-1">
-                        NYA DENNA VECKA
+                        NYA DENNA VECKA • V{(() => {
+                          const now = new Date();
+                          const start = new Date(now.getFullYear(), 0, 1);
+                          const diff = now.getTime() - start.getTime();
+                          const oneWeek = 1000 * 60 * 60 * 24 * 7;
+                          return Math.ceil(diff / oneWeek);
+                        })()}
                       </p>
                     </div>
                   </div>
                   <p className="text-base md:text-lg text-white/95">
                     <strong>3 konkreta åtgärder</strong> för att öka intäkter denna vecka. 
-                    AI har analyserat din data och hittat optimeringsmöjligheter värda tiotusentals kr! 🚀
+                    Flow har analyserat din data och hittat optimeringsmöjligheter värda tiotusentals kr! 🚀
                   </p>
                   <div className="flex items-center gap-2 text-sm bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 w-fit">
                     <CheckCircle className="h-4 w-4" />
@@ -507,15 +513,15 @@ export default function DashboardPage() {
           </>
         )}
 
-        {/* AI Insights Section */}
-        <AIInsightsSection days={getDaysFromTimePeriod(timePeriod)} />
+        {/* Flow Insights Section */}
+        <InsightsSection days={getDaysFromTimePeriod(timePeriod)} />
 
         {/* Quick Links to Advanced Analytics */}
         <Card>
           <CardHeader>
-            <CardTitle>Avancerad Analys & AI-verktyg</CardTitle>
+            <CardTitle>Avancerad Analys & Verktyg</CardTitle>
             <p className="text-sm text-muted-foreground">
-              AI-drivna insikter för att optimera din klinik och öka intäkterna
+              Datadrivna insikter för att optimera din klinik och öka intäkterna
             </p>
           </CardHeader>
           <CardContent>
@@ -529,7 +535,7 @@ export default function DashboardPage() {
                   <h3 className="font-semibold">No-Show Riskanalys</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  AI-förutsägelse av uteblivna besök med åtgärdsrekommendationer för att skydda intäkter
+                  Förutsägelse av uteblivna besök med åtgärdsrekommendationer för att skydda intäkter
                 </p>
               </Link>
 
@@ -559,7 +565,7 @@ export default function DashboardPage() {
               >
                 <h3 className="font-semibold mb-2">Intäktsprognos</h3>
                 <p className="text-sm text-muted-foreground">
-                  AI-drivna förutsägelser för framtida intäkter och bokningstrender
+                  Datadrivna förutsägelser för framtida intäkter och bokningstrender
                 </p>
               </Link>
             </div>

@@ -103,7 +103,7 @@ export default function AtRiskClient() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">⚠️ Riskbokningar</h1>
               <p className="text-muted-foreground mt-2">
-                AI-driven förutsägelse av uteblivna besök för att skydda dina intäkter
+                Datadriven förutsägelse av uteblivna besök för att skydda dina intäkter
               </p>
             </div>
             <div className="flex gap-2">

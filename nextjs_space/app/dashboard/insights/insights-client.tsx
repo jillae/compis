@@ -178,7 +178,7 @@ export default function InsightsClient() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Laddar AI-insikter...</p>
+          <p className="text-muted-foreground">Laddar Insikter...</p>
         </div>
       </div>
     )
@@ -199,7 +199,7 @@ export default function InsightsClient() {
                 <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">AI-Insikter</h1>
+                <h1 className="text-xl font-bold text-gray-900">Insikter</h1>
                 <p className="text-sm text-gray-600">Datadrivna rekommendationer</p>
               </div>
             </div>

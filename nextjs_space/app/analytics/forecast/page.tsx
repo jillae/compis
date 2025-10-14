@@ -111,7 +111,7 @@ export default function ForecastPage() {
               <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
                 Intäktsprognos
               </h1>
-              <p className="text-muted-foreground mt-1">AI-drivna förutsägelser för din verksamhet</p>
+              <p className="text-muted-foreground mt-1">Datadrivna förutsägelser för din verksamhet</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Link 

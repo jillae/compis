@@ -294,7 +294,7 @@ export default async function LandingPage() {
                   <h3 className="text-2xl font-bold mb-4 mt-6 text-gray-900">Lösningen</h3>
                   <p className="text-gray-600">
                     Flow analyserade 6 månaders bokningshistorik och identifierade mönster. 
-                    Systemet varnade för riskbokningar och föreslog optimala marknadsföringstider.
+                    Flow varnade för riskbokningar och föreslog optimala marknadsföringstider.
                   </p>
                 </div>
 
@@ -323,7 +323,7 @@ export default async function LandingPage() {
 
               <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
                 <p className="text-gray-700 italic text-lg">
-                  "Flow gav oss insikter vi aldrig hade hittat själva. Nu driver AI vår affärsplanering 
+                  "Flow gav oss insikter vi aldrig hade hittat själva. Nu driver Flow vår affärsplanering 
                   och vi kan fokusera på det vi är bäst på - att ta hand om våra kunder."
                 </p>
                 <p className="mt-3 font-semibold">— Sarah Lindqvist, Grundare av ArchClinic</p>
@@ -371,7 +371,7 @@ export default async function LandingPage() {
           <CardContent className="p-12 text-center space-y-6">
             <h2 className="text-4xl font-bold">Redo att växa din klinik?</h2>
             <p className="text-xl text-blue-50 max-w-2xl mx-auto">
-              Börja med Flow idag och se hur AI kan transformera din verksamhet på 14 dagar.
+              Börja med Flow idag och se hur Flow kan transformera din verksamhet på 14 dagar.
             </p>
             <div className="flex items-center justify-center gap-4 pt-4">
               <Link href="/auth/signup">

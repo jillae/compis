@@ -42,7 +42,7 @@ const insightIcons = {
   'Staff Performance Insights': Award,
 };
 
-export function AIInsightsSection({ days }: AIInsightsProps) {
+export function InsightsSection({ days }: AIInsightsProps) {
   const [insights, setInsights] = useState<Record<string, Insight> | null>(null);
   const [dismissedInsights, setDismissedInsights] = useState<Set<string>>(new Set());
   const [showDismissed, setShowDismissed] = useState(false);
@@ -63,7 +63,7 @@ export function AIInsightsSection({ days }: AIInsightsProps) {
         setInsights(result.data);
       }
     } catch (error) {
-      console.error('Failed to fetch AI insights:', error);
+      console.error('Failed to fetch Flow insights:', error);
     } finally {
       setLoading(false);
     }
@@ -125,7 +125,7 @@ export function AIInsightsSection({ days }: AIInsightsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            AI-insikter
+            Insikter
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -159,7 +159,7 @@ export function AIInsightsSection({ days }: AIInsightsProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            AI-drivna Intäktsinsikter
+            Intäktsinsikter
           </CardTitle>
           {dismissedCount > 0 && (
             <Button

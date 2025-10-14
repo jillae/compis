@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       ? Math.round(((currentMetrics.revenue - prevMetrics.revenue) / prevMetrics.revenue) * 100)
       : 0;
 
-    // Fetch AI insights (last 3)
+    // Fetch Flow insights (last 3)
     const insightsResponse = await fetch(
       `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/dashboard/ai-insights?days=7`,
       { headers: { 'Cookie': request.headers.get('cookie') || '' } }

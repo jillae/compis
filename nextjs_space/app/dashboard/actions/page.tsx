@@ -103,7 +103,7 @@ export default function ActionsPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Genererar AI-rekommendationer...</p>
+          <p className="text-muted-foreground">Genererar Rekommendationer...</p>
         </div>
       </div>
     );
@@ -150,7 +150,7 @@ export default function ActionsPage() {
               <h1 className="text-3xl md:text-4xl font-bold">Veckans Prioriteter</h1>
             </div>
             <p className="text-lg text-blue-50 mb-4">
-              AI-drivna rekommendationer för att optimera din klinik och öka intäkter
+              Datadrivna rekommendationer för att optimera din klinik och öka intäkter
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 mt-6">

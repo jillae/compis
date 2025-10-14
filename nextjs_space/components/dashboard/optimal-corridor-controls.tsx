@@ -157,7 +157,7 @@ export function OptimalCorridorControls({
         {/* Planned Intake Corridor */}
         {onChangePlannedIntake && (
           <div className="space-y-4 pt-4 border-t">
-            <h4 className="font-semibold text-sm">Kundintag per Period</h4>
+            <h4 className="font-semibold text-sm">Kundintag per Vecka</h4>
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -221,9 +221,9 @@ export function OptimalCorridorControls({
           <p>
             Den optimala korridoren ({safeMinUtilization}% - {safeMaxUtilization}%) definierar det ideala beläggningsintervallet för din verksamhet.
             {onChangePlannedIntake && (
-              <> Kundintagskorridoren ({safeMinPlannedIntake} - {safeMaxPlannedIntake} kunder) definierar det optimala intervallet för inflöde av nya kunder.</>
+              <> Kundintagskorridoren ({safeMinPlannedIntake} - {safeMaxPlannedIntake} nya kunder/vecka) definierar det optimala intervallet för inflöde av nya kunder per vecka.</>
             )}
-            {' '}Systemet kommer att varna när prognosen går utanför dessa gränser.
+            {' '}Flow varnar automatiskt när prognosen går utanför dessa gränser.
           </p>
         </div>
       </CardContent>

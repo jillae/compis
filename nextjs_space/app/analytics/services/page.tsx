@@ -201,9 +201,9 @@ export default function ServiceAnalyticsPage() {
             <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950 dark:to-yellow-950">
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-600" />
-                AI-rekommendationer för Optimering
+                Rekommendationer för Optimering
               </CardTitle>
-              <CardDescription>AI-drivna förslag för att förbättra tjänsteprestanda</CardDescription>
+              <CardDescription>Datadrivna förslag för att förbättra tjänsteprestanda</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-4">
