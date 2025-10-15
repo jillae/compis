@@ -156,11 +156,11 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             </Link>
           </div>
 
-          {/* Role Toggle for Super Admin and Admin */}
-          {(userRole === UserRole.SUPER_ADMIN || userRole === UserRole.ADMIN) && simulatedRole && onRoleChange && (
+          {/* Role Toggle for Super Admin */}
+          {userRole === UserRole.SUPER_ADMIN && simulatedRole && onRoleChange && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Rollväxling
+                Admin
               </h3>
               <div className="px-3">
                 <RoleToggle currentRole={simulatedRole} onRoleChange={onRoleChange} />
