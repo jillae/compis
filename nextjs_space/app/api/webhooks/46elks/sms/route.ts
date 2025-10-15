@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { smsService } from '@/lib/sms/sms-service';
+import { verify46ElksIP, logBlockedWebhook } from '@/lib/middleware/verify-46elks-ip';
 
 /**
  * 46elks SMS Webhook
@@ -15,6 +16,17 @@ import { smsService } from '@/lib/sms/sms-service';
  * - created: ISO timestamp
  */
 export async function POST(req: NextRequest) {
+  // 🔒 Security: Verify request comes from trusted 46elks IP
+  const { verified, ip, reason } = verify46ElksIP(req);
+  
+  if (!verified) {
+    await logBlockedWebhook(ip, '/api/webhooks/46elks/sms', reason || 'IP verification failed');
+    return NextResponse.json(
+      { error: 'Forbidden' }, 
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await req.formData();
     
