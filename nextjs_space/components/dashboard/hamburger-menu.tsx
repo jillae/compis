@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -97,6 +97,19 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
               <Mail className="h-4 w-4 mr-2" />
               Skicka veckorapport
             </Button>
+          </div>
+
+          {/* Settings */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Inställningar
+            </h3>
+            <Link href="/dashboard/settings" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <Settings className="h-4 w-4 mr-2" />
+                Funktioner & Integrationer
+              </Button>
+            </Link>
           </div>
 
           {/* External Links */}

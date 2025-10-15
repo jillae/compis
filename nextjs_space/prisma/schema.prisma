@@ -90,8 +90,12 @@ model Clinic {
   isActive          Boolean    @default(true)
   
   // Integration toggles
-  bokadirektEnabled Boolean    @default(false) // Toggle for Bokadirekt integration
+  bokadirektEnabled Boolean    @default(true)  // Toggle for Bokadirekt integration
   metaEnabled       Boolean    @default(false) // Toggle for Meta API integration
+  corexEnabled      Boolean    @default(false) // Toggle for Corex integration (SMS/Communication)
+  dynamicPricingEnabled Boolean @default(false) // Toggle for Dynamic Pricing recommendations
+  retentionAutopilotEnabled Boolean @default(false) // Toggle for Retention Autopilot campaigns
+  aiActionsEnabled  Boolean    @default(true)  // Toggle for AI Action Recommendations
   
   // Meta Marketing API credentials
   metaAccessToken   String?    // Meta Marketing API access token
