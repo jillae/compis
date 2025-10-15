@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -61,6 +61,31 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
               <Button variant="ghost" className="w-full justify-start">
                 <Sparkles className="h-4 w-4 mr-2" />
                 AI Rekommendationer
+              </Button>
+            </Link>
+          </div>
+
+          {/* Customer Intelligence */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Kundinsikter
+            </h3>
+            <Link href="/dashboard/tags" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <Tag className="h-4 w-4 mr-2" />
+                Tag Manager
+              </Button>
+            </Link>
+            <Link href="/dashboard/segments" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <UsersRound className="h-4 w-4 mr-2" />
+                Kundsegment
+              </Button>
+            </Link>
+            <Link href="/dashboard/newsletters" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Nyhetsbrev
               </Button>
             </Link>
           </div>

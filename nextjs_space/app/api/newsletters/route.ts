@@ -4,7 +4,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
-// GET /api/newsletters - List all newsletters
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -12,16 +11,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-
     const newsletters = await prisma.newsletter.findMany({
       where: {
         clinicId: session.user.clinicId,
-        ...(status && { status: status as any }),
       },
       include: {
-        segment: true,
+        segment: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -30,15 +30,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(newsletters);
   } catch (error) {
-    console.error('[Newsletters API] GET error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch newsletters' },
-      { status: 500 }
-    );
+    console.error('Error fetching newsletters:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// POST /api/newsletters - Create a new newsletter
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -47,100 +43,53 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      name,
-      description,
-      subject,
-      contentHtml,
-      contentText,
-      contentSms,
-      sendChannels,
-      segmentId,
-      tagFilters,
-      scheduledAt,
-      isAbTest,
-      variantName,
-      parentId,
-    } = body;
+    const { subject, content, segmentId, scheduledFor, status } = body;
 
-    if (!name) {
+    if (!subject || !content || !segmentId) {
       return NextResponse.json(
-        { error: 'Name is required' },
+        { error: 'Subject, content, and segment are required' },
         { status: 400 }
       );
     }
 
-    if (!sendChannels || sendChannels.length === 0) {
-      return NextResponse.json(
-        { error: 'At least one send channel is required' },
-        { status: 400 }
-      );
-    }
-
-    // Calculate recipient count based on segment/tags
-    let recipientCount = 0;
-    if (segmentId) {
-      const segment = await prisma.customerSegment.findFirst({
-        where: {
-          id: segmentId,
-          clinicId: session.user.clinicId,
-        },
-      });
-      if (segment) {
-        recipientCount = segment.customerCount;
-      }
-    } else if (tagFilters && tagFilters.length > 0) {
-      // Count customers with these tags
-      recipientCount = await prisma.customer.count({
-        where: {
-          clinicId: session.user.clinicId,
-          customerTags: {
-            some: {
-              tag: {
-                name: {
-                  in: tagFilters,
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      // All customers
-      recipientCount = await prisma.customer.count({
-        where: {
-          clinicId: session.user.clinicId,
-        },
-      });
-    }
-
-    const newsletter = await prisma.newsletter.create({
-      data: {
+    // Get segment to count recipients
+    const segment = await prisma.customerSegment.findFirst({
+      where: {
+        id: segmentId,
         clinicId: session.user.clinicId,
-        name,
-        description,
-        subject,
-        contentHtml,
-        contentText,
-        contentSms,
-        sendChannels,
-        segmentId,
-        tagFilters: tagFilters || [],
-        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-        status: scheduledAt ? 'SCHEDULED' : 'DRAFT',
-        isAbTest: isAbTest || false,
-        variantName,
-        parentId,
-        recipientCount,
       },
     });
 
-    return NextResponse.json(newsletter, { status: 201 });
+    if (!segment) {
+      return NextResponse.json({ error: 'Segment not found' }, { status: 404 });
+    }
+
+    // Create newsletter
+    const newsletter = await prisma.newsletter.create({
+      data: {
+        name: subject,
+        subject,
+        contentHtml: content,
+        contentText: content,
+        status: status || 'DRAFT',
+        scheduledAt: scheduledFor ? new Date(scheduledFor) : null,
+        recipientCount: segment.customerCount,
+        clinicId: session.user.clinicId,
+        segmentId,
+      },
+      include: {
+        segment: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(newsletter);
   } catch (error) {
-    console.error('[Newsletters API] POST error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create newsletter' },
-      { status: 500 }
-    );
+    console.error('Error creating newsletter:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
