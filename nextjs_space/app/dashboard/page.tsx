@@ -449,6 +449,49 @@ export default function DashboardPage() {
           </Link>
         </div>
 
+        {/* Retention & Marketing Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Retention Autopilot - Indigo */}
+          <Link href="/dashboard/retention">
+            <Card className="cursor-pointer hover:shadow-lg transition-all border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-100/50">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-indigo-900">Retention Autopilot</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
+                  <Users className="h-4 w-4 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-indigo-700">
+                  Identifiera at-risk
+                </div>
+                <p className="text-xs text-indigo-600 mt-1 font-medium">
+                  Rädda kunder innan de churnar →
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Marketing Intelligence - Cyan */}
+          <Link href="/dashboard/marketing">
+            <Card className="cursor-pointer hover:shadow-lg transition-all border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-100/50">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-cyan-900">Marketing Intelligence</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-cyan-700">
+                  Meta Ads-optimering
+                </div>
+                <p className="text-xs text-cyan-600 mt-1 font-medium">
+                  ROAS, CPL, Budget AI →
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
         {/* Two Column Layout - Colorful Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Top Services */}
