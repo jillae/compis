@@ -111,140 +111,186 @@ export default function SettingsPage() {
         </AlertDescription>
       </Alert>
 
-      {/* Data Sources */}
-      <Card>
-        <CardHeader>
+      {/* Data Sources - IMPROVED: More visual, clearer that switches are the only interactive element */}
+      <Card className="border-2">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
           <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
+            <Zap className="h-5 w-5 text-blue-600" />
             Datakällor & Integrationer
           </CardTitle>
           <CardDescription>
-            Hantera anslutningar till externa system
+            Aktivera eller inaktivera integrationer med toggle-knapparna
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 pt-6">
           {/* Bokadirekt */}
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="bokadirekt" className="text-base font-medium">
-                Bokadirekt Integration
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Synkronisera bokningar, kunder och tjänster från Bokadirekt
-              </p>
+          <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="bokadirekt" className="text-base font-semibold cursor-pointer">
+                    Bokadirekt Integration
+                  </Label>
+                  {settings.bokadirektEnabled && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Aktiv
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Synkronisera bokningar, kunder och tjänster från Bokadirekt
+                </p>
+              </div>
+              <Switch
+                id="bokadirekt"
+                checked={settings.bokadirektEnabled}
+                onCheckedChange={() => handleToggle('bokadirektEnabled')}
+              />
             </div>
-            <Switch
-              id="bokadirekt"
-              checked={settings.bokadirektEnabled}
-              onCheckedChange={() => handleToggle('bokadirektEnabled')}
-            />
           </div>
-
-          <Separator />
 
           {/* Corex */}
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="corex" className="text-base font-medium">
-                Corex Integration
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Omnichannel-assistent för SMS, påminnelser och kundkommunikation
-              </p>
+          <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="corex" className="text-base font-semibold cursor-pointer">
+                    Corex Integration
+                  </Label>
+                  {settings.corexEnabled && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Aktiv
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Omnichannel-assistent för SMS, påminnelser och kundkommunikation
+                </p>
+              </div>
+              <Switch
+                id="corex"
+                checked={settings.corexEnabled}
+                onCheckedChange={() => handleToggle('corexEnabled')}
+              />
             </div>
-            <Switch
-              id="corex"
-              checked={settings.corexEnabled}
-              onCheckedChange={() => handleToggle('corexEnabled')}
-            />
           </div>
 
-          <Separator />
-
           {/* Meta Ads */}
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="meta" className="text-base font-medium">
-                Meta Marketing Integration
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Automatisk optimering av Facebook/Instagram-annonser
-              </p>
+          <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="meta" className="text-base font-semibold cursor-pointer">
+                    Meta Marketing Integration
+                  </Label>
+                  {settings.metaEnabled && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Aktiv
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Automatisk optimering av Facebook/Instagram-annonser
+                </p>
+              </div>
+              <Switch
+                id="meta"
+                checked={settings.metaEnabled}
+                onCheckedChange={() => handleToggle('metaEnabled')}
+              />
             </div>
-            <Switch
-              id="meta"
-              checked={settings.metaEnabled}
-              onCheckedChange={() => handleToggle('metaEnabled')}
-            />
           </div>
         </CardContent>
       </Card>
 
-      {/* AI Features */}
-      <Card>
-        <CardHeader>
+      {/* AI Features - IMPROVED: Same visual treatment */}
+      <Card className="border-2">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
           <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-purple-500" />
+            <Zap className="h-5 w-5 text-purple-600" />
             AI-Funktioner
           </CardTitle>
           <CardDescription>
-            Aktivera eller inaktivera AI-drivna funktioner
+            Aktivera eller inaktivera AI-drivna funktioner med toggle-knapparna
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 pt-6">
           {/* AI Actions */}
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="ai-actions" className="text-base font-medium">
-                AI Action Recommendations
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Veckovisa AI-genererade rekommendationer för att öka intäkter
-              </p>
+          <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="ai-actions" className="text-base font-semibold cursor-pointer">
+                    AI Action Recommendations
+                  </Label>
+                  {settings.aiActionsEnabled && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Aktiv
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Veckovisa AI-genererade rekommendationer för att öka intäkter
+                </p>
+              </div>
+              <Switch
+                id="ai-actions"
+                checked={settings.aiActionsEnabled}
+                onCheckedChange={() => handleToggle('aiActionsEnabled')}
+              />
             </div>
-            <Switch
-              id="ai-actions"
-              checked={settings.aiActionsEnabled}
-              onCheckedChange={() => handleToggle('aiActionsEnabled')}
-            />
           </div>
-
-          <Separator />
 
           {/* Dynamic Pricing */}
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="dynamic-pricing" className="text-base font-medium">
-                Dynamic Pricing Intelligence
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                AI-baserade prisrekommendationer baserat på efterfrågan och konkurrens
-              </p>
+          <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="dynamic-pricing" className="text-base font-semibold cursor-pointer">
+                    Dynamic Pricing Intelligence
+                  </Label>
+                  {settings.dynamicPricingEnabled && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Aktiv
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  AI-baserade prisrekommendationer baserat på efterfrågan och konkurrens
+                </p>
+              </div>
+              <Switch
+                id="dynamic-pricing"
+                checked={settings.dynamicPricingEnabled}
+                onCheckedChange={() => handleToggle('dynamicPricingEnabled')}
+              />
             </div>
-            <Switch
-              id="dynamic-pricing"
-              checked={settings.dynamicPricingEnabled}
-              onCheckedChange={() => handleToggle('dynamicPricingEnabled')}
-            />
           </div>
 
-          <Separator />
-
           {/* Retention Autopilot */}
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="retention" className="text-base font-medium">
-                Retention Autopilot
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Automatiska kampanjer för att återaktivera inaktiva kunder
-              </p>
+          <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="retention" className="text-base font-semibold cursor-pointer">
+                    Retention Autopilot
+                  </Label>
+                  {settings.retentionAutopilotEnabled && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Aktiv
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Automatiska kampanjer för att återaktivera inaktiva kunder
+                </p>
+              </div>
+              <Switch
+                id="retention"
+                checked={settings.retentionAutopilotEnabled}
+                onCheckedChange={() => handleToggle('retentionAutopilotEnabled')}
+              />
             </div>
-            <Switch
-              id="retention"
-              checked={settings.retentionAutopilotEnabled}
-              onCheckedChange={() => handleToggle('retentionAutopilotEnabled')}
-            />
           </div>
         </CardContent>
       </Card>

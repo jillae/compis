@@ -133,6 +133,12 @@ model Clinic {
   bookings          Booking[]
   pricingRecommendations PricingRecommendation[]
   staffPerformances StaffPerformance[]
+  
+  // Billing relations (Wave 4D)
+  subscription      Subscription?
+  invoices          Invoice[]
+  payments          Payment[]
+  billingAlerts     BillingAlert[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -595,6 +601,49 @@ enum PricingStatus {
   PENDING
   APPLIED
   DISMISSED
+}
+
+enum InvoiceStatus {
+  DRAFT            // Being prepared
+  OPEN             // Sent to customer, awaiting payment
+  PAID             // Successfully paid
+  VOID             // Cancelled
+  UNCOLLECTIBLE    // Marked as uncollectible
+  OVERDUE          // Past due date
+}
+
+enum PaymentStatus {
+  PENDING          // Payment initiated
+  PROCESSING       // Being processed
+  SUCCEEDED        // Successfully paid
+  FAILED           // Payment failed
+  CANCELLED        // Payment cancelled
+  REFUNDED         // Payment refunded
+}
+
+enum PaymentMethod {
+  CARD             // Credit/debit card (Stripe)
+  SWISH            // Swish mobile payment
+  BANK_TRANSFER    // Manual bank transfer
+  INVOICE          // Pay by invoice (NET 30)
+  OTHER            // Other methods
+}
+
+enum BillingAlertType {
+  TRIAL_EXPIRING   // Trial ending soon
+  TRIAL_EXPIRED    // Trial has ended
+  PAYMENT_FAILED   // Payment attempt failed
+  INVOICE_OVERDUE  // Invoice past due
+  USAGE_LIMIT      // Approaching usage limit
+  CARD_EXPIRING    // Payment card expiring soon
+  SUBSCRIPTION_CANCELLED // Subscription cancelled
+}
+
+enum AlertSeverity {
+  INFO             // Informational
+  WARNING          // Needs attention
+  ERROR            // Requires immediate action
+  CRITICAL         // Service at risk
 }
 
 // ============================================================================
@@ -1083,4 +1132,159 @@ model LoyaltyTransaction {
   @@index([clinicId])
   @@index([type])
   @@index([createdAt])
+}
+
+// ============================================
+// BILLING & SUBSCRIPTION MANAGEMENT
+// Wave 4D - October 2025
+// ============================================
+
+model Subscription {
+  id                String               @id @default(cuid())
+  clinicId          String               @unique
+  clinic            Clinic               @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  tier              SubscriptionTier
+  status            SubscriptionStatus
+  
+  // Stripe integration
+  stripeCustomerId      String?          @unique
+  stripeSubscriptionId  String?          @unique
+  stripePriceId         String?
+  
+  // Billing cycle
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  trialStart            DateTime?
+  trialEnd              DateTime?
+  cancelledAt           DateTime?
+  cancelAtPeriodEnd     Boolean          @default(false)
+  
+  // Usage tracking
+  bookingsThisMonth     Int              @default(0)
+  bookingsLimit         Int?             // null = unlimited
+  
+  // Pricing
+  monthlyPrice          Decimal          @db.Decimal(10, 2)
+  currency              String           @default("SEK")
+  
+  // Relationships
+  invoices              Invoice[]
+  payments              Payment[]
+  billingAlerts         BillingAlert[]
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([clinicId])
+  @@index([status])
+  @@index([stripeSubscriptionId])
+}
+
+model Invoice {
+  id                String           @id @default(cuid())
+  clinicId          String
+  clinic            Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  subscriptionId    String
+  subscription      Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  // Invoice details
+  invoiceNumber     String           @unique // INV-2025-001
+  status            InvoiceStatus
+  
+  // Stripe
+  stripeInvoiceId   String?          @unique
+  hostedInvoiceUrl  String?          // Stripe-hosted invoice URL
+  invoicePdfUrl     String?          // PDF download URL
+  
+  // Amounts
+  subtotal          Decimal          @db.Decimal(10, 2)
+  tax               Decimal          @default(0) @db.Decimal(10, 2)
+  total             Decimal          @db.Decimal(10, 2)
+  amountPaid        Decimal          @default(0) @db.Decimal(10, 2)
+  amountDue         Decimal          @db.Decimal(10, 2)
+  currency          String           @default("SEK")
+  
+  // Line items (JSON)
+  lineItems         Json             // [{description, quantity, unitPrice, amount}]
+  
+  // Dates
+  periodStart       DateTime
+  periodEnd         DateTime
+  dueDate           DateTime
+  paidAt            DateTime?
+  
+  // Relationships
+  payments          Payment[]
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([clinicId])
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([invoiceNumber])
+}
+
+model Payment {
+  id                String           @id @default(cuid())
+  clinicId          String
+  clinic            Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  subscriptionId    String
+  subscription      Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  invoiceId         String?
+  invoice           Invoice?         @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  
+  // Payment details
+  amount            Decimal          @db.Decimal(10, 2)
+  currency          String           @default("SEK")
+  status            PaymentStatus
+  paymentMethod     PaymentMethod
+  
+  // Stripe
+  stripePaymentIntentId String?      @unique
+  stripeChargeId        String?      @unique
+  
+  // Payment info
+  last4             String?          // Last 4 digits of card
+  brand             String?          // visa, mastercard, etc
+  
+  // Dates
+  attemptedAt       DateTime         @default(now())
+  succeededAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?          @db.Text
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([clinicId])
+  @@index([subscriptionId])
+  @@index([invoiceId])
+  @@index([status])
+}
+
+model BillingAlert {
+  id                String           @id @default(cuid())
+  clinicId          String
+  clinic            Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  subscriptionId    String
+  subscription      Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  type              BillingAlertType
+  severity          AlertSeverity
+  message           String           @db.Text
+  resolved          Boolean          @default(false)
+  resolvedAt        DateTime?
+  
+  // Associated data (JSON)
+  metadata          Json?            // {invoiceId, paymentId, etc}
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([clinicId])
+  @@index([subscriptionId])
+  @@index([resolved])
+  @@index([type])
 }

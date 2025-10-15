@@ -221,18 +221,22 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2">
                 <WorkdayToggle value={workdays} onChange={setWorkdays} />
                 <SyncButton />
-                <TimePeriodSelector 
-                  value={timePeriod} 
-                  onChange={setTimePeriod}
-                  className="w-[120px] md:w-[160px]"
-                />
+                <div data-tour="time-period-selector">
+                  <TimePeriodSelector 
+                    value={timePeriod} 
+                    onChange={setTimePeriod}
+                    className="w-[120px] md:w-[160px]"
+                  />
+                </div>
                 
                 {/* Hamburger Menu */}
-                <HamburgerMenu 
-                  userRole={session?.user?.role}
-                  simulatedRole={simulatedRole}
-                  onRoleChange={setSimulatedRole}
-                />
+                <div data-tour="hamburger-menu">
+                  <HamburgerMenu 
+                    userRole={session?.user?.role}
+                    simulatedRole={simulatedRole}
+                    onRoleChange={setSimulatedRole}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -244,7 +248,7 @@ export default function DashboardPage() {
         {/* Horizontal CTA Cards - Main Action Cards (1+1+1) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* 1. Veckans Rekommendationer - PRIMARY */}
-          <Link href="/dashboard/actions">
+          <Link href="/dashboard/actions" data-tour="actions-card">
             <Card className="bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all duration-300 cursor-pointer border-0 shadow-xl hover:shadow-2xl h-full">
               <CardContent className="p-6">
                 <div className="flex flex-col h-full">
@@ -283,7 +287,7 @@ export default function DashboardPage() {
           </Link>
 
           {/* 2. Intäktssimulator - SECONDARY */}
-          <Link href="/dashboard/simulator">
+          <Link href="/dashboard/simulator" data-tour="simulator-card">
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
               <CardContent className="p-6">
                 <div className="flex flex-col h-full">
@@ -308,7 +312,7 @@ export default function DashboardPage() {
           </Link>
 
           {/* 3. Marketing Intelligence - TERTIARY (PRO+) */}
-          <Link href="/dashboard/marketing">
+          <Link href="/dashboard/marketing" data-tour="marketing-card">
             <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
               <CardContent className="p-6">
                 <div className="flex flex-col h-full">
@@ -339,7 +343,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Overview Cards - Colorful & Clear */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" data-tour="overview-cards">
           {/* Total Bookings - Blue */}
           <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

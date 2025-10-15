@@ -42,6 +42,9 @@ export default async function LandingPage() {
             </span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            <Link href="#pricing">
+              <Button variant="ghost" size="sm" className="text-sm hidden md:inline-flex">Priser</Button>
+            </Link>
             <Link href="/auth/login">
               <Button variant="ghost" size="sm" className="text-sm">Logga in</Button>
             </Link>
@@ -210,6 +213,209 @@ export default async function LandingPage() {
               </p>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+            💰 Enkla och transparenta priser
+          </span>
+          <h2 className="text-4xl font-bold mt-6 mb-4">Välj rätt plan för din klinik</h2>
+          <p className="text-xl text-gray-600">14 dagars gratis prova-på. Inga dolda avgifter.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* BASIC */}
+          <Card className="border-2 hover:border-blue-300 transition-all">
+            <CardContent className="p-8">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-2xl font-bold">Basic</h3>
+                  <p className="text-sm text-gray-600 mt-1">För mindre kliniker</p>
+                </div>
+                <div className="flex items-baseline">
+                  <span className="text-5xl font-bold text-blue-600">499</span>
+                  <span className="ml-2 text-gray-600">kr/månad</span>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Upp till 500 bokningar/månad</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Grundläggande analys</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>No-show förutsägelse</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>E-postrapporter</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Bokadirekt-integration</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Standard support</span>
+                  </li>
+                </ul>
+                <Link href="/auth/signup" className="block">
+                  <Button className="w-full" variant="outline">
+                    Kom igång
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* PROFESSIONAL - Popular */}
+          <Card className="border-2 border-purple-300 shadow-xl relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-xs font-semibold">
+                POPULÄRAST
+              </span>
+            </div>
+            <CardContent className="p-8 bg-gradient-to-br from-purple-50 to-white">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-purple-900">Professional</h3>
+                  <p className="text-sm text-purple-700 mt-1">För växande kliniker</p>
+                </div>
+                <div className="flex items-baseline">
+                  <span className="text-5xl font-bold text-purple-600">1 499</span>
+                  <span className="ml-2 text-gray-600">kr/månad</span>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Obegränsat antal bokningar</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Avancerad analys</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>AI-rekommendationer</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Meta Ads-integration</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Kapacitetsplanering</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Dynamisk prissättning</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Retention Autopilot</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Prioriterad support</span>
+                  </li>
+                </ul>
+                <Link href="/auth/signup" className="block">
+                  <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                    <Zap className="mr-2 h-4 w-4" />
+                    Kom igång
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ENTERPRISE */}
+          <Card className="border-2 hover:border-indigo-300 transition-all">
+            <CardContent className="p-8">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-2xl font-bold">Enterprise</h3>
+                  <p className="text-sm text-gray-600 mt-1">För etablerade kedjor</p>
+                </div>
+                <div className="flex items-baseline">
+                  <span className="text-5xl font-bold text-indigo-600">2 999</span>
+                  <span className="ml-2 text-gray-600">kr/månad</span>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Allt i Professional</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Anpassade integrationer</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Dedikerad success manager</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>White-label möjlighet</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>SLA-garanti</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>Multi-klinik hantering</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span>24/7 support</span>
+                  </li>
+                </ul>
+                <Link href="/auth/signup" className="block">
+                  <Button className="w-full bg-gradient-to-r from-indigo-600 to-blue-600">
+                    Kontakta oss
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Pricing FAQ */}
+        <div className="mt-16 max-w-3xl mx-auto">
+          <h3 className="text-2xl font-bold text-center mb-8">Vanliga frågor om priser</h3>
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <h4 className="font-semibold mb-2">Kan jag byta plan när som helst?</h4>
+                <p className="text-sm text-gray-600">
+                  Ja, du kan uppgradera eller nedgradera din plan när som helst. Ändringar träder i kraft omedelbart.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <h4 className="font-semibold mb-2">Vad händer efter trial-perioden?</h4>
+                <p className="text-sm text-gray-600">
+                  Efter 14 dagar behöver du välja en plan. Vi skickar påminnelser innan trial går ut.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <h4 className="font-semibold mb-2">Vilka betalningsmetoder accepteras?</h4>
+                <p className="text-sm text-gray-600">
+                  Vi accepterar kreditkort (Visa, Mastercard, Amex) och Swish. Faktura finns för Enterprise-kunder.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
