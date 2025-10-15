@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,9 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Mail, Send, Eye, Users, Calendar, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Unlayer editor to avoid SSR issues
+const UnlayerEmailEditor = dynamic(
+  () => import('@/components/unlayer-email-editor').then(mod => ({ default: mod.UnlayerEmailEditor })),
+  { ssr: false }
+);
 
 interface Newsletter {
   id: string;
@@ -47,6 +53,10 @@ export default function NewslettersPage() {
   const [loading, setLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [previewNewsletter, setPreviewNewsletter] = useState<Newsletter | null>(null);
+  const [license, setLicense] = useState<any>(null);
+  const [emailHtml, setEmailHtml] = useState('');
+  const [emailDesign, setEmailDesign] = useState(null);
+  const editorRef = useRef<any>(null);
   const [formData, setFormData] = useState({
     subject: '',
     content: '',
@@ -58,8 +68,21 @@ export default function NewslettersPage() {
     if (status === 'authenticated') {
       fetchNewsletters();
       fetchSegments();
+      fetchLicense();
     }
   }, [status]);
+
+  const fetchLicense = async () => {
+    try {
+      const response = await fetch('/api/unlayer-licenses/for-clinic');
+      if (response.ok) {
+        const data = await response.json();
+        setLicense(data);
+      }
+    } catch (error) {
+      console.error('Error fetching license:', error);
+    }
+  };
 
   const fetchNewsletters = async () => {
     try {
@@ -102,12 +125,23 @@ export default function NewslettersPage() {
       return;
     }
 
+    if (!emailHtml || !formData.subject) {
+      toast({
+        title: 'Fyll i alla fält',
+        description: 'Ämnesrad och email-design krävs',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const response = await fetch('/api/newsletters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          subject: formData.subject,
+          content: emailHtml, // Use HTML from Unlayer
+          segmentId: formData.segmentId,
           scheduledFor: formData.scheduledFor || null,
           status: sendNow ? 'SENT' : (formData.scheduledFor ? 'SCHEDULED' : 'DRAFT'),
         }),
@@ -213,6 +247,8 @@ export default function NewslettersPage() {
       segmentId: '',
       scheduledFor: '',
     });
+    setEmailHtml('');
+    setEmailDesign(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -277,17 +313,22 @@ export default function NewslettersPage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="content">Innehåll*</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Skriv ditt nyhetsbrev här..."
-                  rows={12}
-                  className="font-mono text-sm"
-                />
+                <Label>Email Design*</Label>
+                {license && (
+                  <UnlayerEmailEditor
+                    plan={license.plan}
+                    apiKey={license.apiKey}
+                    onReady={() => {
+                      console.log('Unlayer editor ready');
+                    }}
+                    onDesignLoad={(data) => {
+                      setEmailHtml(data.html);
+                      setEmailDesign(data.design);
+                    }}
+                  />
+                )}
                 <p className="text-xs text-muted-foreground">
-                  Tips: Använd {'{namn}'} för att personalisera med kundens namn
+                  Tips: Använd personalisering i din email-mall för bättre resultat
                 </p>
               </div>
 
@@ -339,13 +380,13 @@ export default function NewslettersPage() {
               <Button 
                 variant="outline"
                 onClick={() => handleCreateNewsletter(false)}
-                disabled={!formData.subject || !formData.content || !formData.segmentId}
+                disabled={!formData.subject || !emailHtml || !formData.segmentId}
               >
                 Spara som utkast
               </Button>
               <Button 
                 onClick={() => handleCreateNewsletter(true)}
-                disabled={!formData.subject || !formData.content || !formData.segmentId}
+                disabled={!formData.subject || !emailHtml || !formData.segmentId}
               >
                 <Send className="h-4 w-4 mr-2" />
                 Skicka nu

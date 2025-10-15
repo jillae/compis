@@ -153,6 +153,9 @@ model Clinic {
   voiceCalls         VoiceCall[]
   voiceTickets       VoiceTicket[]
 
+  // Unlayer License Management
+  unlayerLicense UnlayerLicense?
+
   @@index([bokadirektId])
   @@index([name])
   @@index([tier])
@@ -1925,4 +1928,59 @@ enum TicketPriority {
   MEDIUM
   HIGH
   URGENT
+}
+
+// ============================================================================
+// WAVE 7: UNLAYER EMAIL EDITOR & LICENSE MANAGEMENT
+// ============================================================================
+
+// UnlayerLicense - Paid Unlayer licenses for Enterprise tier
+model UnlayerLicense {
+  id        String   @id @default(cuid())
+  clinicId  String   @unique
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  // License details
+  plan           UnlayerPlan         @default(FREE)
+  status         UnlayerLicenseStatus @default(ACTIVE)
+  apiKey         String?              // Unlayer API key for paid plans
+  projectId      String?              // Unlayer Project ID
+
+  // Pricing
+  pricePerMonth  Decimal              @default(0) @db.Decimal(10, 2)
+
+  // Validity
+  activatedAt    DateTime             @default(now())
+  expiresAt      DateTime?
+  lastSyncedAt   DateTime?            // Last time we synced with Unlayer API
+
+  // Usage tracking
+  emailsSent     Int                  @default(0)
+  emailsLimit    Int?                 // Monthly limit (null = unlimited)
+
+  // Metadata
+  metadata       Json?                // Additional Unlayer plan details
+
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([clinicId])
+  @@index([status])
+  @@index([plan])
+  @@index([expiresAt])
+}
+
+enum UnlayerPlan {
+  FREE          // Free plan (no API key needed)
+  LAUNCH        // Paid Launch plan
+  SCALE         // Paid Scale plan  
+  OPTIMIZE      // Paid Optimize plan
+}
+
+enum UnlayerLicenseStatus {
+  ACTIVE        // License is active
+  EXPIRED       // License has expired
+  SUSPENDED     // License is suspended (payment issue)
+  CANCELLED     // License cancelled by admin
+  PENDING       // License pending activation
 }
