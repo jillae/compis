@@ -122,6 +122,9 @@ model Clinic {
   smsProviderConfigs    SMSProviderConfig[]
   smsCampaigns          SMSCampaign[]
   loyaltyTransactions   LoyaltyTransaction[]
+  smsLogs               SMSLog[]
+  smsRateLimit          SMSRateLimit?
+  smsTemplates          SMSTemplate[]
 
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
@@ -201,6 +204,8 @@ model Customer {
   redemptions       Redemption[]
   events            Event[]
   optOuts           OptOut[]
+  smsLogs           SMSLog[]
+  communicationPreference CustomerCommunicationPreference?
 
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -816,6 +821,7 @@ model Campaign {
   clinic            Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   
   messages          Message[]
+  smsLogs           SMSLog[]
   
   // Timestamps
   sentAt            DateTime?
@@ -1132,6 +1138,212 @@ model LoyaltyTransaction {
   @@index([clinicId])
   @@index([type])
   @@index([createdAt])
+}
+
+// ============================================
+// SMS COMPLIANCE & TRACKING (PRIORITY 1)
+// ============================================
+
+// SMSLog - Complete audit trail for all SMS communications
+model SMSLog {
+  id              String          @id @default(cuid())
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  // Message details
+  direction       String          // "outbound" | "inbound"
+  from            String
+  to              String
+  message         String          @db.Text
+  
+  // Provider details
+  provider        String          // "46elks" | "twilio"
+  providerId      String?         // External message ID from provider
+  providerStatus  String?         // Provider-specific status
+  
+  // Status tracking
+  status          String          @default("pending") // "pending" | "sent" | "delivered" | "failed" | "stopped"
+  deliveredAt     DateTime?
+  failedAt        DateTime?
+  failureReason   String?         @db.Text
+  
+  // Cost tracking
+  cost            Float?
+  parts           Int             @default(1) // Number of SMS parts
+  
+  // Customer relation
+  customerId      String?
+  customer        Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  // Campaign relation
+  campaignId      String?
+  campaign        Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  // Retry tracking
+  retryCount      Int             @default(0)
+  maxRetries      Int             @default(3)
+  nextRetryAt     DateTime?
+  
+  // Metadata
+  metadata        Json?           // Additional provider-specific data
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([customerId])
+  @@index([campaignId])
+  @@index([status])
+  @@index([direction])
+  @@index([providerId])
+  @@index([createdAt])
+}
+
+// SMSRateLimit - Track rate limiting per clinic
+model SMSRateLimit {
+  id              String          @id @default(cuid())
+  clinicId        String          @unique
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  // Rate limit configuration
+  maxPerHour      Int             @default(100)
+  maxPerDay       Int             @default(500)
+  maxPerMonth     Int             @default(10000)
+  
+  // Current usage
+  sentThisHour    Int             @default(0)
+  sentToday       Int             @default(0)
+  sentThisMonth   Int             @default(0)
+  
+  // Reset timestamps
+  hourResetAt     DateTime
+  dayResetAt      DateTime
+  monthResetAt    DateTime
+  
+  // Budget tracking
+  budgetSEK       Float?
+  spentThisMonth  Float           @default(0)
+  
+  // Alerts
+  alertAt80Percent Boolean        @default(true)
+  alertAt100Percent Boolean       @default(true)
+  lastAlertSent   DateTime?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+}
+
+// CustomerCommunicationPreference - Granular consent and preferences
+model CustomerCommunicationPreference {
+  id              String          @id @default(cuid())
+  customerId      String          @unique
+  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  // Channel preferences
+  smsEnabled      Boolean         @default(true)
+  emailEnabled    Boolean         @default(true)
+  pushEnabled     Boolean         @default(false)
+  
+  // Category preferences
+  transactional   Boolean         @default(true)  // Booking confirmations, receipts
+  marketing       Boolean         @default(false) // Promotions, offers
+  loyalty         Boolean         @default(false) // Loyalty program updates
+  reminders       Boolean         @default(true)  // Appointment reminders
+  surveys         Boolean         @default(false) // Feedback requests
+  
+  // Quiet hours
+  quietHoursEnabled Boolean       @default(false)
+  quietHoursStart String?         // "22:00"
+  quietHoursEnd   String?         // "08:00"
+  
+  // Frequency limits
+  maxPerDay       Int?            @default(3)
+  maxPerWeek      Int?            @default(10)
+  
+  // GDPR compliance
+  consentGivenAt  DateTime?
+  consentMethod   String?         // "web_form" | "sms_reply" | "in_person" | "import"
+  consentIpAddress String?
+  consentUpdatedAt DateTime?
+  
+  // Opt-out tracking
+  optedOutAt      DateTime?
+  optOutMethod    String?         // "sms_stop" | "web_form" | "support_request"
+  optOutReason    String?         @db.Text
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([customerId])
+  @@index([smsEnabled])
+  @@index([marketing])
+}
+
+// SMSTemplate - Reusable SMS templates with variables
+model SMSTemplate {
+  id              String          @id @default(cuid())
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  name            String
+  description     String?         @db.Text
+  category        String          // "welcome" | "reminder" | "promotion" | "loyalty" | "reactivation"
+  
+  // Template content
+  message         String          @db.Text
+  variables       String[]        @default([]) // ["firstName", "stampsNeeded", "rewardName"]
+  
+  // A/B testing
+  isVariant       Boolean         @default(false)
+  parentId        String?         // Reference to parent template for A/B test
+  variantName     String?         // "A" | "B" | "C"
+  
+  // Performance tracking
+  sentCount       Int             @default(0)
+  deliveredCount  Int             @default(0)
+  clickedCount    Int             @default(0)
+  convertedCount  Int             @default(0)
+  optOutCount     Int             @default(0)
+  
+  // Calculated metrics
+  deliveryRate    Float?          // deliveredCount / sentCount
+  conversionRate  Float?          // convertedCount / deliveredCount
+  optOutRate      Float?          // optOutCount / deliveredCount
+  
+  // Status
+  isActive        Boolean         @default(true)
+  isDraft         Boolean         @default(false)
+  
+  // Compliance
+  requiresConsent Boolean         @default(true)
+  consentType     String?         // "marketing" | "loyalty" | "transactional"
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([clinicId])
+  @@index([category])
+  @@index([isActive])
+  @@index([isVariant])
+}
+
+// SMSStopKeyword - Track STOP keywords and auto-responses
+model SMSStopKeyword {
+  id              String          @id @default(cuid())
+  keyword         String          @unique // "STOP", "STOPP", "SLUTA", "AVSLUTA", etc.
+  isActive        Boolean         @default(true)
+  language        String          @default("sv") // "sv" | "en"
+  
+  // Auto-response
+  responseMessage String?         @db.Text
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([keyword])
+  @@index([isActive])
 }
 
 // ============================================

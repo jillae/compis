@@ -43,11 +43,18 @@ export class FortySevenElksProvider implements SMSProvider {
       }
 
       // Prepare request body
-      const body = new URLSearchParams({
+      const bodyData: Record<string, string> = {
         from,
         to,
         message,
-      });
+      };
+
+      // Add delivery receipt webhook (only in production)
+      if (process.env.NODE_ENV === 'production' || process.env.ENABLE_46ELKS_WEBHOOKS === 'true') {
+        bodyData.whendelivered = 'https://flow.abacusai.app/api/webhooks/46elks/delivery';
+      }
+
+      const body = new URLSearchParams(bodyData);
 
       // Send SMS via 46elks API
       const response = await fetch(this.apiUrl, {

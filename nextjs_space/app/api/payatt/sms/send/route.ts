@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { smsService, SMSService } from '@/lib/sms/sms-service';
 import { renderTemplate } from '@/lib/sms/templates';
 import { prisma } from '@/lib/db';
+import { MessageCategory } from '@/lib/sms/consent-checker';
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,11 +17,12 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-      recipients, // Array of phone numbers or customer IDs
+      recipients, // Array of phone numbers
       message, 
       templateId,
       templateVariables,
-      customerIds 
+      customerIds,
+      category = 'marketing' as MessageCategory
     } = body;
 
     // If customerIds provided, fetch their phone numbers
@@ -63,22 +65,39 @@ export async function POST(req: NextRequest) {
       finalMessage = renderTemplate(templateId, templateVariables);
     }
 
-    // Send SMS
-    const result = await smsService.sendBulk(
-      formattedNumbers, 
-      finalMessage
-    );
-
-    // Log SMS campaign
-    await prisma.sMSCampaign.create({
+    // Create campaign record first
+    const campaign = await prisma.sMSCampaign.create({
       data: {
         clinicId: session.user.clinicId!,
         name: templateId || 'Manual SMS',
         message: finalMessage,
         recipientCount: formattedNumbers.length,
+        successCount: 0,
+        failedCount: 0,
+      }
+    });
+
+    // Send SMS with enhanced service (rate limiting, consent checking, retry logic)
+    const result = await smsService.sendBulk(
+      formattedNumbers, 
+      finalMessage,
+      'KlinikFlow',
+      {
+        clinicId: session.user.clinicId!,
+        campaignId: campaign.id,
+        category
+      }
+    );
+
+    // Update campaign with results
+    await prisma.sMSCampaign.update({
+      where: { id: campaign.id },
+      data: {
         successCount: result.successful,
         failedCount: result.failed,
         sentAt: new Date(),
+        // Calculate cost (estimate: 0.40 SEK per SMS)
+        totalCost: result.successful * 0.40
       }
     });
 
@@ -86,6 +105,8 @@ export async function POST(req: NextRequest) {
       success: true,
       sent: result.successful,
       failed: result.failed,
+      blocked: result.blocked,
+      campaignId: campaign.id,
       details: result.results
     });
 
