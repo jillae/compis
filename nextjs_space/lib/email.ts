@@ -3,6 +3,35 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+/**
+ * Generic email sending function
+ */
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  from = 'Flow <noreply@flowrevenue.se>',
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  from?: string;
+}) {
+  try {
+    const result = await resend.emails.send({
+      from,
+      to,
+      subject,
+      html,
+    });
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return { success: false, error };
+  }
+}
+
 interface WeeklyReportData {
   clinicName: string;
   weekRange: string;

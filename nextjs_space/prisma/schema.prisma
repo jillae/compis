@@ -148,6 +148,11 @@ model Clinic {
   newsletters           Newsletter[]
   newsletterSubscribers NewsletterSubscriber[]
 
+  // Voice & AI Assistant (Wave 6)
+  voiceConfiguration VoiceConfiguration?
+  voiceCalls         VoiceCall[]
+  voiceTickets       VoiceTicket[]
+
   @@index([bokadirektId])
   @@index([name])
   @@index([tier])
@@ -218,6 +223,10 @@ model Customer {
 
   clinic   Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   bookings Booking[]
+
+  // Voice & AI Assistant (Wave 6)
+  voiceCalls   VoiceCall[]
+  voiceTickets VoiceTicket[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -320,6 +329,9 @@ model Booking {
   staff    Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
   service  Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   room     Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  // Voice & AI Assistant (Wave 6)
+  voiceCalls VoiceCall[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -1711,4 +1723,206 @@ model BillingAlert {
   @@index([subscriptionId])
   @@index([resolved])
   @@index([type])
+}
+
+// ===================================
+// WAVE 6: COREX VOICE INTEGRATION
+// ===================================
+
+// Voice Configuration (TTS Settings per clinic)
+model VoiceConfiguration {
+  id       String @id @default(cuid())
+  clinicId String @unique
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  // Primary Provider
+  primaryProvider TTSProvider @default(OPENAI)
+  
+  // OpenAI Settings
+  openaiApiKey    String? // Encrypted
+  openaiVoice     String  @default("nova") // alloy, echo, fable, onyx, nova, shimmer
+  openaiModel     String  @default("tts-1") // tts-1, tts-1-hd
+  openaiSpeed     Float   @default(1.0) // 0.5 - 2.0
+  openaiFormat    String  @default("mp3") // mp3, opus, aac, flac, wav, pcm
+
+  // ElevenLabs Settings (Fallback)
+  elevenlabsApiKey String? // Encrypted
+  elevenlabsVoiceId String? // Voice profile ID
+  elevenlabsSpeed Float   @default(1.0)
+  elevenlabsFormat String  @default("mp3_44100_128")
+
+  // Fallback Configuration
+  enableFallback      Boolean @default(true)
+  fallbackTimeoutMs   Int     @default(5000) // 5 seconds
+  
+  // 46elks Voice Settings
+  phoneNumber  String  @default("+46766866273")
+  elksUsername String? // 46elks API username
+  elksPassword String? // 46elks API password (encrypted)
+
+  // Conversation Settings
+  maxCallDurationMinutes Int     @default(5)
+  enableBookingIntent    Boolean @default(true)
+  enableRebookingIntent  Boolean @default(true)
+  enableCancelIntent     Boolean @default(true)
+  enableFAQIntent        Boolean @default(false) // Start disabled, enable after FAQ setup
+
+  // Fallback Contact (when AI fails)
+  fallbackEmail   String  @default("info@archacademy.se")
+  fallbackSubject String  @default("Tappat kundsamtal")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  VoiceCall VoiceCall[]
+}
+
+// Voice Call Log
+model VoiceCall {
+  id        String   @id @default(cuid())
+  clinicId  String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  configId  String
+  config    VoiceConfiguration @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  // Call Details
+  callId          String   @unique // From 46elks
+  fromNumber      String // Customer phone
+  toNumber        String // Clinic phone (+46766866273)
+  direction       CallDirection
+  
+  // Call Status
+  status          CallStatus @default(INITIATED)
+  duration        Int?       // Duration in seconds
+  recordingUrl    String?    // Call recording URL
+  
+  // Conversation Details
+  transcript      String?    @db.Text // Full conversation transcript
+  detectedIntent  VoiceIntentType?
+  intentConfidence Float?    // 0.0 - 1.0
+  
+  // TTS Provider Used
+  ttsProviderUsed TTSProvider?
+  ttsFallbackUsed Boolean     @default(false)
+  
+  // Booking Context (if intent is booking-related)
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  bookingId       String?
+  booking         Booking?  @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  
+  // AI Response
+  aiResponse      Json? // Full AI conversation flow
+  
+  // Fallback Ticket (if created)
+  ticketId        String?
+  ticket          VoiceTicket? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  
+  // Timestamps
+  startedAt       DateTime  @default(now())
+  endedAt         DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([clinicId])
+  @@index([callId])
+  @@index([status])
+  @@index([detectedIntent])
+  @@index([customerId])
+  @@index([bookingId])
+}
+
+// Voice Ticket (Fallback when AI fails)
+model VoiceTicket {
+  id       String @id @default(cuid())
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  // Ticket Details
+  ticketNumber String @unique // TICKET-2025-001
+  status       VoiceTicketStatus @default(OPEN)
+  priority     TicketPriority    @default(HIGH)
+  
+  // Customer Info
+  customerPhone String
+  customerName  String?
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  // Call Reference
+  callId        String?
+  
+  // Ticket Content
+  subject       String
+  description   String @db.Text
+  transcript    String? @db.Text
+  
+  // Resolution
+  resolved      Boolean   @default(false)
+  resolvedAt    DateTime?
+  resolvedBy    String?   // User ID who resolved
+  resolution    String?   @db.Text
+  
+  // Email Sent
+  emailSent     Boolean   @default(false)
+  emailSentAt   DateTime?
+  emailTo       String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  VoiceCall VoiceCall[]
+
+  @@index([clinicId])
+  @@index([ticketNumber])
+  @@index([status])
+  @@index([customerId])
+  @@index([resolved])
+}
+
+// Enums for Voice
+enum TTSProvider {
+  OPENAI
+  ELEVENLABS
+}
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CallStatus {
+  INITIATED
+  RINGING
+  ANSWERED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  BUSY
+  NO_ANSWER
+  CANCELLED
+}
+
+enum VoiceIntentType {
+  BOOKING
+  REBOOKING
+  CANCELLATION
+  FAQ
+  OTHER
+  UNKNOWN
+}
+
+enum VoiceTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
