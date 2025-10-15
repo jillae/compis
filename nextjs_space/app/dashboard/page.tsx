@@ -427,6 +427,26 @@ export default function DashboardPage() {
               </Card>
             </Link>
           )}
+
+          {/* Capacity Forecast - Purple */}
+          <Link href="/dashboard/capacity">
+            <Card className="cursor-pointer hover:shadow-lg transition-all border-purple-200 bg-gradient-to-br from-purple-50 to-pink-100/50">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-purple-900">Kapacitetsprognos</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
+                  <Calendar className="h-4 w-4 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-700">
+                  4 veckor framåt
+                </div>
+                <p className="text-xs text-purple-600 mt-1 font-medium">
+                  Optimera lediga slots →
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* Two Column Layout - Colorful Cards */}

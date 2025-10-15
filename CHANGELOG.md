@@ -1,6 +1,56 @@
 
 # Flow Changelog
 
+## 2025-10-15 - Wave 2: Capacity Forecasting UI ✅
+
+### 🚀 Nya Funktioner
+
+#### 1. Capacity Forecasting UI (PRODUCTION READY)
+- **Komplett dashboard** på `/dashboard/capacity` för 4-veckors kapacitetsprognoser
+- **Weekly Overview Cards:**
+  - Visuell beläggningsstatus (UNDERUTILIZED/OPTIMAL/NEAR_FULL/OVERBOOKED)
+  - Total kapacitet vs bokat
+  - Revenue vs Projected Revenue
+  - "Du lämnar X kr på bordet" alerts
+- **Daily Breakdown Table:**
+  - Expandable per vecka
+  - Dag-för-dag analys (beläggning, lediga slots, rekommendationer)
+  - Color-coded status indicators
+  - Optimal slots calculation
+- **AI-Generated Insights:**
+  - WARNING: Överbelastade veckor (risk för stress)
+  - OPPORTUNITY: Underutnyttjade veckor (förlorad intäkt)
+  - INFO: Pattern insights (måndagar vs fredagar)
+  - Actionable recommendations med ekonomisk impact
+- **Summary Dashboard:**
+  - Genomsnittlig beläggning (4 veckor)
+  - Peak vs Lägst utilization
+  - Förväntad intäkt vs Kapacitetsgap
+  - Quick-switch: 2 veckor / 4 veckor view
+- **Dashboard Integration:**
+  - Nytt "Kapacitetsprognos" kort på huvuddashboard
+  - Direct link från dashboard → capacity page
+  - Purple-pink gradient design matching Flow style
+
+**VÄRDE:** 
+- Identifiera underutnyttjade veckor i förväg → Kör kampanjer proaktivt
+- Förhindra överbelastning → Bättre personalplanering
+- Konkret ekonomisk impact: "57,500 kr potential vid 80% beläggning"
+- "Du lämnar X kr på bordet varje månad" visualisering
+
+**Komponenter skapade:**
+- `app/dashboard/capacity/page.tsx` - Huvudsida med state management
+- `components/dashboard/capacity-week-card.tsx` - Veckoöversikt med expand/collapse
+- `components/dashboard/capacity-daily-table.tsx` - Daglig breakdown tabell
+- `components/dashboard/capacity-insights.tsx` - AI insights display
+
+**API Integration:**
+- Använder existing `/api/capacity/forecast` endpoint
+- Parameter: `?weeks=2` eller `?weeks=4`
+- Real-time data från Prisma/Bokadirekt
+
+---
+
 ## 2025-10-13 - META Integration & Enhanced Charts
 
 ### 🚀 Nya Funktioner
