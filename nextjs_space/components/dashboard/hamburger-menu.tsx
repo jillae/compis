@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -52,6 +52,19 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
         </SheetHeader>
         
         <div className="mt-6 space-y-4">
+          {/* AI Actions */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              AI Autopilot
+            </h3>
+            <Link href="/dashboard/actions" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <Sparkles className="h-4 w-4 mr-2" />
+                AI Rekommendationer
+              </Button>
+            </Link>
+          </div>
+
           {/* Staff Management */}
           <div className="space-y-2">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">

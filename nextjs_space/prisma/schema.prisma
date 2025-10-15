@@ -127,6 +127,8 @@ model Clinic {
   staff             Staff[]
   services          Service[]
   bookings          Booking[]
+  pricingRecommendations PricingRecommendation[]
+  staffPerformances StaffPerformance[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -222,6 +224,7 @@ model Staff {
   clinic          Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   bookings        Booking[]
   leaves          StaffLeave[]
+  performances    StaffPerformance[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -258,6 +261,7 @@ model Service {
   
   clinic       Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   bookings     Booking[]
+  pricingRecommendations PricingRecommendation[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -506,6 +510,88 @@ model MetaCampaignMetric {
   @@index([metaCampaignId])
 }
 
+
+// ============================================================================
+// WAVE 3: AI AUTOPILOT & REVENUE OPTIMIZATION
+// ============================================================================
+
+// PricingRecommendation - Dynamic pricing suggestions
+model PricingRecommendation {
+  id                String   @id @default(cuid())
+  clinicId          String
+  serviceId         String
+  currentPrice      Decimal  @db.Decimal(10, 2)
+  recommendedPrice  Decimal  @db.Decimal(10, 2)
+  reasoning         String   @db.Text
+  competitorData    Json?    // Array of {name: string, price: number}
+  demandData        Json     // {currentUtilization: number, historicalDemand: number}
+  expectedImpact    Decimal  @db.Decimal(10, 2) // kr/month
+  status            PricingStatus @default(PENDING)
+  appliedAt         DateTime?
+  dismissedAt       DateTime?
+  dismissReason     String?
+  
+  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  service           Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([clinicId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// StaffPerformance - Weekly performance metrics per staff
+model StaffPerformance {
+  id                String   @id @default(cuid())
+  staffId           String
+  clinicId          String
+  weekStart         DateTime // Monday of the week
+  weekEnd           DateTime // Sunday of the week
+  
+  // Performance metrics
+  utilization       Decimal  @db.Decimal(5, 2) // % (0-100)
+  revenueGenerated  Decimal  @db.Decimal(10, 2)
+  totalBookings     Int
+  completedBookings Int
+  noShowBookings    Int
+  avgTreatmentTime  Int      // minutes
+  avgBookingValue   Decimal  @db.Decimal(10, 2)
+  
+  // Customer satisfaction (if available)
+  customerRating    Decimal? @db.Decimal(3, 2) // 0-5.00
+  reviewCount       Int      @default(0)
+  
+  // Ranking
+  rank              Int?     // Position among all staff
+  totalStaff        Int?     // Total number of staff
+  
+  // Goal tracking
+  goalRevenue       Decimal? @db.Decimal(10, 2)
+  goalProgress      Decimal? @db.Decimal(5, 2) // % (0-100)
+  bonusEarned       Decimal? @db.Decimal(10, 2)
+  
+  staff             Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([staffId, weekStart])
+  @@index([staffId])
+  @@index([clinicId])
+  @@index([weekStart])
+  @@index([utilization])
+  @@index([revenueGenerated])
+}
+
+enum PricingStatus {
+  PENDING
+  APPLIED
+  DISMISSED
+}
 
 // ============================================================================
 // PAYATT-MODULEN: LOYALTY, SMS, CAMPAIGNS (additions)

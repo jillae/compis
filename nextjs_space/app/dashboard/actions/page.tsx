@@ -3,14 +3,29 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ActionCard } from '@/components/intelligence/action-card';
-import { Sparkles, RefreshCw, TrendingUp, Calendar } from 'lucide-react';
-import Link from 'next/link';
-import { BackButton } from '@/components/ui/back-button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  AlertTriangle, 
+  TrendingUp, 
+  Zap, 
+  CheckCircle2,
+  X,
+  RefreshCw,
+  ChevronRight,
+  Sparkles,
+  DollarSign,
+  Target,
+  Clock,
+  Users,
+  Calendar,
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ActionCard } from '@/components/dashboard/action-card';
 
-interface WeeklyAction {
+interface ActionData {
   id: string;
   priority: number;
   title: string;
@@ -19,215 +34,324 @@ interface WeeklyAction {
   description: string;
   reasoning: string;
   status: string;
-  steps: any[];
-  evidence: any[];
-  weekStartDate: string;
+  steps: Array<{
+    description: string;
+    completed: boolean;
+  }>;
+  evidence: Array<{
+    metric: string;
+    currentValue: number;
+    targetValue: number;
+  }>;
+  createdAt: string;
+  completedAt?: string;
+  dismissedAt?: string;
 }
+
+interface StatsData {
+  total: number;
+  pending: number;
+  inProgress: number;
+  completed: number;
+  dismissed: number;
+  totalImpact: number;
+  potentialImpact: number;
+}
+
+const categoryIcons: Record<string, any> = {
+  CAPACITY_OPTIMIZATION: Calendar,
+  PRICING: DollarSign,
+  MARKETING: TrendingUp,
+  SERVICE_MIX: Target,
+  CUSTOMER_RETENTION: Users,
+  STAFFING: Clock,
+};
+
+const categoryColors: Record<string, string> = {
+  CAPACITY_OPTIMIZATION: 'text-blue-600 bg-blue-50',
+  PRICING: 'text-green-600 bg-green-50',
+  MARKETING: 'text-purple-600 bg-purple-50',
+  SERVICE_MIX: 'text-orange-600 bg-orange-50',
+  CUSTOMER_RETENTION: 'text-pink-600 bg-pink-50',
+  STAFFING: 'text-indigo-600 bg-indigo-50',
+};
+
+const priorityLabels: Record<number, { label: string; color: string }> = {
+  1: { label: 'KRITISK', color: 'bg-red-500' },
+  2: { label: 'HÖG', color: 'bg-orange-500' },
+  3: { label: 'MEDEL', color: 'bg-yellow-500' },
+};
 
 export default function ActionsPage() {
   const { data: session } = useSession() || {};
-  const [actions, setActions] = useState<WeeklyAction[]>([]);
+  const [actions, setActions] = useState<ActionData[]>([]);
+  const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [regenerating, setRegenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
-    fetchActions();
+    loadActions();
   }, []);
 
-  const fetchActions = async () => {
+  const loadActions = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/intelligence/actions/weekly');
-      const result = await response.json();
-
-      if (result.success) {
-        setActions(result.data);
-        setError(null);
-      } else {
-        setError(result.error || 'Failed to fetch actions');
+      const response = await fetch('/api/ai/actions/list');
+      const data = await response.json();
+      
+      if (data.success) {
+        setActions(data.actions);
+        setStats(data.stats);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+    } catch (error) {
+      console.error('Error loading actions:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleActionUpdate = async (actionId: string, updates: any) => {
+  const generateRecommendations = async () => {
     try {
-      const response = await fetch('/api/intelligence/actions/weekly', {
+      setGenerating(true);
+      const response = await fetch('/api/ai/recommendations');
+      const data = await response.json();
+      
+      if (data.success) {
+        await loadActions(); // Reload list
+      }
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const updateAction = async (id: string, updates: any) => {
+    try {
+      const response = await fetch(`/api/ai/recommendations/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actionId, ...updates }),
+        body: JSON.stringify(updates),
       });
-
-      const result = await response.json();
       
-      if (result.success) {
-        // Update local state
-        setActions((prev) =>
-          prev.map((action) =>
-            action.id === actionId ? { ...action, ...updates } : action
-          )
-        );
+      if (response.ok) {
+        await loadActions(); // Reload list
       }
-    } catch (err) {
-      console.error('Failed to update action:', err);
+    } catch (error) {
+      console.error('Error updating action:', error);
     }
   };
 
-  const handleRegenerate = async () => {
-    if (!confirm('Detta kommer ta bort nuvarande rekommendationer och generera nya. Fortsätt?')) {
-      return;
-    }
+  const filteredActions = actions.filter(action => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'pending') return action.status === 'PENDING';
+    if (activeTab === 'active') return action.status === 'IN_PROGRESS';
+    if (activeTab === 'completed') return action.status === 'COMPLETED';
+    return true;
+  });
 
-    setRegenerating(true);
-    try {
-      // Delete old actions (you may want to add an API endpoint for this)
-      // For now, we'll just refetch
-      await fetchActions();
-    } finally {
-      setRegenerating(false);
-    }
-  };
-
-  const totalImpact = actions
-    .filter((a) => a.status !== 'DISMISSED')
-    .reduce((sum, a) => sum + a.expectedImpact, 0);
-
-  const completedActions = actions.filter((a) => a.status === 'COMPLETED').length;
+  const criticalActions = filteredActions.filter(a => a.priority === 1);
+  const highActions = filteredActions.filter(a => a.priority === 2);
+  const mediumActions = filteredActions.filter(a => a.priority === 3);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Genererar Rekommendationer...</p>
+        <div className="flex flex-col items-center gap-4">
+          <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-sm text-gray-600">Laddar rekommendationer...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen p-6">
-        <Card className="max-w-md w-full">
-          <CardHeader>
-            <CardTitle className="text-destructive">Fel</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4">{error}</p>
-            <Button onClick={fetchActions}>Försök igen</Button>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <BackButton href="/dashboard" />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRegenerate}
-            disabled={regenerating}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${regenerating ? 'animate-spin' : ''}`} />
-            Regenerera
-          </Button>
+    <div className="container mx-auto p-6 max-w-7xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-blue-600" />
+            AI Rekommendationer
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Proaktiva åtgärder för att maximera din intäkt
+          </p>
         </div>
+        <Button
+          onClick={generateRecommendations}
+          disabled={generating}
+          className="flex items-center gap-2"
+        >
+          {generating ? (
+            <>
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              Genererar...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4" />
+              Uppdatera Rekommendationer
+            </>
+          )}
+        </Button>
+      </div>
 
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-8 text-white">
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-3">
-              <Sparkles className="h-8 w-8" />
-              <h1 className="text-3xl md:text-4xl font-bold">Veckans Prioriteter</h1>
-            </div>
-            <p className="text-lg text-blue-50 mb-4">
-              Datadrivna rekommendationer för att optimera din klinik och öka intäkter
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-6 mt-6">
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="text-sm opacity-90">Total Potential</span>
-                </div>
-                <div className="text-3xl font-bold">
-                  +{totalImpact.toLocaleString('sv-SE')} kr
-                </div>
-              </div>
-
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Calendar className="h-5 w-5" />
-                  <span className="text-sm opacity-90">Denna Vecka</span>
-                </div>
-                <div className="text-3xl font-bold">
-                  {actions.filter((a) => a.status !== 'DISMISSED').length} actions
-                </div>
-              </div>
-
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Sparkles className="h-5 w-5" />
-                  <span className="text-sm opacity-90">Genomförda</span>
-                </div>
-                <div className="text-3xl font-bold">
-                  {completedActions}/{actions.length}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions List */}
-        {actions.length === 0 ? (
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <Sparkles className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Inga rekommendationer än</h3>
-              <p className="text-muted-foreground mb-4">
-                Vi behöver lite mer data för att generera personaliserade rekommendationer.
-              </p>
-              <Link href="/dashboard">
-                <Button>Tillbaka till Dashboard</Button>
-              </Link>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Aktiva Åtgärder</p>
+                  <p className="text-2xl font-bold">{stats.pending + stats.inProgress}</p>
+                </div>
+                <Target className="h-8 w-8 text-blue-600" />
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="space-y-6">
-            {actions
-              .filter((a) => a.status !== 'DISMISSED')
-              .map((action) => (
-                <ActionCard 
-                  key={action.id} 
-                  action={action as any} 
-                  onUpdate={handleActionUpdate}
-                />
-              ))}
-          </div>
-        )}
 
-        {/* Info Card */}
-        <Card className="bg-muted/50">
-          <CardContent className="py-6">
-            <h3 className="font-semibold mb-2">💡 Tips</h3>
-            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-              <li>Nya rekommendationer genereras automatiskt varje måndag</li>
-              <li>Checka av steg allteftersom du genomför dem</li>
-              <li>Förväntad impact är baserad på din historiska data</li>
-              <li>Du kan avfärda rekommendationer som inte passar din klinik</li>
-            </ul>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Slutförda</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
+                </div>
+                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Potentiell Impact</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {Math.round(stats.potentialImpact).toLocaleString('sv-SE')} kr
+                  </p>
+                </div>
+                <DollarSign className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Impact</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {Math.round(stats.totalImpact).toLocaleString('sv-SE')} kr
+                  </p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {actions.length === 0 && (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <Sparkles className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Inga rekommendationer än</h3>
+              <p className="text-gray-600 mb-6">
+                Klicka på "Uppdatera Rekommendationer" för att generera AI-drivna åtgärder
+              </p>
+              <Button onClick={generateRecommendations} disabled={generating}>
+                {generating ? 'Genererar...' : 'Generera Rekommendationer'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
-      </div>
+      )}
+
+      {/* Tabs */}
+      {actions.length > 0 && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList>
+            <TabsTrigger value="all">
+              Alla ({actions.length})
+            </TabsTrigger>
+            <TabsTrigger value="pending">
+              Väntande ({stats?.pending || 0})
+            </TabsTrigger>
+            <TabsTrigger value="active">
+              Pågående ({stats?.inProgress || 0})
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              Slutförda ({stats?.completed || 0})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
+
+      {/* Critical Actions */}
+      {criticalActions.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+            <h2 className="text-xl font-bold">Kritiska Åtgärder</h2>
+            <Badge className="bg-red-500">Prioritet 1</Badge>
+          </div>
+          <div className="space-y-4">
+            {criticalActions.map(action => (
+              <ActionCard
+                key={action.id}
+                action={action}
+                onUpdate={updateAction}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* High Priority Actions */}
+      {highActions.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="h-5 w-5 text-orange-600" />
+            <h2 className="text-xl font-bold">Höga Prioritet</h2>
+            <Badge className="bg-orange-500">Prioritet 2</Badge>
+          </div>
+          <div className="space-y-4">
+            {highActions.map(action => (
+              <ActionCard
+                key={action.id}
+                action={action}
+                onUpdate={updateAction}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Medium Priority Actions */}
+      {mediumActions.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="h-5 w-5 text-yellow-600" />
+            <h2 className="text-xl font-bold">Medel Prioritet</h2>
+            <Badge className="bg-yellow-500">Prioritet 3</Badge>
+          </div>
+          <div className="space-y-4">
+            {mediumActions.map(action => (
+              <ActionCard
+                key={action.id}
+                action={action}
+                onUpdate={updateAction}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
