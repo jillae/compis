@@ -38,25 +38,25 @@ model Session {
 }
 
 model User {
-  id                   String    @id @default(cuid())
-  name                 String?
-  email                String?   @unique
-  emailVerified        DateTime?
-  image                String?
-  password             String?
-  firstName            String?
-  lastName             String?
-  companyName          String?
-  jobTitle             String?
-  role                 UserRole  @default(STAFF)
-  clinicId             String?
-  onboardingStep       Int?      @default(0)
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String?   @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  firstName             String?
+  lastName              String?
+  companyName           String?
+  jobTitle              String?
+  role                  UserRole  @default(STAFF)
+  clinicId              String?
+  onboardingStep        Int?      @default(0)
   onboardingCompletedAt DateTime?
-  clinic               Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
-  accounts             Account[]
-  sessions             Session[]
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  clinic                Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  accounts              Account[]
+  sessions              Session[]
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@index([clinicId])
   @@index([role])
@@ -74,74 +74,79 @@ model VerificationToken {
 
 // Clinic (Salon) - represents a beauty/health clinic using Bokadirekt
 model Clinic {
-  id                String     @id @default(cuid())
-  bokadirektId      String?    @unique // Bokadirekt salon ID
-  bokadirektApiKey  String?    // Each clinic has their own API key
-  name              String
-  description       String?
-  address           String?
-  phone             String?
-  email             String?
-  website           String?
-  tier              SubscriptionTier @default(BASIC)
+  id                 String             @id @default(cuid())
+  bokadirektId       String?            @unique // Bokadirekt salon ID
+  bokadirektApiKey   String? // Each clinic has their own API key
+  name               String
+  description        String?
+  address            String?
+  phone              String?
+  email              String?
+  website            String?
+  tier               SubscriptionTier   @default(BASIC)
   subscriptionStatus SubscriptionStatus @default(TRIAL)
-  trialEndsAt       DateTime?
+  trialEndsAt        DateTime?
   subscriptionEndsAt DateTime?
-  isActive          Boolean    @default(true)
-  
+  isActive           Boolean            @default(true)
+
   // Integration toggles
-  bokadirektEnabled Boolean    @default(true)  // Toggle for Bokadirekt integration
-  metaEnabled       Boolean    @default(false) // Toggle for Meta API integration
-  corexEnabled      Boolean    @default(false) // Toggle for Corex integration (SMS/Communication)
-  dynamicPricingEnabled Boolean @default(false) // Toggle for Dynamic Pricing recommendations
+  bokadirektEnabled         Boolean @default(true) // Toggle for Bokadirekt integration
+  metaEnabled               Boolean @default(false) // Toggle for Meta API integration
+  corexEnabled              Boolean @default(false) // Toggle for Corex integration (SMS/Communication)
+  dynamicPricingEnabled     Boolean @default(false) // Toggle for Dynamic Pricing recommendations
   retentionAutopilotEnabled Boolean @default(false) // Toggle for Retention Autopilot campaigns
-  aiActionsEnabled  Boolean    @default(true)  // Toggle for AI Action Recommendations
-  
+  aiActionsEnabled          Boolean @default(true) // Toggle for AI Action Recommendations
+
   // Meta Marketing API credentials
-  metaAccessToken   String?    // Meta Marketing API access token
-  metaAdAccountId   String?    // Meta Ad Account ID (act_XXXXXXXXX)
-  metaPixelId       String?    // Meta Pixel ID for Conversions API
-  metaAppId         String?    // Meta App ID
-  metaAppSecret     String?    // Meta App Secret
-  
+  metaAccessToken String? // Meta Marketing API access token
+  metaAdAccountId String? // Meta Ad Account ID (act_XXXXXXXXX)
+  metaPixelId     String? // Meta Pixel ID for Conversions API
+  metaAppId       String? // Meta App ID
+  metaAppSecret   String? // Meta App Secret
+
   // Meta optimization settings
-  metaTargetCPL     Decimal?   @db.Decimal(8, 2) // Target Cost Per Lead
-  metaTargetROAS    Decimal?   @db.Decimal(5, 2) // Target Return on Ad Spend
-  metaCapacityMin   Int?       @default(75) // Min capacity % before reducing budget
-  metaCapacityMax   Int?       @default(90) // Max capacity % before increasing budget
-  
+  metaTargetCPL   Decimal? @db.Decimal(8, 2) // Target Cost Per Lead
+  metaTargetROAS  Decimal? @db.Decimal(5, 2) // Target Return on Ad Spend
+  metaCapacityMin Int?     @default(75) // Min capacity % before reducing budget
+  metaCapacityMax Int?     @default(90) // Max capacity % before increasing budget
 
-  loyaltyPrograms       LoyaltyProgram[]
-  customerStatuses      CustomerStatus[]
-  campaigns             Campaign[]
-  messages              Message[]
-  redemptions           Redemption[]
-  events                Event[]
-  optOuts               OptOut[]
-  importJobs            ImportJob[]
-  smsProviderConfigs    SMSProviderConfig[]
-  smsCampaigns          SMSCampaign[]
-  loyaltyTransactions   LoyaltyTransaction[]
-  smsLogs               SMSLog[]
-  smsRateLimit          SMSRateLimit?
-  smsTemplates          SMSTemplate[]
+  loyaltyPrograms     LoyaltyProgram[]
+  customerStatuses    CustomerStatus[]
+  campaigns           Campaign[]
+  messages            Message[]
+  redemptions         Redemption[]
+  events              Event[]
+  optOuts             OptOut[]
+  importJobs          ImportJob[]
+  smsProviderConfigs  SMSProviderConfig[]
+  smsCampaigns        SMSCampaign[]
+  loyaltyTransactions LoyaltyTransaction[]
+  smsLogs             SMSLog[]
+  smsRateLimit        SMSRateLimit?
+  smsTemplates        SMSTemplate[]
 
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  
-  users             User[]
-  customers         Customer[]
-  staff             Staff[]
-  services          Service[]
-  bookings          Booking[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users                  User[]
+  customers              Customer[]
+  staff                  Staff[]
+  services               Service[]
+  bookings               Booking[]
   pricingRecommendations PricingRecommendation[]
-  staffPerformances StaffPerformance[]
-  
+  staffPerformances      StaffPerformance[]
+
   // Billing relations (Wave 4D)
-  subscription      Subscription?
-  invoices          Invoice[]
-  payments          Payment[]
-  billingAlerts     BillingAlert[]
+  subscription  Subscription?
+  invoices      Invoice[]
+  payments      Payment[]
+  billingAlerts BillingAlert[]
+
+  // Customer Intelligence & Tags (Wave 4)
+  tags                  Tag[]
+  segments              CustomerSegment[]
+  newsletters           Newsletter[]
+  newsletterSubscribers NewsletterSubscriber[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -150,68 +155,69 @@ model Clinic {
 }
 
 model Customer {
-  id             String    @id @default(cuid())
-  bokadirektId   String?   @unique // Bokadirekt customer ID
-  clinicId       String?
-  name           String?
-  phone          String?
-  email          String?
-  tags           String[]  @default([])
-  dateOfBirth    DateTime?
-  city           String?
-  postalCode     String?
-  firstName      String?
-  lastName       String?
-  firstVisit     DateTime?
-  totalBookings  Int       @default(0)
-  noShowCount    Int       @default(0)
-  totalSpent     Decimal   @default(0) @db.Decimal(10, 2)
+  id            String    @id @default(cuid())
+  bokadirektId  String?   @unique // Bokadirekt customer ID
+  clinicId      String?
+  name          String?
+  phone         String?
+  email         String?
+  tags          String[]  @default([])
+  dateOfBirth   DateTime?
+  city          String?
+  postalCode    String?
+  firstName     String?
+  lastName      String?
+  firstVisit    DateTime?
+  totalBookings Int       @default(0)
+  noShowCount   Int       @default(0)
+  totalSpent    Decimal   @default(0) @db.Decimal(10, 2)
 
   // PayAtt additions
-  source            String          @default("bokadirekt")
-  sourceId          String?
-  importedAt        DateTime?
-  lastSyncAt        DateTime?
-  customerStatusId  String?
-  customerStatus    CustomerStatus? @relation(fields: [customerStatusId], references: [id])
-  roles             String[]        @default([])
-  consentSms        Boolean         @default(false)
-  consentEmail      Boolean         @default(false)
-  consentMarketing  Boolean         @default(false)
-  consentedAt       DateTime?
-  paidBy            String?
-  canBookFor        String[]        @default([])
-  hasResponsible    String?
-  isResponsibleFor  String[]        @default([])
-  isCompany         Boolean         @default(false)
-  companyName       String?
-  profileImage      String?
-  notes             String?         @db.Text
-  totalVisits       Int             @default(0)
-  firstVisitAt      DateTime?
-  lastVisitAt       DateTime?
-  averageSpend      Decimal?        @db.Decimal(10, 2)
-  lifetimeValue     Decimal         @default(0) @db.Decimal(10, 2)
-  churnRisk         String?
-  churnScore        Decimal?        @db.Decimal(3, 2)
-  predictedChurnDate DateTime?
-  isActive          Boolean         @default(true)
-  deactivatedAt     DateTime?
-  deactivationReason String?
-  loyaltyCards      LoyaltyCard[]
-  loyaltyTransactions LoyaltyTransaction[]
-  messages          Message[]
-  redemptions       Redemption[]
-  events            Event[]
-  optOuts           OptOut[]
-  smsLogs           SMSLog[]
+  source                  String                           @default("bokadirekt")
+  sourceId                String?
+  importedAt              DateTime?
+  lastSyncAt              DateTime?
+  customerStatusId        String?
+  customerStatus          CustomerStatus?                  @relation(fields: [customerStatusId], references: [id])
+  roles                   String[]                         @default([])
+  consentSms              Boolean                          @default(false)
+  consentEmail            Boolean                          @default(false)
+  consentMarketing        Boolean                          @default(false)
+  consentedAt             DateTime?
+  paidBy                  String?
+  canBookFor              String[]                         @default([])
+  hasResponsible          String?
+  isResponsibleFor        String[]                         @default([])
+  isCompany               Boolean                          @default(false)
+  companyName             String?
+  profileImage            String?
+  notes                   String?                          @db.Text
+  totalVisits             Int                              @default(0)
+  firstVisitAt            DateTime?
+  lastVisitAt             DateTime?
+  averageSpend            Decimal?                         @db.Decimal(10, 2)
+  lifetimeValue           Decimal                          @default(0) @db.Decimal(10, 2)
+  churnRisk               String?
+  churnScore              Decimal?                         @db.Decimal(3, 2)
+  predictedChurnDate      DateTime?
+  isActive                Boolean                          @default(true)
+  deactivatedAt           DateTime?
+  deactivationReason      String?
+  loyaltyCards            LoyaltyCard[]
+  loyaltyTransactions     LoyaltyTransaction[]
+  messages                Message[]
+  redemptions             Redemption[]
+  events                  Event[]
+  optOuts                 OptOut[]
+  smsLogs                 SMSLog[]
   communicationPreference CustomerCommunicationPreference?
+  customerTags            CustomerTag[]
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  
-  clinic         Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
-  bookings       Booking[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clinic   Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  bookings Booking[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -221,25 +227,25 @@ model Customer {
 }
 
 model Staff {
-  id              String    @id @default(cuid())
-  bokadirektId    String?   @unique // Bokadirekt resource ID
+  id              String   @id @default(cuid())
+  bokadirektId    String?  @unique // Bokadirekt resource ID
   clinicId        String?
   name            String
   email           String?
   phone           String?
-  role            String?   // E.g., "Hudterapeut", "Massageterapeut"
-  specializations String[]  @default([])
+  role            String? // E.g., "Hudterapeut", "Massageterapeut"
+  specializations String[] @default([])
   specialization  String?
-  hourlyRate      Decimal?  @db.Decimal(8, 2)
-  weeklyHours     Int?      // Antal arbetstimmar per vecka
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  clinic          Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
-  bookings        Booking[]
-  leaves          StaffLeave[]
-  performances    StaffPerformance[]
+  hourlyRate      Decimal? @db.Decimal(8, 2)
+  weeklyHours     Int? // Antal arbetstimmar per vecka
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  clinic       Clinic?            @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  bookings     Booking[]
+  leaves       StaffLeave[]
+  performances StaffPerformance[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -262,20 +268,20 @@ model Room {
 }
 
 model Service {
-  id           String    @id @default(cuid())
-  bokadirektId String?   @unique // Bokadirekt service ID
+  id           String   @id @default(cuid())
+  bokadirektId String?  @unique // Bokadirekt service ID
   clinicId     String?
   name         String
   description  String?
-  category     String    @default("general")
-  price        Decimal   @default(0) @db.Decimal(10, 2)
-  duration     Int       @default(60) // Duration in minutes
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  
-  clinic       Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
-  bookings     Booking[]
+  category     String   @default("general")
+  price        Decimal  @default(0) @db.Decimal(10, 2)
+  duration     Int      @default(60) // Duration in minutes
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clinic                 Clinic?                 @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  bookings               Booking[]
   pricingRecommendations PricingRecommendation[]
 
   @@index([bokadirektId])
@@ -296,12 +302,12 @@ model Booking {
   scheduledTime   DateTime
   startTime       DateTime?
   endTime         DateTime?
-  duration        Int?          // Duration in minutes
+  duration        Int? // Duration in minutes
   price           Decimal       @db.Decimal(8, 2)
   revenue         Decimal       @default(0) @db.Decimal(10, 2)
   cost            Decimal       @default(0) @db.Decimal(10, 2)
-  source          String?       // 'bokadirekt', 'bokadirekt_online', 'manual', etc.
-  bookingChannel  String?       // 'online', 'phone', 'walk-in', etc.
+  source          String? // 'bokadirekt', 'bokadirekt_online', 'manual', etc.
+  bookingChannel  String? // 'online', 'phone', 'walk-in', etc.
   bookedAt        DateTime      @default(now())
   status          BookingStatus @default(SCHEDULED)
   isOnlineBooking Boolean       @default(false)
@@ -309,7 +315,7 @@ model Booking {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  clinic   Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  clinic   Clinic?  @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   staff    Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
   service  Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
@@ -330,16 +336,16 @@ model Booking {
 }
 
 model ImportLog {
-  id           String            @id @default(cuid())
-  filename     String
-  status       ImportStatus      @default(PROCESSING)
-  totalRows    Int               @default(0)
-  successRows  Int               @default(0)
-  errorRows    Int               @default(0)
-  errors       String?           @db.Text
-  metadata     Json?             // Store column mappings, import settings
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id          String       @id @default(cuid())
+  filename    String
+  status      ImportStatus @default(PROCESSING)
+  totalRows   Int          @default(0)
+  successRows Int          @default(0)
+  errorRows   Int          @default(0)
+  errors      String?      @db.Text
+  metadata    Json? // Store column mappings, import settings
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([status])
   @@index([createdAt])
@@ -347,14 +353,14 @@ model ImportLog {
 
 // AI Insight Dismissals - tracks which insights users have acknowledged
 model InsightDismissal {
-  id         String   @id @default(cuid())
-  userId     String
-  clinicId   String
-  insightKey String   // E.g., "revenue_recovery_opportunity"
+  id          String   @id @default(cuid())
+  userId      String
+  clinicId    String
+  insightKey  String // E.g., "revenue_recovery_opportunity"
   insightDate DateTime // Date the insight was generated for
   dismissedAt DateTime @default(now())
-  notes      String?  // Optional notes from user
-  
+  notes       String? // Optional notes from user
+
   @@unique([userId, clinicId, insightKey, insightDate])
   @@index([userId])
   @@index([clinicId])
@@ -363,18 +369,18 @@ model InsightDismissal {
 
 // Staff Leave/Vacation tracking
 model StaffLeave {
-  id          String   @id @default(cuid())
-  staffId     String
-  startDate   DateTime
-  endDate     DateTime
-  leaveType   LeaveType
-  reason      String?
-  status      LeaveStatus @default(APPROVED) // Most clinics auto-approve
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  
+  id        String      @id @default(cuid())
+  staffId   String
+  startDate DateTime
+  endDate   DateTime
+  leaveType LeaveType
+  reason    String?
+  status    LeaveStatus @default(APPROVED) // Most clinics auto-approve
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
   @@index([staffId])
   @@index([startDate])
   @@index([endDate])
@@ -382,25 +388,25 @@ model StaffLeave {
 
 // Enums
 enum UserRole {
-  SUPER_ADMIN      // System owner - can see all clinics
-  ADMIN            // Clinic owner - can see their clinic
-  STAFF            // Staff member - limited access
-  CLINIC_ADMIN     // Legacy - same as ADMIN
-  CLINIC_STAFF     // Legacy - same as STAFF
+  SUPER_ADMIN // System owner - can see all clinics
+  ADMIN // Clinic owner - can see their clinic
+  STAFF // Staff member - limited access
+  CLINIC_ADMIN // Legacy - same as ADMIN
+  CLINIC_STAFF // Legacy - same as STAFF
 }
 
 enum SubscriptionTier {
-  BASIC            // 499 SEK/month
-  PROFESSIONAL     // 1499 SEK/month
-  ENTERPRISE       // 2999+ SEK/month
+  BASIC // 499 SEK/month
+  PROFESSIONAL // 1499 SEK/month
+  ENTERPRISE // 2999+ SEK/month
 }
 
 enum SubscriptionStatus {
-  TRIAL            // 14-day free trial
-  ACTIVE           // Paying customer
-  PAST_DUE         // Payment failed
-  CANCELLED        // Subscription cancelled
-  EXPIRED          // Trial/subscription expired
+  TRIAL // 14-day free trial
+  ACTIVE // Paying customer
+  PAST_DUE // Payment failed
+  CANCELLED // Subscription cancelled
+  EXPIRED // Trial/subscription expired
 }
 
 enum BookingStatus {
@@ -411,9 +417,9 @@ enum BookingStatus {
   NO_SHOW
   CANCELLED
   RESCHEDULED
-  completed    // lowercase for Bokadirekt compatibility
-  cancelled    // lowercase for Bokadirekt compatibility
-  no_show      // lowercase for Bokadirekt compatibility
+  completed // lowercase for Bokadirekt compatibility
+  cancelled // lowercase for Bokadirekt compatibility
+  no_show // lowercase for Bokadirekt compatibility
 }
 
 enum ImportStatus {
@@ -424,44 +430,44 @@ enum ImportStatus {
 }
 
 enum LeaveType {
-  VACATION      // Semester
-  SICK_LEAVE    // Sjukfrånvaro
-  PERSONAL      // Personlig ledighet
-  UNPAID        // Obetald ledighet
-  PARENTAL      // Föräldraledighet
-  OTHER         // Annat
+  VACATION // Semester
+  SICK_LEAVE // Sjukfrånvaro
+  PERSONAL // Personlig ledighet
+  UNPAID // Obetald ledighet
+  PARENTAL // Föräldraledighet
+  OTHER // Annat
 }
 
 enum LeaveStatus {
-  PENDING       // Väntar på godkännande
-  APPROVED      // Godkänd
-  REJECTED      // Avvisad
-  CANCELLED     // Avbruten
+  PENDING // Väntar på godkännande
+  APPROVED // Godkänd
+  REJECTED // Avvisad
+  CANCELLED // Avbruten
 }
 
 // Weekly Action - AI-generated proactive recommendations
 model WeeklyAction {
-  id              String       @id @default(cuid())
-  clinicId        String
-  weekStartDate   DateTime     // Monday of the week this action is for
-  priority        Int          // 1 = highest, 2 = medium, 3 = low
-  title           String
-  category        ActionCategory
-  expectedImpact  Decimal      @db.Decimal(10, 2) // Expected revenue impact in kr
-  description     String       @db.Text
-  reasoning       String       @db.Text // Why this is important
-  status          ActionStatus @default(PENDING)
-  completedAt     DateTime?
-  dismissedAt     DateTime?
-  dismissReason   String?
-  
+  id             String         @id @default(cuid())
+  clinicId       String
+  weekStartDate  DateTime // Monday of the week this action is for
+  priority       Int // 1 = highest, 2 = medium, 3 = low
+  title          String
+  category       ActionCategory
+  expectedImpact Decimal        @db.Decimal(10, 2) // Expected revenue impact in kr
+  description    String         @db.Text
+  reasoning      String         @db.Text // Why this is important
+  status         ActionStatus   @default(PENDING)
+  completedAt    DateTime?
+  dismissedAt    DateTime?
+  dismissReason  String?
+
   // JSON arrays for steps and evidence
-  steps           Json         // Array of {description: string, completed: boolean}
-  evidence        Json         // Array of {metric: string, currentValue: number, targetValue: number}
-  
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  
+  steps    Json // Array of {description: string, completed: boolean}
+  evidence Json // Array of {metric: string, currentValue: number, targetValue: number}
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([weekStartDate])
   @@index([priority])
@@ -470,61 +476,60 @@ model WeeklyAction {
 }
 
 enum ActionCategory {
-  CAPACITY_OPTIMIZATION  // E.g., "Öka kapacitet torsdagar"
-  PRICING               // E.g., "Justera priser på underpresterande tjänster"
-  MARKETING             // E.g., "Kampanj för att fylla lediga tider"
-  SERVICE_MIX           // E.g., "Öka laser, minska basbehandling"
-  CUSTOMER_RETENTION    // E.g., "Win-back campaign för inaktiva kunder"
-  STAFFING              // E.g., "Optimera schemaläggning"
+  CAPACITY_OPTIMIZATION // E.g., "Öka kapacitet torsdagar"
+  PRICING // E.g., "Justera priser på underpresterande tjänster"
+  MARKETING // E.g., "Kampanj för att fylla lediga tider"
+  SERVICE_MIX // E.g., "Öka laser, minska basbehandling"
+  CUSTOMER_RETENTION // E.g., "Win-back campaign för inaktiva kunder"
+  STAFFING // E.g., "Optimera schemaläggning"
 }
 
 enum ActionStatus {
-  PENDING      // Väntar på att användaren ska agera
-  IN_PROGRESS  // Användaren har påbörjat
-  COMPLETED    // Alla steg är klara
-  DISMISSED    // Användaren har valt att inte göra detta
+  PENDING // Väntar på att användaren ska agera
+  IN_PROGRESS // Användaren har påbörjat
+  COMPLETED // Alla steg är klara
+  DISMISSED // Användaren har valt att inte göra detta
 }
 
 // Meta Campaign Metrics - synced from Meta Marketing API
 model MetaCampaignMetric {
-  id                  String   @id @default(cuid())
-  clinicId            String
-  metaCampaignId      String   // Meta campaign ID
-  metaCampaignName    String
-  date                DateTime // Date for this metric snapshot
-  
+  id               String   @id @default(cuid())
+  clinicId         String
+  metaCampaignId   String // Meta campaign ID
+  metaCampaignName String
+  date             DateTime // Date for this metric snapshot
+
   // Core metrics
-  spend               Decimal  @db.Decimal(10, 2)
-  impressions         Int      @default(0)
-  clicks              Int      @default(0)
-  leads               Int      @default(0)
-  
+  spend       Decimal @db.Decimal(10, 2)
+  impressions Int     @default(0)
+  clicks      Int     @default(0)
+  leads       Int     @default(0)
+
   // Calculated metrics
-  cpm                 Decimal  @db.Decimal(10, 2) // Cost per 1000 impressions
-  cpc                 Decimal  @db.Decimal(10, 2) // Cost per click
-  cpl                 Decimal  @db.Decimal(10, 2) // Cost per lead
-  ctr                 Decimal  @db.Decimal(5, 4)  // Click-through rate
-  
+  cpm Decimal @db.Decimal(10, 2) // Cost per 1000 impressions
+  cpc Decimal @db.Decimal(10, 2) // Cost per click
+  cpl Decimal @db.Decimal(10, 2) // Cost per lead
+  ctr Decimal @db.Decimal(5, 4) // Click-through rate
+
   // Quality metrics
-  qualityRanking      String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
-  conversionRanking   String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
-  engagementRanking   String?  // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
-  
+  qualityRanking    String? // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  conversionRanking String? // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+  engagementRanking String? // 'ABOVE_AVERAGE', 'AVERAGE', 'BELOW_AVERAGE'
+
   // Lead quality (tracked via Conversions API)
-  qualityLeads        Int      @default(0) // Leads that became appointments
-  showUpRate          Decimal? @db.Decimal(5, 4) // % of appointments that showed up
-  revenue             Decimal  @db.Decimal(10, 2) // Revenue generated from these leads
-  roas                Decimal? @db.Decimal(5, 2) // Return on Ad Spend
-  
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  
+  qualityLeads Int      @default(0) // Leads that became appointments
+  showUpRate   Decimal? @db.Decimal(5, 4) // % of appointments that showed up
+  revenue      Decimal  @db.Decimal(10, 2) // Revenue generated from these leads
+  roas         Decimal? @db.Decimal(5, 2) // Return on Ad Spend
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([clinicId, metaCampaignId, date])
   @@index([clinicId])
   @@index([date])
   @@index([metaCampaignId])
 }
-
 
 // ============================================================================
 // WAVE 3: AI AUTOPILOT & REVENUE OPTIMIZATION
@@ -532,26 +537,26 @@ model MetaCampaignMetric {
 
 // PricingRecommendation - Dynamic pricing suggestions
 model PricingRecommendation {
-  id                String   @id @default(cuid())
-  clinicId          String
-  serviceId         String
-  currentPrice      Decimal  @db.Decimal(10, 2)
-  recommendedPrice  Decimal  @db.Decimal(10, 2)
-  reasoning         String   @db.Text
-  competitorData    Json?    // Array of {name: string, price: number}
-  demandData        Json     // {currentUtilization: number, historicalDemand: number}
-  expectedImpact    Decimal  @db.Decimal(10, 2) // kr/month
-  status            PricingStatus @default(PENDING)
-  appliedAt         DateTime?
-  dismissedAt       DateTime?
-  dismissReason     String?
-  
-  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  service           Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  id               String        @id @default(cuid())
+  clinicId         String
+  serviceId        String
+  currentPrice     Decimal       @db.Decimal(10, 2)
+  recommendedPrice Decimal       @db.Decimal(10, 2)
+  reasoning        String        @db.Text
+  competitorData   Json? // Array of {name: string, price: number}
+  demandData       Json // {currentUtilization: number, historicalDemand: number}
+  expectedImpact   Decimal       @db.Decimal(10, 2) // kr/month
+  status           PricingStatus @default(PENDING)
+  appliedAt        DateTime?
+  dismissedAt      DateTime?
+  dismissReason    String?
+
+  clinic  Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([serviceId])
   @@index([status])
@@ -560,40 +565,40 @@ model PricingRecommendation {
 
 // StaffPerformance - Weekly performance metrics per staff
 model StaffPerformance {
-  id                String   @id @default(cuid())
-  staffId           String
-  clinicId          String
-  weekStart         DateTime // Monday of the week
-  weekEnd           DateTime // Sunday of the week
-  
+  id        String   @id @default(cuid())
+  staffId   String
+  clinicId  String
+  weekStart DateTime // Monday of the week
+  weekEnd   DateTime // Sunday of the week
+
   // Performance metrics
-  utilization       Decimal  @db.Decimal(5, 2) // % (0-100)
-  revenueGenerated  Decimal  @db.Decimal(10, 2)
+  utilization       Decimal @db.Decimal(5, 2) // % (0-100)
+  revenueGenerated  Decimal @db.Decimal(10, 2)
   totalBookings     Int
   completedBookings Int
   noShowBookings    Int
-  avgTreatmentTime  Int      // minutes
-  avgBookingValue   Decimal  @db.Decimal(10, 2)
-  
+  avgTreatmentTime  Int // minutes
+  avgBookingValue   Decimal @db.Decimal(10, 2)
+
   // Customer satisfaction (if available)
-  customerRating    Decimal? @db.Decimal(3, 2) // 0-5.00
-  reviewCount       Int      @default(0)
-  
+  customerRating Decimal? @db.Decimal(3, 2) // 0-5.00
+  reviewCount    Int      @default(0)
+
   // Ranking
-  rank              Int?     // Position among all staff
-  totalStaff        Int?     // Total number of staff
-  
+  rank       Int? // Position among all staff
+  totalStaff Int? // Total number of staff
+
   // Goal tracking
-  goalRevenue       Decimal? @db.Decimal(10, 2)
-  goalProgress      Decimal? @db.Decimal(5, 2) // % (0-100)
-  bonusEarned       Decimal? @db.Decimal(10, 2)
-  
-  staff             Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  clinic            Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  goalRevenue  Decimal? @db.Decimal(10, 2)
+  goalProgress Decimal? @db.Decimal(5, 2) // % (0-100)
+  bonusEarned  Decimal? @db.Decimal(10, 2)
+
+  staff  Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([staffId, weekStart])
   @@index([staffId])
   @@index([clinicId])
@@ -609,46 +614,46 @@ enum PricingStatus {
 }
 
 enum InvoiceStatus {
-  DRAFT            // Being prepared
-  OPEN             // Sent to customer, awaiting payment
-  PAID             // Successfully paid
-  VOID             // Cancelled
-  UNCOLLECTIBLE    // Marked as uncollectible
-  OVERDUE          // Past due date
+  DRAFT // Being prepared
+  OPEN // Sent to customer, awaiting payment
+  PAID // Successfully paid
+  VOID // Cancelled
+  UNCOLLECTIBLE // Marked as uncollectible
+  OVERDUE // Past due date
 }
 
 enum PaymentStatus {
-  PENDING          // Payment initiated
-  PROCESSING       // Being processed
-  SUCCEEDED        // Successfully paid
-  FAILED           // Payment failed
-  CANCELLED        // Payment cancelled
-  REFUNDED         // Payment refunded
+  PENDING // Payment initiated
+  PROCESSING // Being processed
+  SUCCEEDED // Successfully paid
+  FAILED // Payment failed
+  CANCELLED // Payment cancelled
+  REFUNDED // Payment refunded
 }
 
 enum PaymentMethod {
-  CARD             // Credit/debit card (Stripe)
-  SWISH            // Swish mobile payment
-  BANK_TRANSFER    // Manual bank transfer
-  INVOICE          // Pay by invoice (NET 30)
-  OTHER            // Other methods
+  CARD // Credit/debit card (Stripe)
+  SWISH // Swish mobile payment
+  BANK_TRANSFER // Manual bank transfer
+  INVOICE // Pay by invoice (NET 30)
+  OTHER // Other methods
 }
 
 enum BillingAlertType {
-  TRIAL_EXPIRING   // Trial ending soon
-  TRIAL_EXPIRED    // Trial has ended
-  PAYMENT_FAILED   // Payment attempt failed
-  INVOICE_OVERDUE  // Invoice past due
-  USAGE_LIMIT      // Approaching usage limit
-  CARD_EXPIRING    // Payment card expiring soon
+  TRIAL_EXPIRING // Trial ending soon
+  TRIAL_EXPIRED // Trial has ended
+  PAYMENT_FAILED // Payment attempt failed
+  INVOICE_OVERDUE // Invoice past due
+  USAGE_LIMIT // Approaching usage limit
+  CARD_EXPIRING // Payment card expiring soon
   SUBSCRIPTION_CANCELLED // Subscription cancelled
 }
 
 enum AlertSeverity {
-  INFO             // Informational
-  WARNING          // Needs attention
-  ERROR            // Requires immediate action
-  CRITICAL         // Service at risk
+  INFO // Informational
+  WARNING // Needs attention
+  ERROR // Requires immediate action
+  CRITICAL // Service at risk
 }
 
 // ============================================================================
@@ -661,174 +666,174 @@ enum AlertSeverity {
 
 // CustomerStatus - från Zoezi (Stammis, Terminare, Dansare)
 model CustomerStatus {
-  id          String     @id @default(cuid())
-  sourceId    String?    // Original ID från Zoezi (2, 3, 4)
-  name        String     // "Stammis", "Terminare", "Dansare"
+  id          String  @id @default(cuid())
+  sourceId    String? // Original ID från Zoezi (2, 3, 4)
+  name        String // "Stammis", "Terminare", "Dansare"
   description String?
-  color       String?    // Hex color för UI
-  isActive    Boolean    @default(true)
-  
-  clinicId    String
-  clinic      Clinic     @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  customers   Customer[]
-  
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  
-  @@index([clinicId])
+  color       String? // Hex color för UI
+  isActive    Boolean @default(true)
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  customers Customer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([clinicId, sourceId])
+  @@index([clinicId])
 }
 
 // LoyaltyProgram - Stämpelkortsprogram
 model LoyaltyProgram {
-  id              String          @id @default(cuid())
-  name            String
-  description     String?         @db.Text
-  code            String?         // Hemlig kod för kunder att registrera sig
-  
+  id          String  @id @default(cuid())
+  name        String
+  description String? @db.Text
+  code        String? // Hemlig kod för kunder att registrera sig
+
   // Rules (JSON för flexibilitet)
-  earnRule        Json            // { type: "per_booking", value: 1, minSpend: 500 }
-  redeemRule      Json            // { 10: "free_addon", 20: "discount_20pct" }
-  tierRules       Json?           // { bronze: 0, silver: 50, gold: 100 }
-  
+  earnRule   Json // { type: "per_booking", value: 1, minSpend: 500 }
+  redeemRule Json // { 10: "free_addon", 20: "discount_20pct" }
+  tierRules  Json? // { bronze: 0, silver: 50, gold: 100 }
+
   // Validity
-  startDate       DateTime?
-  endDate         DateTime?
-  validDays       Int[]          // [1,2,3,4,5] = Mon-Fri
-  validHours      String?         // "09:00-17:00"
-  isRecurring     Boolean         @default(true) // Engångskort vs pågående
-  
+  startDate   DateTime?
+  endDate     DateTime?
+  validDays   Int[] // [1,2,3,4,5] = Mon-Fri
+  validHours  String? // "09:00-17:00"
+  isRecurring Boolean   @default(true) // Engångskort vs pågående
+
   // Expiry
-  stampsExpireDays Int?           // Stämplar går ut efter X dagar
+  stampsExpireDays Int? // Stämplar går ut efter X dagar
   pointsExpireDays Int?
-  
+
   // Design
   backgroundColor String?
   logoUrl         String?
-  
+
   // Settings
-  welcomeSms      String?         @db.Text
-  reminderSms     String?         @db.Text
-  sendWelcomeSms  Boolean         @default(false)
-  
+  welcomeSms     String? @db.Text
+  reminderSms    String? @db.Text
+  sendWelcomeSms Boolean @default(false)
+
   // Social media
-  facebookUrl     String?
-  instagramUrl    String?
-  
+  facebookUrl  String?
+  instagramUrl String?
+
   // Status
-  isActive        Boolean         @default(true)
-  isDraft         Boolean         @default(true)
-  
+  isActive Boolean @default(true)
+  isDraft  Boolean @default(true)
+
   // Relations
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  loyaltyCards    LoyaltyCard[]
-  rewards         Reward[]
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  loyaltyCards LoyaltyCard[]
+  rewards      Reward[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([clinicId, code])
   @@index([clinicId])
   @@index([isActive])
-  @@unique([clinicId, code])
 }
 
 // LoyaltyCard - Kundspecifikt stämpelkort
 model LoyaltyCard {
-  id              String          @id @default(cuid())
-  customerId      String
-  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
-  programId       String
-  program         LoyaltyProgram  @relation(fields: [programId], references: [id], onDelete: Cascade)
-  
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  programId String
+  program   LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
   // Points & stamps
-  stamps          Int             @default(0)
-  points          Int             @default(0)
-  level           String          @default("bronze") // "bronze" | "silver" | "gold"
-  
+  stamps Int    @default(0)
+  points Int    @default(0)
+  level  String @default("bronze") // "bronze" | "silver" | "gold"
+
   // Expiry
-  expiresAt       DateTime?
-  lastEarnedAt    DateTime?
-  
+  expiresAt    DateTime?
+  lastEarnedAt DateTime?
+
   // Status
-  isActive        Boolean         @default(true)
-  activatedAt     DateTime        @default(now())
-  deactivatedAt   DateTime?
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  isActive      Boolean   @default(true)
+  activatedAt   DateTime  @default(now())
+  deactivatedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([customerId, programId])
   @@index([customerId])
   @@index([programId])
   @@index([isActive])
-  @@unique([customerId, programId])
 }
 
 // Campaign - SMS/Email-kampanjer
 model Campaign {
-  id                String          @id @default(cuid())
-  name              String
-  description       String?         @db.Text
-  
+  id          String  @id @default(cuid())
+  name        String
+  description String? @db.Text
+
   // Channel
-  channel           String          @default("sms") // "sms" | "email" | "push" | "whatsapp"
-  
+  channel String @default("sms") // "sms" | "email" | "push" | "whatsapp"
+
   // Template
-  templateId        String?
-  subject           String?         // För email
-  body              String          @db.Text
-  
+  templateId String?
+  subject    String? // För email
+  body       String  @db.Text
+
   // Segmentation
-  segmentQuery      Json            // { tags: ["high-ltv"], stampsMin: 5, churnRisk: "high" }
-  estimatedReach    Int?            // Antal mottagare vid skapande
-  actualReach       Int?            // Faktiskt antal skickade
-  
+  segmentQuery   Json // { tags: ["high-ltv"], stampsMin: 5, churnRisk: "high" }
+  estimatedReach Int? // Antal mottagare vid skapande
+  actualReach    Int? // Faktiskt antal skickade
+
   // Scheduling
-  scheduleType      String          @default("immediate") // "immediate" | "scheduled" | "recurring"
-  scheduleAt        DateTime?
-  recurringRule     Json?           // { frequency: "weekly", dayOfWeek: 4, hour: 18 }
-  
+  scheduleType  String    @default("immediate") // "immediate" | "scheduled" | "recurring"
+  scheduleAt    DateTime?
+  recurringRule Json? // { frequency: "weekly", dayOfWeek: 4, hour: 18 }
+
   // Goal
-  goal              String?         // "retention" | "reactivation" | "promotion" | "capacity_fill"
-  category          String?         // "Uppmuntra återbesök", "Reaktivera inaktiva", etc.
-  
+  goal     String? // "retention" | "reactivation" | "promotion" | "capacity_fill"
+  category String? // "Uppmuntra återbesök", "Reaktivera inaktiva", etc.
+
   // Status
-  status            String          @default("draft") // "draft" | "scheduled" | "sending" | "sent" | "cancelled" | "failed"
-  
+  status String @default("draft") // "draft" | "scheduled" | "sending" | "sent" | "cancelled" | "failed"
+
   // Stats
-  sentCount         Int             @default(0)
-  deliveredCount    Int             @default(0)
-  failedCount       Int             @default(0)
-  clickedCount      Int             @default(0)
-  redeemedCount     Int             @default(0)
-  optOutCount       Int             @default(0)
-  
+  sentCount      Int @default(0)
+  deliveredCount Int @default(0)
+  failedCount    Int @default(0)
+  clickedCount   Int @default(0)
+  redeemedCount  Int @default(0)
+  optOutCount    Int @default(0)
+
   // Cost & ROI
-  costSEK           Float?
-  revenueSEK        Float?          // Tracked incremental revenue
-  roas              Float?          // Return on Ad Spend
-  
+  costSEK    Float?
+  revenueSEK Float? // Tracked incremental revenue
+  roas       Float? // Return on Ad Spend
+
   // AI-generated
-  isAiGenerated     Boolean         @default(false)
-  aiPrompt          String?         @db.Text
-  aiVariants        Json?           // Array av AI-genererade varianter
-  
+  isAiGenerated Boolean @default(false)
+  aiPrompt      String? @db.Text
+  aiVariants    Json? // Array av AI-genererade varianter
+
   // Relations
-  clinicId          String
-  clinic            Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  messages          Message[]
-  smsLogs           SMSLog[]
-  
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+  smsLogs  SMSLog[]
+
   // Timestamps
-  sentAt            DateTime?
-  completedAt       DateTime?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  
+  sentAt      DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
   @@index([clinicId])
   @@index([status])
   @@index([scheduleAt])
@@ -837,44 +842,44 @@ model Campaign {
 
 // Message - Individuellt meddelande till kund
 model Message {
-  id              String          @id @default(cuid())
-  campaignId      String?
-  campaign        Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  
-  customerId      String
-  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
+  id         String    @id @default(cuid())
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
   // Content
-  channel         String          // "sms" | "email"
-  subject         String?
-  body            String          @db.Text
-  
+  channel String // "sms" | "email"
+  subject String?
+  body    String  @db.Text
+
   // Delivery
-  status          String          @default("pending") // "pending" | "sent" | "delivered" | "failed" | "clicked" | "redeemed"
-  to              String          // Phone or email
-  from            String?         // Sender
-  
+  status String  @default("pending") // "pending" | "sent" | "delivered" | "failed" | "clicked" | "redeemed"
+  to     String // Phone or email
+  from   String? // Sender
+
   // Provider tracking
-  providerId      String?         // External provider message ID
-  providerName    String?         // "46elks" | "Twilio"
-  errorMessage    String?         @db.Text
-  
+  providerId   String? // External provider message ID
+  providerName String? // "46elks" | "Twilio"
+  errorMessage String? @db.Text
+
   // Engagement tracking
-  sentAt          DateTime?
-  deliveredAt     DateTime?
-  clickedAt       DateTime?
-  redeemedAt      DateTime?
-  
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  clickedAt   DateTime?
+  redeemedAt  DateTime?
+
   // Cost
-  costSEK         Float?
-  
+  costSEK Float?
+
   // Relations
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([campaignId])
   @@index([customerId])
@@ -884,77 +889,77 @@ model Message {
 
 // Reward - Belöningar i lojalitetsprogram
 model Reward {
-  id              String          @id @default(cuid())
-  programId       String
-  program         LoyaltyProgram  @relation(fields: [programId], references: [id], onDelete: Cascade)
-  
-  name            String
-  description     String?         @db.Text
-  
+  id        String         @id @default(cuid())
+  programId String
+  program   LoyaltyProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String? @db.Text
+
   // Requirements
-  requiredStamps  Int?
-  requiredPoints  Int?
-  
+  requiredStamps Int?
+  requiredPoints Int?
+
   // Value
   valueSEK        Float
   discountPercent Float?
   freeProduct     String?
   freeService     String?
-  
+
   // Validity
-  expiresDays     Int?            // Går ut X dagar efter inlösen
-  
+  expiresDays Int? // Går ut X dagar efter inlösen
+
   // Limits
-  maxRedemptions  Int?            // Max antal inlösningar per kund
-  totalAvailable  Int?            // Totalt antal tillgängliga
-  totalRedeemed   Int             @default(0)
-  
+  maxRedemptions Int? // Max antal inlösningar per kund
+  totalAvailable Int? // Totalt antal tillgängliga
+  totalRedeemed  Int  @default(0)
+
   // Status
-  isActive        Boolean         @default(true)
-  
-  redemptions     Redemption[]
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  isActive Boolean @default(true)
+
+  redemptions Redemption[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([programId])
   @@index([isActive])
 }
 
 // Redemption - Inlösen av belöning
 model Redemption {
-  id              String          @id @default(cuid())
-  customerId      String
-  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
-  rewardId        String
-  reward          Reward          @relation(fields: [rewardId], references: [id], onDelete: Cascade)
-  
-  campaignId      String?         // Om inlösen kom från kampanj
-  
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  rewardId String
+  reward   Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  campaignId String? // Om inlösen kom från kampanj
+
   // Value
-  valueSEK        Float
-  
+  valueSEK Float
+
   // Verification
-  verifiedBy      String?         // Staff user ID eller QR code
+  verifiedBy       String? // Staff user ID eller QR code
   verificationCode String?
-  qrCode          String?
-  
+  qrCode           String?
+
   // Status
-  status          String          @default("pending") // "pending" | "verified" | "used" | "expired" | "cancelled"
-  
+  status String @default("pending") // "pending" | "verified" | "used" | "expired" | "cancelled"
+
   // Timestamps
-  redeemedAt      DateTime        @default(now())
-  verifiedAt      DateTime?
-  usedAt          DateTime?
-  expiresAt       DateTime?
-  
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  redeemedAt DateTime  @default(now())
+  verifiedAt DateTime?
+  usedAt     DateTime?
+  expiresAt  DateTime?
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([customerId])
   @@index([rewardId])
@@ -963,29 +968,29 @@ model Redemption {
 
 // Event - Tracking av kundaktiviteter
 model Event {
-  id              String          @id @default(cuid())
-  customerId      String
-  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
-  type            String          // "stamp_earned" | "booking_created" | "no_show" | "ad_click" | "sms_sent" | "sms_clicked"
-  
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  type String // "stamp_earned" | "booking_created" | "no_show" | "ad_click" | "sms_sent" | "sms_clicked"
+
   // Metadata
-  meta            Json?           // { booking_id, amount, service, etc. }
-  
+  meta Json? // { booking_id, amount, service, etc. }
+
   // Source
-  source          String?         // "bokadirekt" | "zoezi" | "manual" | "campaign"
-  sourceId        String?
-  
+  source   String? // "bokadirekt" | "zoezi" | "manual" | "campaign"
+  sourceId String?
+
   // Value
-  valueSEK        Float?
-  
-  occurredAt      DateTime        @default(now())
-  
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  
+  valueSEK Float?
+
+  occurredAt DateTime @default(now())
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@index([clinicId])
   @@index([customerId])
   @@index([type])
@@ -994,20 +999,20 @@ model Event {
 
 // OptOut - GDPR opt-out tracking
 model OptOut {
-  id              String          @id @default(cuid())
-  customerId      String
-  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
-  channel         String          // "sms" | "email" | "all"
-  reason          String?
-  
-  optedOutAt      DateTime        @default(now())
-  
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  channel String // "sms" | "email" | "all"
+  reason  String?
+
+  optedOutAt DateTime @default(now())
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@index([clinicId])
   @@index([customerId])
   @@index([channel])
@@ -1015,39 +1020,39 @@ model OptOut {
 
 // ImportJob - Tracking av data-importer (Zoezi, manuella filer)
 model ImportJob {
-  id              String          @id @default(cuid())
-  source          String          // "zoezi" | "manual" | "bokadirekt" | "excel"
-  fileName        String?
-  fileUrl         String?
-  
+  id       String  @id @default(cuid())
+  source   String // "zoezi" | "manual" | "bokadirekt" | "excel"
+  fileName String?
+  fileUrl  String?
+
   // Status
-  status          String          @default("pending") // "pending" | "processing" | "completed" | "failed"
-  
+  status String @default("pending") // "pending" | "processing" | "completed" | "failed"
+
   // Progress
-  totalRows       Int?
-  processedRows   Int             @default(0)
-  successfulRows  Int             @default(0)
-  failedRows      Int             @default(0)
-  
+  totalRows      Int?
+  processedRows  Int  @default(0)
+  successfulRows Int  @default(0)
+  failedRows     Int  @default(0)
+
   // Errors
-  errors          Json?           // Array av fel-meddelanden
-  errorLog        String?         @db.Text
-  
+  errors   Json? // Array av fel-meddelanden
+  errorLog String? @db.Text
+
   // Results
-  customersCreated Int            @default(0)
-  customersUpdated Int            @default(0)
-  customersSkipped Int            @default(0)
-  
+  customersCreated Int @default(0)
+  customersUpdated Int @default(0)
+  customersSkipped Int @default(0)
+
   // Timestamps
-  startedAt       DateTime?
-  completedAt     DateTime?
-  
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([status])
   @@index([source])
@@ -1055,35 +1060,35 @@ model ImportJob {
 
 // SMSProviderConfig - Modulär SMS-provider konfiguration
 model SMSProviderConfig {
-  id              String          @id @default(cuid())
-  provider        String          // "46elks" | "Twilio" | "Sinch"
-  isPrimary       Boolean         @default(false)
-  isActive        Boolean         @default(true)
-  
+  id        String  @id @default(cuid())
+  provider  String // "46elks" | "Twilio" | "Sinch"
+  isPrimary Boolean @default(false)
+  isActive  Boolean @default(true)
+
   // Credentials (encrypted)
-  apiKey          String
-  apiSecret       String?
-  fromNumber      String          // +46701234567
-  
+  apiKey     String
+  apiSecret  String?
+  fromNumber String // +46701234567
+
   // Settings
-  config          Json?           // Provider-specific settings
-  
+  config Json? // Provider-specific settings
+
   // Stats
-  messagesSent    Int             @default(0)
-  messagesDelivered Int           @default(0)
-  messagesFailed  Int             @default(0)
-  totalCostSEK    Float           @default(0)
-  
+  messagesSent      Int   @default(0)
+  messagesDelivered Int   @default(0)
+  messagesFailed    Int   @default(0)
+  totalCostSEK      Float @default(0)
+
   // Rate limits
   rateLimitPerHour Int?
-  rateLimitPerDay Int?
-  
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  rateLimitPerDay  Int?
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([provider])
   @@index([isPrimary])
@@ -1091,49 +1096,49 @@ model SMSProviderConfig {
 
 // SMSCampaign - Track SMS campaigns and messages
 model SMSCampaign {
-  id              String          @id @default(cuid())
-  name            String
-  message         String          @db.Text
-  templateId      String?
-  
+  id         String  @id @default(cuid())
+  name       String
+  message    String  @db.Text
+  templateId String?
+
   // Recipients
-  recipientCount  Int             @default(0)
-  successCount    Int             @default(0)
-  failedCount     Int             @default(0)
-  
+  recipientCount Int @default(0)
+  successCount   Int @default(0)
+  failedCount    Int @default(0)
+
   // Scheduling
-  scheduledAt     DateTime?
-  sentAt          DateTime?
-  
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
   // Cost tracking
-  totalCost       Float?
-  
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  totalCost Float?
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([sentAt])
 }
 
 // LoyaltyTransaction - Track stamp and point transactions
 model LoyaltyTransaction {
-  id              String          @id @default(cuid())
-  customerId      String
-  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
-  type            String          // "stamp_earned" | "points_earned" | "reward_redeemed"
-  stamps          Int             @default(0)
-  points          Int             @default(0)
-  description     String?         @db.Text
-  
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime        @default(now())
-  
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  type        String // "stamp_earned" | "points_earned" | "reward_redeemed"
+  stamps      Int     @default(0)
+  points      Int     @default(0)
+  description String? @db.Text
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@index([customerId])
   @@index([clinicId])
   @@index([type])
@@ -1146,50 +1151,50 @@ model LoyaltyTransaction {
 
 // SMSLog - Complete audit trail for all SMS communications
 model SMSLog {
-  id              String          @id @default(cuid())
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
+  id       String @id @default(cuid())
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
   // Message details
-  direction       String          // "outbound" | "inbound"
-  from            String
-  to              String
-  message         String          @db.Text
-  
+  direction String // "outbound" | "inbound"
+  from      String
+  to        String
+  message   String @db.Text
+
   // Provider details
-  provider        String          // "46elks" | "twilio"
-  providerId      String?         // External message ID from provider
-  providerStatus  String?         // Provider-specific status
-  
+  provider       String // "46elks" | "twilio"
+  providerId     String? // External message ID from provider
+  providerStatus String? // Provider-specific status
+
   // Status tracking
-  status          String          @default("pending") // "pending" | "sent" | "delivered" | "failed" | "stopped"
-  deliveredAt     DateTime?
-  failedAt        DateTime?
-  failureReason   String?         @db.Text
-  
+  status        String    @default("pending") // "pending" | "sent" | "delivered" | "failed" | "stopped"
+  deliveredAt   DateTime?
+  failedAt      DateTime?
+  failureReason String?   @db.Text
+
   // Cost tracking
-  cost            Float?
-  parts           Int             @default(1) // Number of SMS parts
-  
+  cost  Float?
+  parts Int    @default(1) // Number of SMS parts
+
   // Customer relation
-  customerId      String?
-  customer        Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
   // Campaign relation
-  campaignId      String?
-  campaign        Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
   // Retry tracking
-  retryCount      Int             @default(0)
-  maxRetries      Int             @default(3)
-  nextRetryAt     DateTime?
-  
+  retryCount  Int       @default(0)
+  maxRetries  Int       @default(3)
+  nextRetryAt DateTime?
+
   // Metadata
-  metadata        Json?           // Additional provider-specific data
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  metadata Json? // Additional provider-specific data
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([customerId])
   @@index([campaignId])
@@ -1201,81 +1206,81 @@ model SMSLog {
 
 // SMSRateLimit - Track rate limiting per clinic
 model SMSRateLimit {
-  id              String          @id @default(cuid())
-  clinicId        String          @unique
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
+  id       String @id @default(cuid())
+  clinicId String @unique
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
   // Rate limit configuration
-  maxPerHour      Int             @default(100)
-  maxPerDay       Int             @default(500)
-  maxPerMonth     Int             @default(10000)
-  
+  maxPerHour  Int @default(100)
+  maxPerDay   Int @default(500)
+  maxPerMonth Int @default(10000)
+
   // Current usage
-  sentThisHour    Int             @default(0)
-  sentToday       Int             @default(0)
-  sentThisMonth   Int             @default(0)
-  
+  sentThisHour  Int @default(0)
+  sentToday     Int @default(0)
+  sentThisMonth Int @default(0)
+
   // Reset timestamps
-  hourResetAt     DateTime
-  dayResetAt      DateTime
-  monthResetAt    DateTime
-  
+  hourResetAt  DateTime
+  dayResetAt   DateTime
+  monthResetAt DateTime
+
   // Budget tracking
-  budgetSEK       Float?
-  spentThisMonth  Float           @default(0)
-  
+  budgetSEK      Float?
+  spentThisMonth Float  @default(0)
+
   // Alerts
-  alertAt80Percent Boolean        @default(true)
-  alertAt100Percent Boolean       @default(true)
-  lastAlertSent   DateTime?
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  alertAt80Percent  Boolean   @default(true)
+  alertAt100Percent Boolean   @default(true)
+  lastAlertSent     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
 }
 
 // CustomerCommunicationPreference - Granular consent and preferences
 model CustomerCommunicationPreference {
-  id              String          @id @default(cuid())
-  customerId      String          @unique
-  customer        Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
+  id         String   @id @default(cuid())
+  customerId String   @unique
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
   // Channel preferences
-  smsEnabled      Boolean         @default(true)
-  emailEnabled    Boolean         @default(true)
-  pushEnabled     Boolean         @default(false)
-  
+  smsEnabled   Boolean @default(true)
+  emailEnabled Boolean @default(true)
+  pushEnabled  Boolean @default(false)
+
   // Category preferences
-  transactional   Boolean         @default(true)  // Booking confirmations, receipts
-  marketing       Boolean         @default(false) // Promotions, offers
-  loyalty         Boolean         @default(false) // Loyalty program updates
-  reminders       Boolean         @default(true)  // Appointment reminders
-  surveys         Boolean         @default(false) // Feedback requests
-  
+  transactional Boolean @default(true) // Booking confirmations, receipts
+  marketing     Boolean @default(false) // Promotions, offers
+  loyalty       Boolean @default(false) // Loyalty program updates
+  reminders     Boolean @default(true) // Appointment reminders
+  surveys       Boolean @default(false) // Feedback requests
+
   // Quiet hours
-  quietHoursEnabled Boolean       @default(false)
-  quietHoursStart String?         // "22:00"
-  quietHoursEnd   String?         // "08:00"
-  
+  quietHoursEnabled Boolean @default(false)
+  quietHoursStart   String? // "22:00"
+  quietHoursEnd     String? // "08:00"
+
   // Frequency limits
-  maxPerDay       Int?            @default(3)
-  maxPerWeek      Int?            @default(10)
-  
+  maxPerDay  Int? @default(3)
+  maxPerWeek Int? @default(10)
+
   // GDPR compliance
-  consentGivenAt  DateTime?
-  consentMethod   String?         // "web_form" | "sms_reply" | "in_person" | "import"
+  consentGivenAt   DateTime?
+  consentMethod    String? // "web_form" | "sms_reply" | "in_person" | "import"
   consentIpAddress String?
   consentUpdatedAt DateTime?
-  
+
   // Opt-out tracking
-  optedOutAt      DateTime?
-  optOutMethod    String?         // "sms_stop" | "web_form" | "support_request"
-  optOutReason    String?         @db.Text
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  optedOutAt   DateTime?
+  optOutMethod String? // "sms_stop" | "web_form" | "support_request"
+  optOutReason String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([customerId])
   @@index([smsEnabled])
   @@index([marketing])
@@ -1283,46 +1288,46 @@ model CustomerCommunicationPreference {
 
 // SMSTemplate - Reusable SMS templates with variables
 model SMSTemplate {
-  id              String          @id @default(cuid())
-  clinicId        String
-  clinic          Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  name            String
-  description     String?         @db.Text
-  category        String          // "welcome" | "reminder" | "promotion" | "loyalty" | "reactivation"
-  
+  id       String @id @default(cuid())
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String? @db.Text
+  category    String // "welcome" | "reminder" | "promotion" | "loyalty" | "reactivation"
+
   // Template content
-  message         String          @db.Text
-  variables       String[]        @default([]) // ["firstName", "stampsNeeded", "rewardName"]
-  
+  message   String   @db.Text
+  variables String[] @default([]) // ["firstName", "stampsNeeded", "rewardName"]
+
   // A/B testing
-  isVariant       Boolean         @default(false)
-  parentId        String?         // Reference to parent template for A/B test
-  variantName     String?         // "A" | "B" | "C"
-  
+  isVariant   Boolean @default(false)
+  parentId    String? // Reference to parent template for A/B test
+  variantName String? // "A" | "B" | "C"
+
   // Performance tracking
-  sentCount       Int             @default(0)
-  deliveredCount  Int             @default(0)
-  clickedCount    Int             @default(0)
-  convertedCount  Int             @default(0)
-  optOutCount     Int             @default(0)
-  
+  sentCount      Int @default(0)
+  deliveredCount Int @default(0)
+  clickedCount   Int @default(0)
+  convertedCount Int @default(0)
+  optOutCount    Int @default(0)
+
   // Calculated metrics
-  deliveryRate    Float?          // deliveredCount / sentCount
-  conversionRate  Float?          // convertedCount / deliveredCount
-  optOutRate      Float?          // optOutCount / deliveredCount
-  
+  deliveryRate   Float? // deliveredCount / sentCount
+  conversionRate Float? // convertedCount / deliveredCount
+  optOutRate     Float? // optOutCount / deliveredCount
+
   // Status
-  isActive        Boolean         @default(true)
-  isDraft         Boolean         @default(false)
-  
+  isActive Boolean @default(true)
+  isDraft  Boolean @default(false)
+
   // Compliance
-  requiresConsent Boolean         @default(true)
-  consentType     String?         // "marketing" | "loyalty" | "transactional"
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  requiresConsent Boolean @default(true)
+  consentType     String? // "marketing" | "loyalty" | "transactional"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([category])
   @@index([isActive])
@@ -1331,18 +1336,225 @@ model SMSTemplate {
 
 // SMSStopKeyword - Track STOP keywords and auto-responses
 model SMSStopKeyword {
-  id              String          @id @default(cuid())
-  keyword         String          @unique // "STOP", "STOPP", "SLUTA", "AVSLUTA", etc.
-  isActive        Boolean         @default(true)
-  language        String          @default("sv") // "sv" | "en"
-  
+  id       String  @id @default(cuid())
+  keyword  String  @unique // "STOP", "STOPP", "SLUTA", "AVSLUTA", etc.
+  isActive Boolean @default(true)
+  language String  @default("sv") // "sv" | "en"
+
   // Auto-response
-  responseMessage String?         @db.Text
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  responseMessage String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([keyword])
+  @@index([isActive])
+}
+
+// ============================================
+// CUSTOMER INTELLIGENCE & TAG MANAGEMENT
+// Wave 4 - Customer Intelligence Hub + Newsletter
+// ============================================
+
+enum TagSource {
+  BOOKING_SYSTEM // Synced from booking system
+  XLS_IMPORT // Imported from Excel/CSV
+  AUTO // Auto-generated by Flow AI
+  MANUAL // Manually created by user
+}
+
+// Tag - Master list of available tags
+model Tag {
+  id          String  @id @default(cuid())
+  clinicId    String
+  clinic      Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name        String // "VIP", "Inactive", "New Customer"
+  description String? @db.Text
+  color       String? // Hex color for UI
+  icon        String? // Icon name for UI
+
+  // Auto-tagging rules (if applicable)
+  isAutoTag   Boolean @default(false)
+  autoTagRule Json? // { totalVisits: ">10", totalSpend: ">5000" }
+
+  // Stats
+  customerCount Int @default(0)
+
+  isActive Boolean @default(true)
+
+  customerTags CustomerTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([clinicId, name])
+  @@index([clinicId])
+  @@index([isActive])
+}
+
+// CustomerTag - Many-to-many relationship with source tracking
+model CustomerTag {
+  id         String    @id @default(cuid())
+  customerId String
+  tagId      String
+  source     TagSource @default(MANUAL)
+
+  // Metadata
+  sourceReference String? // Reference to booking system ID or import job ID
+  appliedAt       DateTime @default(now())
+  appliedBy       String? // User ID who applied the tag (if manual)
+
+  // Auto-tag tracking
+  autoTaggedAt   DateTime?
+  lastVerifiedAt DateTime? // When auto-tag rule was last checked
+
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([customerId, tagId])
+  @@index([customerId])
+  @@index([tagId])
+  @@index([source])
+}
+
+// CustomerSegment - Saved customer segments for targeting
+model CustomerSegment {
+  id          String  @id @default(cuid())
+  clinicId    String
+  clinic      Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name        String
+  description String? @db.Text
+
+  // Filter rules (JSON)
+  filters Json // { tags: ["VIP"], ltvMin: 10000, churnRisk: "HIGH" }
+
+  // Stats (cached for performance)
+  customerCount Int     @default(0)
+  totalValue    Decimal @default(0) @db.Decimal(12, 2)
+
+  // Last calculation
+  lastCalculatedAt DateTime?
+
+  // Usage
+  isActive   Boolean @default(true)
+  usageCount Int     @default(0) // How many campaigns used this segment
+
+  newsletters Newsletter[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([isActive])
+}
+
+// Newsletter - Email/SMS newsletter campaigns
+model Newsletter {
+  id          String  @id @default(cuid())
+  clinicId    String
+  clinic      Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name        String
+  description String? @db.Text
+
+  // Content
+  subject     String? // For email
+  contentHtml String  @db.Text // HTML content for email
+  contentText String? @db.Text // Plain text version
+  contentSms  String? @db.Text // SMS version (max 160 chars)
+
+  // Channels
+  sendChannels String[] @default(["email"]) // ["email", "sms", "push"]
+
+  // Segmentation
+  segmentId  String?
+  segment    CustomerSegment? @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+  tagFilters String[]         @default([]) // Additional tag filters
+
+  // Scheduling
+  status      NewsletterStatus @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
+  // A/B Testing
+  isAbTest    Boolean @default(false)
+  variantName String? // "A" | "B" | "Control"
+  parentId    String? // Reference to parent newsletter for A/B test
+
+  // Stats
+  recipientCount    Int @default(0)
+  sentCount         Int @default(0)
+  deliveredCount    Int @default(0)
+  openedCount       Int @default(0)
+  clickedCount      Int @default(0)
+  unsubscribedCount Int @default(0)
+
+  // Calculated metrics
+  deliveryRate    Float? // deliveredCount / sentCount
+  openRate        Float? // openedCount / deliveredCount
+  clickRate       Float? // clickedCount / openedCount
+  unsubscribeRate Float? // unsubscribedCount / deliveredCount
+
+  // Cost & ROI
+  costSEK    Float?
+  revenueSEK Float? // Tracked conversions
+  roiPercent Float? // (revenue - cost) / cost * 100
+
+  // Template
+  templateId String? // Reference to SMSTemplate if used
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([status])
+  @@index([segmentId])
+  @@index([scheduledAt])
+}
+
+enum NewsletterStatus {
+  DRAFT // Being edited
+  SCHEDULED // Scheduled for sending
+  SENDING // Currently being sent
+  SENT // Completed
+  PAUSED // Paused mid-send
+  CANCELLED // Cancelled before sending
+  FAILED // Failed to send
+}
+
+// NewsletterSubscriber - Track newsletter subscriptions separately from general comms
+model NewsletterSubscriber {
+  id         String @id @default(cuid())
+  clinicId   String
+  clinic     Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  customerId String
+
+  // Subscription status
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+  isActive       Boolean   @default(true)
+
+  // Channel preferences for newsletters
+  channels String[] @default(["email"]) // ["sms", "email", "push"]
+
+  // Frequency preference
+  frequency String @default("weekly") // "daily" | "weekly" | "monthly"
+
+  // Interests/categories
+  interests String[] @default([]) // ["promotions", "tips", "news"]
+
+  // Unsubscribe tracking
+  unsubscribeReason String? @db.Text
+  unsubscribeMethod String? // "email_link" | "sms_reply" | "support"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([clinicId, customerId])
+  @@index([clinicId])
+  @@index([customerId])
   @@index([isActive])
 }
 
@@ -1352,86 +1564,86 @@ model SMSStopKeyword {
 // ============================================
 
 model Subscription {
-  id                String               @id @default(cuid())
-  clinicId          String               @unique
-  clinic            Clinic               @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  
-  tier              SubscriptionTier
-  status            SubscriptionStatus
-  
+  id       String @id @default(cuid())
+  clinicId String @unique
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  tier   SubscriptionTier
+  status SubscriptionStatus
+
   // Stripe integration
-  stripeCustomerId      String?          @unique
-  stripeSubscriptionId  String?          @unique
-  stripePriceId         String?
-  
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+
   // Billing cycle
-  currentPeriodStart    DateTime
-  currentPeriodEnd      DateTime
-  trialStart            DateTime?
-  trialEnd              DateTime?
-  cancelledAt           DateTime?
-  cancelAtPeriodEnd     Boolean          @default(false)
-  
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  cancelledAt        DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+
   // Usage tracking
-  bookingsThisMonth     Int              @default(0)
-  bookingsLimit         Int?             // null = unlimited
-  
+  bookingsThisMonth Int  @default(0)
+  bookingsLimit     Int? // null = unlimited
+
   // Pricing
-  monthlyPrice          Decimal          @db.Decimal(10, 2)
-  currency              String           @default("SEK")
-  
+  monthlyPrice Decimal @db.Decimal(10, 2)
+  currency     String  @default("SEK")
+
   // Relationships
-  invoices              Invoice[]
-  payments              Payment[]
-  billingAlerts         BillingAlert[]
-  
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  invoices      Invoice[]
+  payments      Payment[]
+  billingAlerts BillingAlert[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([status])
   @@index([stripeSubscriptionId])
 }
 
 model Invoice {
-  id                String           @id @default(cuid())
-  clinicId          String
-  clinic            Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  subscriptionId    String
-  subscription      Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  
+  id             String       @id @default(cuid())
+  clinicId       String
+  clinic         Clinic       @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
   // Invoice details
-  invoiceNumber     String           @unique // INV-2025-001
-  status            InvoiceStatus
-  
+  invoiceNumber String        @unique // INV-2025-001
+  status        InvoiceStatus
+
   // Stripe
-  stripeInvoiceId   String?          @unique
-  hostedInvoiceUrl  String?          // Stripe-hosted invoice URL
-  invoicePdfUrl     String?          // PDF download URL
-  
+  stripeInvoiceId  String? @unique
+  hostedInvoiceUrl String? // Stripe-hosted invoice URL
+  invoicePdfUrl    String? // PDF download URL
+
   // Amounts
-  subtotal          Decimal          @db.Decimal(10, 2)
-  tax               Decimal          @default(0) @db.Decimal(10, 2)
-  total             Decimal          @db.Decimal(10, 2)
-  amountPaid        Decimal          @default(0) @db.Decimal(10, 2)
-  amountDue         Decimal          @db.Decimal(10, 2)
-  currency          String           @default("SEK")
-  
+  subtotal   Decimal @db.Decimal(10, 2)
+  tax        Decimal @default(0) @db.Decimal(10, 2)
+  total      Decimal @db.Decimal(10, 2)
+  amountPaid Decimal @default(0) @db.Decimal(10, 2)
+  amountDue  Decimal @db.Decimal(10, 2)
+  currency   String  @default("SEK")
+
   // Line items (JSON)
-  lineItems         Json             // [{description, quantity, unitPrice, amount}]
-  
+  lineItems Json // [{description, quantity, unitPrice, amount}]
+
   // Dates
-  periodStart       DateTime
-  periodEnd         DateTime
-  dueDate           DateTime
-  paidAt            DateTime?
-  
+  periodStart DateTime
+  periodEnd   DateTime
+  dueDate     DateTime
+  paidAt      DateTime?
+
   // Relationships
-  payments          Payment[]
-  
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([subscriptionId])
   @@index([status])
@@ -1439,37 +1651,37 @@ model Invoice {
 }
 
 model Payment {
-  id                String           @id @default(cuid())
-  clinicId          String
-  clinic            Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  subscriptionId    String
-  subscription      Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  invoiceId         String?
-  invoice           Invoice?         @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
-  
+  id             String       @id @default(cuid())
+  clinicId       String
+  clinic         Clinic       @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  invoiceId      String?
+  invoice        Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
   // Payment details
-  amount            Decimal          @db.Decimal(10, 2)
-  currency          String           @default("SEK")
-  status            PaymentStatus
-  paymentMethod     PaymentMethod
-  
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("SEK")
+  status        PaymentStatus
+  paymentMethod PaymentMethod
+
   // Stripe
-  stripePaymentIntentId String?      @unique
-  stripeChargeId        String?      @unique
-  
+  stripePaymentIntentId String? @unique
+  stripeChargeId        String? @unique
+
   // Payment info
-  last4             String?          // Last 4 digits of card
-  brand             String?          // visa, mastercard, etc
-  
+  last4 String? // Last 4 digits of card
+  brand String? // visa, mastercard, etc
+
   // Dates
-  attemptedAt       DateTime         @default(now())
-  succeededAt       DateTime?
-  failedAt          DateTime?
-  failureReason     String?          @db.Text
-  
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  attemptedAt   DateTime  @default(now())
+  succeededAt   DateTime?
+  failedAt      DateTime?
+  failureReason String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([subscriptionId])
   @@index([invoiceId])
@@ -1477,24 +1689,24 @@ model Payment {
 }
 
 model BillingAlert {
-  id                String           @id @default(cuid())
-  clinicId          String
-  clinic            Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  subscriptionId    String
-  subscription      Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  
-  type              BillingAlertType
-  severity          AlertSeverity
-  message           String           @db.Text
-  resolved          Boolean          @default(false)
-  resolvedAt        DateTime?
-  
+  id             String       @id @default(cuid())
+  clinicId       String
+  clinic         Clinic       @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  type       BillingAlertType
+  severity   AlertSeverity
+  message    String           @db.Text
+  resolved   Boolean          @default(false)
+  resolvedAt DateTime?
+
   // Associated data (JSON)
-  metadata          Json?            // {invoiceId, paymentId, etc}
-  
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  metadata Json? // {invoiceId, paymentId, etc}
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clinicId])
   @@index([subscriptionId])
   @@index([resolved])
