@@ -192,6 +192,26 @@ export default function BankIntegrationPage() {
           </Alert>
         )}
 
+        {/* Nordea Sandbox Test */}
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-900">
+              🧪 Nordea Sandbox Test
+            </CardTitle>
+            <CardDescription>
+              Test GoCardless integration with Nordea sandbox environment
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/settings/bank/nordea-sandbox">
+              <Button variant="outline" className="w-full gap-2 border-blue-300 hover:bg-blue-100">
+                <ExternalLink className="h-4 w-4" />
+                Open Nordea Sandbox Test
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* Connect New Bank */}
         <Card>
           <CardHeader>

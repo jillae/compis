@@ -47,8 +47,9 @@ export async function POST(req: NextRequest) {
 
     const client = new GoCardlessClient(user.clinic.gocardlessAccessToken)
 
-    // Create requisition
-    const redirectUrl = `${process.env.NEXTAUTH_URL}/settings/bank/callback`
+    // Step 2: Create requisition with proper redirect URL
+    // Redirect URL: User returns here after bank authorization
+    const redirectUrl = `${process.env.NEXTAUTH_URL}/api/bank/callback`
     const reference = `clinic_${user.clinic.id}_${Date.now()}`
 
     const requisition = await client.createRequisition({

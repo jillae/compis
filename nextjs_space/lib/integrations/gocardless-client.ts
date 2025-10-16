@@ -168,13 +168,23 @@ export class GoCardlessClient {
   }
 
   // Helper: Get Nordea institution ID for Sweden
-  static getNordeaInstitutionId(): string {
-    return 'NORDEA_NDEASES1'
+  static getNordeaInstitutionId(sandbox = false): string {
+    return sandbox ? 'NDEASES1_SANDBOX' : 'NORDEA_NDEASES1'
+  }
+
+  // Helper: Get Nordea Sandbox institution ID
+  static getNordeaSandboxInstitutionId(): string {
+    return 'NDEASES1_SANDBOX'
   }
 
   // Helper: Format date for API (YYYY-MM-DD)
   static formatDate(date: Date): string {
     return date.toISOString().split('T')[0]
+  }
+
+  // Helper: Check if requisition is complete
+  static isRequisitionComplete(requisition: RequisitionResponse): boolean {
+    return requisition.status === 'LN' && requisition.accounts.length > 0
   }
 }
 

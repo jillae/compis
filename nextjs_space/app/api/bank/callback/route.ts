@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const ref = searchParams.get('ref') // requisition ID
 
     if (!ref) {
-      return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/settings/bank?error=missing_ref`)
+      return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/settings/bank/callback?error=missing_ref`)
     }
 
     // Find the requisition in database
@@ -23,37 +23,47 @@ export async function GET(req: NextRequest) {
 
     if (!connection) {
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL}/settings/bank?error=connection_not_found`
+        `${process.env.NEXTAUTH_URL}/settings/bank/callback?error=connection_not_found`
       )
     }
 
     if (!connection.clinic.gocardlessAccessToken) {
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL}/settings/bank?error=no_token`
+        `${process.env.NEXTAUTH_URL}/settings/bank/callback?error=no_token`
       )
     }
 
     const client = new GoCardlessClient(connection.clinic.gocardlessAccessToken)
 
-    // Get updated requisition with account IDs
+    // Step 6: Get updated requisition with account IDs
     const requisition = await client.getRequisition(ref)
 
-    // Update connection with account IDs
+    // Step 7: Extract account_id from response.accounts[0].id
+    const accountIds = requisition.accounts || []
+    
+    if (accountIds.length === 0) {
+      return NextResponse.redirect(
+        `${process.env.NEXTAUTH_URL}/settings/bank/callback?error=no_accounts`
+      )
+    }
+
+    // Update connection with account IDs and mark as ACTIVE
     await prisma.bankConnection.update({
       where: { id: connection.id },
       data: {
-        accountIds: requisition.accounts,
+        accountIds,
         status: 'ACTIVE',
       },
     })
 
+    // Step 8: Flow complete - redirect with success
     return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL}/settings/bank?success=connected`
+      `${process.env.NEXTAUTH_URL}/settings/bank/callback?ref=${ref}&success=connected`
     )
   } catch (error: any) {
     console.error('Error handling bank callback:', error)
     return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL}/settings/bank?error=callback_failed`
+      `${process.env.NEXTAUTH_URL}/settings/bank/callback?error=callback_failed`
     )
   }
 }
