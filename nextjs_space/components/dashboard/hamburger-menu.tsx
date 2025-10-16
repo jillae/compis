@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -141,7 +141,34 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
                 Prenumeration & Fakturering
               </Button>
             </Link>
+            <Link href="/settings/bank" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <Building className="h-4 w-4 mr-2" />
+                Bank-integration
+              </Button>
+            </Link>
           </div>
+
+          {/* LABS Features (only for INTERNAL tier) */}
+          {userRole === UserRole.SUPER_ADMIN && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-yellow-600 uppercase tracking-wide">
+                🧪 LABS - Arch Clinic
+              </h3>
+              <Link href="/revenue-pro" onClick={() => setOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Revenue Intelligence Pro
+                </Button>
+              </Link>
+              <Link href="/superadmin/gocardless" onClick={() => setOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Building className="h-4 w-4 mr-2" />
+                  GoCardless Config
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {/* External Links */}
           <div className="space-y-2">

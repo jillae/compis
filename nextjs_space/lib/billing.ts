@@ -7,6 +7,21 @@
 import { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
 
 export const PRICING_TIERS = {
+  INTERNAL: {
+    name: 'Internal (Arch Clinic)',
+    price: 0,
+    currency: 'SEK',
+    interval: 'month',
+    bookingsLimit: null, // unlimited
+    features: [
+      'Alla funktioner',
+      'Experimentella LABS-moduler',
+      'Revenue Intelligence Pro',
+      'Bank-integration (GoCardless)',
+      'Alla premium-funktioner',
+      'Testbench för nya features',
+    ],
+  },
   BASIC: {
     name: 'Basic',
     price: 499,

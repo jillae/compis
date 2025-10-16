@@ -186,6 +186,15 @@ model Clinic {
   
   // Staff Management & Scheduling (WAVE 9)
   clockifyIntegration   ClockifyIntegration?
+  
+  // Display Mode Settings (WAVE 10)
+  activeDisplayMode     DisplayMode @default(FULL)
+  displayModeConfigs    DisplayModeConfig[]
+  
+  // Bank Integration (WAVE 11) - GoCardless
+  bankConnections       BankConnection[]
+  gocardlessAccessToken String? // GoCardless API access token
+  gocardlessEnabled     Boolean @default(false)
 
   @@index([bokadirektId])
   @@index([name])
@@ -567,6 +576,7 @@ enum UserRole {
 }
 
 enum SubscriptionTier {
+  INTERNAL // Arch Clinic testbench - all features
   BASIC // 499 SEK/month
   PROFESSIONAL // 1499 SEK/month
   ENTERPRISE // 2999+ SEK/month
@@ -2628,4 +2638,219 @@ model GHLIntegrationLog {
   @@index([entityType])
   @@index([entityId])
   @@index([createdAt])
+}
+
+// ============================================================================
+// WAVE 10: TIER & MODULE FRAMEWORK + DISPLAY MODES
+// ============================================================================
+
+// Module - Registry of all modules in the system
+model Module {
+  id          String       @id @default(cuid())
+  key         String       @unique // "analytics", "campaigns", "revenue_intelligence_pro"
+  name        String       // "Analytics Dashboard"
+  description String?      @db.Text
+  icon        String?      // lucide icon name
+  category    String?      // "core", "premium", "labs"
+  status      ModuleStatus @default(STABLE)
+  order       Int          @default(0) // Display order
+  
+  // Access control
+  moduleAccess ModuleAccess[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+  @@index([category])
+}
+
+// ModuleAccess - Which modules are available per tier
+model ModuleAccess {
+  id       String           @id @default(cuid())
+  moduleId String
+  module   Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  tier     SubscriptionTier
+  
+  // Can be toggled per clinic
+  isEnabled Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([moduleId, tier])
+  @@index([tier])
+}
+
+// DisplayModeConfig - Per-clinic configuration of what staff sees in each mode
+model DisplayModeConfig {
+  id          String      @id @default(cuid())
+  clinicId    String
+  clinic      Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  displayMode DisplayMode
+  moduleKey   String // Reference to Module.key
+  
+  // Who can see this module in this mode
+  isVisibleToStaff  Boolean @default(true)
+  isVisibleToAdmin  Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([clinicId, displayMode, moduleKey])
+  @@index([clinicId])
+  @@index([displayMode])
+}
+
+// DisplayMode enum
+enum DisplayMode {
+  FULL       // Admin view - all modules
+  OPERATIONS // Staff operations - daily work essentials
+  KIOSK      // Public kiosk - limited customer-facing features
+  CAMPAIGNS  // Marketing focus - CTA and preventive actions
+}
+
+// ModuleStatus enum
+enum ModuleStatus {
+  STABLE // Production-ready
+  BETA   // Testing phase, visible to all
+  LABS   // Experimental, only for INTERNAL tier
+}
+
+// ============================================================================
+// WAVE 11: REVENUE INTELLIGENCE PRO + GOCARDLESS BANK INTEGRATION
+// ============================================================================
+
+// BankConnection - GoCardless bank account connections
+model BankConnection {
+  id              String   @id @default(cuid())
+  clinicId        String
+  clinic          Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  // GoCardless requisition data
+  requisitionId   String   @unique // GoCardless requisition ID
+  institutionId   String   // Bank institution ID (e.g., "NORDEA_NDEASES1")
+  institutionName String   // Human-readable bank name
+  
+  // Connection status
+  status          BankConnectionStatus @default(PENDING)
+  redirectUrl     String?  // URL user was redirected to for auth
+  reference       String?  // User reference for this connection
+  
+  // Account IDs (multiple accounts can be linked per requisition)
+  accountIds      String[] @default([]) // Array of GoCardless account IDs
+  
+  // Metadata
+  agreementId     String?  // End-user agreement ID
+  expiresAt       DateTime? // Requisition expiration (90 days)
+  
+  // Sync tracking
+  lastSyncAt      DateTime?
+  lastSyncStatus  String?  @default("pending") // "success", "failed", "pending"
+  lastSyncError   String?  @db.Text
+  
+  // Relations
+  transactions    BankTransaction[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([clinicId])
+  @@index([status])
+  @@index([requisitionId])
+}
+
+// BankTransaction - Transactions from connected bank accounts
+model BankTransaction {
+  id                    String         @id @default(cuid())
+  bankConnectionId      String
+  bankConnection        BankConnection @relation(fields: [bankConnectionId], references: [id], onDelete: Cascade)
+  clinicId              String
+  
+  // GoCardless transaction data
+  transactionId         String         @unique // GoCardless transaction ID
+  accountId             String         // Which account this transaction belongs to
+  
+  // Transaction details
+  amount                Decimal        @db.Decimal(12, 2)
+  currency              String         @default("SEK")
+  bookingDate           DateTime       // Date transaction was booked
+  valueDate             DateTime       // Date transaction value was applied
+  
+  // Description & categorization
+  remittanceInformation String?        @db.Text // Payment description
+  debtorName            String?        // Who paid (if incoming)
+  creditorName          String?        // Who received (if outgoing)
+  
+  // Transaction type
+  transactionType       String?        // "DEBIT" or "CREDIT"
+  proprietaryCode       String?        // Bank-specific code
+  
+  // Flow categorization (AI-enhanced)
+  category              String?        // "booking_revenue", "expense", "other"
+  isReconciled          Boolean        @default(false) // Matched to a booking/expense
+  reconciledBookingId   String?        // If matched to a booking
+  
+  // AI analysis
+  aiConfidence          Decimal?       @db.Decimal(5, 4) // 0.0 to 1.0
+  aiSuggestions         Json?          // AI suggestions for categorization
+  
+  // Metadata
+  metadata              Json?          // Raw data from GoCardless
+  
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  
+  @@index([bankConnectionId])
+  @@index([clinicId])
+  @@index([bookingDate])
+  @@index([category])
+  @@index([isReconciled])
+}
+
+// BankConnectionStatus enum
+enum BankConnectionStatus {
+  PENDING   // Waiting for user to authorize
+  ACTIVE    // Successfully connected
+  EXPIRED   // Requisition expired (90 days)
+  SUSPENDED // Temporarily disabled
+  ERROR     // Connection error
+}
+
+// RevenueIntelligence - Advanced financial insights (LABS module)
+model RevenueIntelligence {
+  id                String   @id @default(cuid())
+  clinicId          String
+  
+  // Time period
+  periodStart       DateTime
+  periodEnd         DateTime
+  
+  // Key metrics
+  totalRevenue      Decimal  @db.Decimal(12, 2)
+  bankRevenue       Decimal? @db.Decimal(12, 2) // From bank transactions
+  bokadirektRevenue Decimal? @db.Decimal(12, 2) // From bookings
+  variance          Decimal? @db.Decimal(12, 2) // Difference between bank and bookings
+  
+  // Cash flow analysis
+  cashflowIn        Decimal? @db.Decimal(12, 2)
+  cashflowOut       Decimal? @db.Decimal(12, 2)
+  netCashflow       Decimal? @db.Decimal(12, 2)
+  
+  // Predictions
+  predictedRevenue  Decimal? @db.Decimal(12, 2)
+  predictedCashflow Decimal? @db.Decimal(12, 2)
+  predictionConfidence Decimal? @db.Decimal(5, 4)
+  
+  // Service margins (Top 5)
+  topServices       Json?    // [{service, revenue, margin, bookings}]
+  
+  // AI insights
+  insights          Json?    // AI-generated insights and recommendations
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([clinicId])
+  @@index([periodStart])
+  @@index([periodEnd])
 }

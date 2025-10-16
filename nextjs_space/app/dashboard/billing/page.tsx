@@ -184,7 +184,7 @@ export default function BillingPage() {
             <div>
               <h4 className="font-semibold mb-3">Inkluderade funktioner:</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {currentTier.features.map((feature, index) => (
+                {currentTier.features.map((feature: string, index: number) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                     <span>{feature}</span>

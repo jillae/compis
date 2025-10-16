@@ -31,6 +31,7 @@ import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
 import { TimePeriodSelector } from '@/components/time-period-selector';
 import { HamburgerMenu } from '@/components/dashboard/hamburger-menu';
 import { ExpandableRiskZone } from '@/components/dashboard/expandable-risk-zone';
+import { DisplayModeSwitcher } from '@/components/display-mode-switcher';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 
@@ -257,6 +258,9 @@ export default function DashboardPage() {
                     className="w-[120px] md:w-[160px]"
                   />
                 </div>
+                
+                {/* Display Mode Switcher */}
+                <DisplayModeSwitcher />
                 
                 {/* Hamburger Menu */}
                 <div data-tour="hamburger-menu">
