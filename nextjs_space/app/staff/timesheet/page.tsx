@@ -1,20 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
-export default function StaffLeavePage() {
+export default function StaffTimesheetPage() {
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Calendar className="h-8 w-8" />
-          Ledighetshantering
+          <Clock className="h-8 w-8" />
+          Tidrapport
         </h1>
         <p className="text-muted-foreground mt-2">
-          Ansök om ledighet och godkänn personalens ledighetsansökningar
+          Se arbetade timmar och checka in/ut
         </p>
       </div>
 
@@ -22,13 +20,13 @@ export default function StaffLeavePage() {
         <CardHeader>
           <CardTitle>Kommande funktion</CardTitle>
           <CardDescription>
-            Ledighetshantering är under utveckling
+            Tidrapportering är under utveckling
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Här kommer du kunna ansöka om semester, VAB, sjukledighet och annat. 
-            Admins kan godkänna/neka ansökningar direkt i systemet.
+            Här kommer du kunna checka in/ut och se dina arbetade timmar per månad.
+            Exportera till lönesystem och se övertid.
           </p>
         </CardContent>
       </Card>

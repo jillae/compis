@@ -55,6 +55,7 @@ model User {
   clinic                Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
   accounts              Account[]
   sessions              Session[]
+  staffProfile          Staff[] // Link to Staff for scheduling
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -182,6 +183,9 @@ model Clinic {
   
   // Corex AI Context (WAVE 8)
   corexConversations    CorexConversation[]
+  
+  // Staff Management & Scheduling (WAVE 9)
+  clockifyIntegration   ClockifyIntegration?
 
   @@index([bokadirektId])
   @@index([name])
@@ -278,27 +282,43 @@ model Staff {
   id              String   @id @default(cuid())
   bokadirektId    String?  @unique // Bokadirekt resource ID
   clinicId        String?
+  userId          String? // Link to User account (optional)
   name            String
   email           String?
   phone           String?
   role            String? // E.g., "Hudterapeut", "Massageterapeut"
   specializations String[] @default([])
   specialization  String?
-  hourlyRate      Decimal? @db.Decimal(8, 2)
-  weeklyHours     Int? // Antal arbetstimmar per vecka
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  
+  // Clockify Integration
+  clockifyUserId      String? // Clockify API user ID
+  clockifyWorkspaceId String? // Clockify workspace ID
+  
+  // Employment Details
+  employmentType StaffEmploymentType @default(FULLTIME)
+  hourlyRate     Decimal?            @db.Decimal(8, 2)
+  weeklyHours    Int?                @default(40) // Antal arbetstimmar per vecka
+  startDate      DateTime?
+  endDate        DateTime? // För uppsagda
+  
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   clinic       Clinic?            @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  user         User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   bookings     Booking[]
   leaves       StaffLeave[]
   performances StaffPerformance[]
+  schedules    StaffSchedule[]
+  timeEntries  StaffTimeEntry[]
 
   @@index([bokadirektId])
   @@index([clinicId])
+  @@index([userId])
   @@index([name])
   @@index([specialization])
+  @@index([clockifyUserId])
 }
 
 model Room {
@@ -418,23 +438,123 @@ model InsightDismissal {
   @@index([insightKey])
 }
 
+// ============================================
+// STAFF MANAGEMENT & SCHEDULING (WAVE 9)
+// Clockify Integration for Schedule & Time Tracking
+// ============================================
+
+// ClockifyIntegration - Clinic-level Clockify configuration
+model ClockifyIntegration {
+  id            String    @id @default(cuid())
+  clinicId      String    @unique
+  clinic        Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  apiKey        String // Encrypted Clockify API key
+  workspaceId   String
+  workspaceName String
+  
+  isActive      Boolean   @default(true)
+  lastSyncAt    DateTime?
+  syncErrors    Json? // Array of sync errors
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([clinicId])
+  @@index([workspaceId])
+}
+
+// StaffSchedule - Individual shifts and work schedules
+model StaffSchedule {
+  id        String      @id @default(cuid())
+  clinicId  String
+  staffId   String
+  staff     Staff       @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  clockifyTimeEntryId String? // Clockify API time entry ID
+  
+  shiftDate   DateTime
+  startTime   DateTime
+  endTime     DateTime
+  breakMinutes Int       @default(30)
+  shiftType   ShiftType @default(REGULAR)
+  
+  status      ScheduleStatus @default(SCHEDULED)
+  notes       String?        @db.Text
+  
+  // Tracking
+  createdBy   String // userId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([staffId])
+  @@index([shiftDate])
+  @@index([status])
+  @@index([clockifyTimeEntryId])
+}
+
+// StaffTimeEntry - Clock in/out tracking for actual worked time
+model StaffTimeEntry {
+  id        String   @id @default(cuid())
+  clinicId  String
+  staffId   String
+  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  clockifyTimeEntryId String? // Clockify API time entry ID
+  
+  clockInAt  DateTime
+  clockOutAt DateTime?
+  
+  totalMinutes Int? // Calculated on clock-out
+  breakMinutes Int  @default(0)
+  workMinutes  Int? // totalMinutes - breakMinutes
+  
+  notes String? @db.Text
+  
+  // Tracking
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([staffId])
+  @@index([clockInAt])
+  @@index([clockifyTimeEntryId])
+}
+
 // Staff Leave/Vacation tracking
 model StaffLeave {
   id        String      @id @default(cuid())
+  clinicId  String
   staffId   String
+  
+  clockifyTimeOffId String? // Om Clockify stödjer time-off tracking
+  
+  leaveType LeaveType
   startDate DateTime
   endDate   DateTime
-  leaveType LeaveType
-  reason    String?
-  status    LeaveStatus @default(APPROVED) // Most clinics auto-approve
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  totalDays Float       @default(1) // Inkl halvdagar (0.5, 1, 1.5, etc.)
+  reason    String?     @db.Text
+  status    LeaveStatus @default(PENDING) // Changed from APPROVED
+  
+  // Approval tracking
+  approvedBy String? // userId
+  approvedAt DateTime?
+  rejectedBy String? // userId
+  rejectedAt DateTime?
+  rejectReason String? @db.Text
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
   @@index([staffId])
+  @@index([clinicId])
   @@index([startDate])
   @@index([endDate])
+  @@index([status])
+  @@index([leaveType])
 }
 
 // Enums
@@ -494,6 +614,32 @@ enum LeaveStatus {
   APPROVED // Godkänd
   REJECTED // Avvisad
   CANCELLED // Avbruten
+}
+
+enum StaffEmploymentType {
+  FULLTIME // Heltid
+  PARTTIME // Deltid
+  HOURLY // Timanställd
+  CONTRACTOR // Konsult/Frilans
+  TEMPORARY // Vikarie
+}
+
+enum ShiftType {
+  REGULAR // Ordinarie pass
+  MORNING // Morgonpass
+  AFTERNOON // Eftermiddagspass
+  EVENING // Kvällspass
+  NIGHT // Nattpass
+  ON_CALL // Jour
+  EXTRA // Extratjänst
+}
+
+enum ScheduleStatus {
+  SCHEDULED // Planerat
+  CONFIRMED // Bekräftat
+  COMPLETED // Genomfört
+  CANCELLED // Inställt
+  NO_SHOW // Utebliven
 }
 
 // Weekly Action - AI-generated proactive recommendations

@@ -53,21 +53,29 @@ export async function POST(
     }
 
     const staffId = params.id;
-    const { startDate, endDate, leaveType, reason } = await req.json();
+    const { startDate, endDate, leaveType, reason, clinicId } = await req.json();
 
-    if (!startDate || !endDate || !leaveType) {
+    if (!startDate || !endDate || !leaveType || !clinicId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // Calculate total days
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
     // Create leave record
     const leave = await prisma.staffLeave.create({
       data: {
+        clinicId,
         staffId,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
+        totalDays,
         leaveType,
         reason,
-        status: 'APPROVED' // Auto-approve for now
+        status: 'PENDING' // Changed from APPROVED
       }
     });
 
