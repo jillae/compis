@@ -1,27 +1,35 @@
 
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { cn } from '@/lib/utils'
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 interface BackButtonProps {
-  href: string
-  label?: string
-  className?: string
+  href?: string;
+  label?: string;
+  className?: string;
 }
 
-export function BackButton({ href, label = 'Tillbaka', className }: BackButtonProps) {
+export function BackButton({ href, label = 'Tillbaka', className = '' }: BackButtonProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    if (href) {
+      router.push(href);
+    } else {
+      router.back();
+    }
+  };
+
   return (
-    <Link 
-      href={href}
-      className={cn(
-        "inline-flex items-center gap-2 text-sm font-medium text-muted-foreground",
-        "hover:text-foreground transition-colors duration-200",
-        "group",
-        className
-      )}
+    <Button
+      variant="ghost"
+      onClick={handleClick}
+      className={`gap-2 ${className}`}
     >
-      <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
-      <span>{label}</span>
-    </Link>
-  )
+      <ArrowLeft className="h-4 w-4" />
+      {label}
+    </Button>
+  );
 }

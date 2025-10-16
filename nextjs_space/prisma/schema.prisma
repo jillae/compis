@@ -174,6 +174,15 @@ model Clinic {
   // Competitive Intelligence (WAVE 5B)
   competitorProfiles CompetitorProfile[]
 
+  // GoHighLevel Integration (WAVE 8)
+  ghlEnabled            Boolean @default(false)
+  ghlApiKey             String?
+  ghlLocationId         String?
+  ghlLastSync           DateTime?
+  
+  // Corex AI Context (WAVE 8)
+  corexConversations    CorexConversation[]
+
   @@index([bokadirektId])
   @@index([name])
   @@index([tier])
@@ -2403,4 +2412,78 @@ model CompetitorPriceSnapshot {
   @@index([competitorId])
   @@index([snapshotDate])
   @@index([serviceName])
+}
+
+// ============================================================================
+// WAVE 8: COREX AI MEMORY & GOHIGHLEVEL INTEGRATION
+// ============================================================================
+
+// CorexConversation - Långt kontextminne per användare
+model CorexConversation {
+  id               String   @id @default(cuid())
+  clinicId         String
+  clinic           Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  userId           String?  // User som pratar med Corex (optional för anonyma sessions)
+  sessionId        String   // Unik session-ID för varje konversation
+  
+  // Conversation metadata
+  channel          String   @default("web") // "web", "voice", "sms", "whatsapp"
+  locale           String   @default("sv-SE")
+  
+  // AI Context
+  messages         Json     // Array av {role, content, timestamp}
+  summary          String?  @db.Text // AI-genererad sammanfattning av konversationen
+  keywords         String[] @default([]) // Extraherade nyckelord för snabbare sökning
+  sentiment        String?  // "positive", "neutral", "negative"
+  
+  // User preferences learned
+  preferences      Json?    // Learned preferences: {preferredTimes, favoriteServices, etc}
+  
+  // Status
+  isActive         Boolean  @default(true)
+  lastInteraction  DateTime @default(now())
+  
+  // Metrics
+  messageCount     Int      @default(0)
+  averageResponseTime Int?  // milliseconds
+  satisfactionScore Int?    // 1-5
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([isActive])
+  @@index([lastInteraction])
+}
+
+// GHLIntegrationLog - Spåra synkningar till GoHighLevel
+model GHLIntegrationLog {
+  id          String   @id @default(cuid())
+  clinicId    String
+  
+  action      String   // "push_booking", "sync_customer", "update_booking"
+  entityType  String   // "booking", "customer", "contact"
+  entityId    String   // ID i Flow-systemet
+  ghlId       String?  // Motsvarande ID i GHL
+  
+  status      String   @default("pending") // "pending", "success", "failed"
+  errorMessage String? @db.Text
+  
+  requestPayload  Json? // Vad vi skickade till GHL
+  responsePayload Json? // Vad vi fick tillbaka
+  
+  retryCount  Int      @default(0)
+  maxRetries  Int      @default(3)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([status])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
 }

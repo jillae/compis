@@ -1,5 +1,6 @@
 
 'use client'
+import { BackButton } from '@/components/ui/back-button';
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -108,6 +109,7 @@ export default function CapacityForecastPage() {
   if (error) {
     return (
       <div className="container mx-auto py-8 px-4">
+      <BackButton href="/dashboard" />
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
@@ -119,6 +121,7 @@ export default function CapacityForecastPage() {
   if (!forecastData) {
     return (
       <div className="container mx-auto py-8 px-4">
+      <BackButton href="/dashboard" />
         <Alert>
           <AlertDescription>Ingen data tillgänglig</AlertDescription>
         </Alert>
@@ -130,6 +133,7 @@ export default function CapacityForecastPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
+      <BackButton href="/dashboard" />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

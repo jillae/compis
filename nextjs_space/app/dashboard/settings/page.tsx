@@ -1,5 +1,6 @@
 
 'use client';
+import { BackButton } from '@/components/ui/back-button';
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -92,6 +93,7 @@ export default function SettingsPage() {
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 p-6">
+      <BackButton href="/dashboard" />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BackButton } from '@/components/ui/back-button';
 import { Users, HeartPulse, TrendingUp } from 'lucide-react';
 
 export default function CustomersPage() {
@@ -10,6 +11,7 @@ export default function CustomersPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <BackButton href="/dashboard" />
       <div className="flex items-center gap-3">
         <Users className="h-8 w-8 text-primary" />
         <div>
@@ -49,7 +51,14 @@ export default function CustomersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                router.push('/dashboard/segments'); 
+              }}
+            >
               Hantera Segment →
             </Button>
           </CardContent>
@@ -66,7 +75,14 @@ export default function CustomersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                router.push('/dashboard/tags'); 
+              }}
+            >
               Hantera Taggar →
             </Button>
           </CardContent>

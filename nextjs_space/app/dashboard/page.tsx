@@ -30,6 +30,7 @@ import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
 import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
 import { TimePeriodSelector } from '@/components/time-period-selector';
 import { HamburgerMenu } from '@/components/dashboard/hamburger-menu';
+import { ExpandableRiskZone } from '@/components/dashboard/expandable-risk-zone';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 
@@ -410,26 +411,12 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* At-Risk Bookings - Red */}
+          {/* At-Risk Bookings - Red - Expandable */}
           {atRiskMetrics && (
-            <Link href="/dashboard/at-risk">
-              <Card className="cursor-pointer hover:shadow-lg transition-all border-red-200 bg-gradient-to-br from-red-50 to-red-100/50">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-red-900">Risk 14d</CardTitle>
-                  <div className="p-2 bg-red-500 rounded-lg">
-                    <AlertTriangle className="h-4 w-4 text-white" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-red-700">
-                    {atRiskMetrics.highRiskBookings}
-                  </div>
-                  <p className="text-xs text-red-600 mt-1 font-medium">
-                    {atRiskMetrics.potentialLoss.toLocaleString()} kr i riskzon
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+            <ExpandableRiskZone 
+              metrics={atRiskMetrics}
+              timeRange={14}
+            />
           )}
 
           {/* Capacity Forecast - Purple */}
