@@ -173,10 +173,10 @@ export default function ActionsPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Sparkles className="h-8 w-8 text-blue-600" />
-            AI Rekommendationer
+            Corex Rekommendationer
           </h1>
           <p className="text-gray-600 mt-1">
-            Proaktiva åtgärder för att maximera din intäkt
+            Intelligenta åtgärder för att maximera din intäkt
           </p>
         </div>
         <Button

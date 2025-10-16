@@ -22,7 +22,7 @@ export default function FAQPage() {
             <AccordionItem value="item-1">
               <AccordionTrigger>Vad är Flow?</AccordionTrigger>
               <AccordionContent>
-                Flow är en AI-driven revenue intelligence-plattform för skönhets- och hälsokliniker.
+                Flow är en intelligent revenue intelligence-plattform för skönhets- och hälsokliniker, driven av Corex.
                 Vi hjälper dig optimera intäkter, reducera no-shows och förbättra kundupplevelsen genom
                 proaktiva insikter och automatisering.
               </AccordionContent>

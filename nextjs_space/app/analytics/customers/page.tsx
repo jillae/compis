@@ -39,6 +39,8 @@ export default function CustomerAnalyticsPage() {
   const [data, setData] = useState<CustomerAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'revenue' | 'bookings' | 'avgValue'>('revenue');
 
   useEffect(() => {
     fetchData();
@@ -78,6 +80,32 @@ export default function CustomerAnalyticsPage() {
   }
 
   const { overview, segmentation, topCustomers } = data;
+
+  // Filter and sort customers
+  const filteredAndSortedCustomers = topCustomers
+    .filter(customer => 
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'revenue':
+          return b.totalRevenue - a.totalRevenue;
+        case 'bookings':
+          return b.bookingCount - a.bookingCount;
+        case 'avgValue':
+          return b.averageBookingValue - a.averageBookingValue;
+        default:
+          return 0;
+      }
+    });
+
+  // Determine star customer (highest revenue)
+  const starCustomer = topCustomers.length > 0 
+    ? topCustomers.reduce((prev, current) => 
+        prev.totalRevenue > current.totalRevenue ? prev : current
+      ) 
+    : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50 dark:from-slate-950 dark:to-emerald-950">
@@ -223,32 +251,124 @@ export default function CustomerAnalyticsPage() {
         {/* Top Customers */}
         <Card className="shadow-lg border-slate-200 dark:border-slate-800">
           <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950">
-            <CardTitle>Topkunder efter Intäkt</CardTitle>
-            <CardDescription>Dina mest värdefulla kunder</CardDescription>
+            <div className="flex flex-col gap-4">
+              <div>
+                <CardTitle>Topkunder efter Intäkt ⭐</CardTitle>
+                <CardDescription>Dina mest värdefulla kunder</CardDescription>
+              </div>
+              
+              {/* Search & Sort Controls */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Sök kund (namn eller email)..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 px-4 py-2 border rounded-lg bg-white dark:bg-slate-900"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSortBy('revenue')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      sortBy === 'revenue'
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-white dark:bg-slate-900 border hover:bg-violet-50'
+                    }`}
+                  >
+                    Intäkt
+                  </button>
+                  <button
+                    onClick={() => setSortBy('bookings')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      sortBy === 'bookings'
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-white dark:bg-slate-900 border hover:bg-violet-50'
+                    }`}
+                  >
+                    Bokningar
+                  </button>
+                  <button
+                    onClick={() => setSortBy('avgValue')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      sortBy === 'avgValue'
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-white dark:bg-slate-900 border hover:bg-violet-50'
+                    }`}
+                  >
+                    Genomsnitt
+                  </button>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-4">
-              {topCustomers.map((customer, index) => (
-                <div key={customer.id} className="flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all bg-gradient-to-r from-white to-violet-50 dark:from-slate-900 dark:to-violet-950">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 text-violet-700 dark:text-violet-300 font-bold">
-                      {index + 1}
+              {filteredAndSortedCustomers.map((customer, index) => {
+                const isStarCustomer = starCustomer?.id === customer.id;
+                const isVIP = customer.totalRevenue > 50000 || customer.bookingCount > 20;
+                
+                return (
+                  <div 
+                    key={customer.id} 
+                    className={`flex items-center justify-between p-4 border rounded-xl hover:shadow-md transition-all ${
+                      isStarCustomer 
+                        ? 'bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950 border-yellow-300 dark:border-yellow-800'
+                        : isVIP
+                        ? 'bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950 border-purple-200'
+                        : 'bg-gradient-to-r from-white to-violet-50 dark:from-slate-900 dark:to-violet-950'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${
+                        isStarCustomer
+                          ? 'bg-gradient-to-br from-yellow-200 to-amber-200 dark:from-yellow-800 dark:to-amber-800 text-yellow-700 dark:text-yellow-300'
+                          : isVIP
+                          ? 'bg-gradient-to-br from-purple-200 to-violet-200 dark:from-purple-800 dark:to-violet-800 text-purple-700 dark:text-purple-300'
+                          : 'bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 text-violet-700 dark:text-violet-300'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold">{customer.name}</p>
+                          {isStarCustomer && <span className="text-lg" title="Periodens stjärna!">🏆</span>}
+                          {isVIP && !isStarCustomer && <span className="text-lg" title="VIP-kund">💎</span>}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{customer.email}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold">{customer.name}</p>
-                      <p className="text-sm text-muted-foreground">{customer.email}</p>
+                    <div className="text-right">
+                      <p className="text-lg font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                        {customer.totalRevenue.toLocaleString('sv-SE')} kr
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {customer.bookingCount} bokningar · Snitt {customer.averageBookingValue.toLocaleString('sv-SE')} kr
+                      </p>
+                      {/* CTA - Corex driven actions */}
+                      <div className="mt-2 flex gap-2">
+                        <Link 
+                          href={`/dashboard/retention?customer=${customer.id}`}
+                          className="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full transition-colors"
+                        >
+                          Skicka Tack 💌
+                        </Link>
+                        <Link 
+                          href={`/dashboard/segments?highlight=${customer.id}`}
+                          className="text-xs px-3 py-1 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-full transition-colors"
+                        >
+                          Specialerbjudande 🎁
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                      {customer.totalRevenue.toLocaleString('sv-SE')} kr
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {customer.bookingCount} bokningar · Snitt {customer.averageBookingValue.toLocaleString('sv-SE')} kr
-                    </p>
-                  </div>
+                );
+              })}
+              
+              {filteredAndSortedCustomers.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  Inga kunder hittades
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>

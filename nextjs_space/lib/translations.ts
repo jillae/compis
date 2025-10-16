@@ -8,7 +8,7 @@ export const translations = {
   // Chart labels
   charts: {
     revenue: 'Intäkt',
-    revenueKr: 'Intäkt (kr)',
+    revenueKr: 'Intäkt',
     bookings: 'Bokningar',
     averageRevenue: 'Snitt Intäkt',
     totalRevenue: 'Total Intäkt',

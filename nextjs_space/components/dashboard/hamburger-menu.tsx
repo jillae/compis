@@ -60,7 +60,7 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             <Link href="/dashboard/actions" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full justify-start">
                 <Sparkles className="h-4 w-4 mr-2" />
-                AI Rekommendationer
+                Corex Rekommendationer
               </Button>
             </Link>
           </div>

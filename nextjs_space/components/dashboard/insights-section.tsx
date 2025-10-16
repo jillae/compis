@@ -48,6 +48,7 @@ export function InsightsSection({ days }: AIInsightsProps) {
   const [showDismissed, setShowDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dismissing, setDismissing] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'priority' | 'impact'>('priority');
 
   useEffect(() => {
     fetchInsights();
@@ -141,12 +142,24 @@ export function InsightsSection({ days }: AIInsightsProps) {
     return null;
   }
 
-  // Filter insights based on dismissed status
+  // Filter and sort insights based on dismissed status and sort preference
   const filteredInsights = insights
-    ? Object.entries(insights).filter(([key]) => {
-        const dismissed = isInsightDismissed(key);
-        return showDismissed ? dismissed : !dismissed;
-      })
+    ? Object.entries(insights)
+        .filter(([key]) => {
+          const dismissed = isInsightDismissed(key);
+          return showDismissed ? dismissed : !dismissed;
+        })
+        .sort((a, b) => {
+          if (sortBy === 'priority') {
+            // Lower priority number = higher priority (1 is higher than 3)
+            return a[1].priority === b[1].priority 
+              ? b[1].impact - a[1].impact 
+              : a[1].priority > b[1].priority ? 1 : -1;
+          } else {
+            // Sort by impact (higher is better)
+            return b[1].impact - a[1].impact;
+          }
+        })
     : [];
 
   const dismissedCount = insights
@@ -156,31 +169,56 @@ export function InsightsSection({ days }: AIInsightsProps) {
   return (
     <Card className="border-primary/50 bg-primary/5">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Intäktsinsikter
-          </CardTitle>
-          {dismissedCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDismissed(!showDismissed)}
-              className="text-xs"
-            >
-              {showDismissed ? (
-                <>
-                  <Eye className="h-4 w-4 mr-1" />
-                  Visa aktiva ({Object.keys(insights || {}).length - dismissedCount})
-                </>
-              ) : (
-                <>
-                  <EyeOff className="h-4 w-4 mr-1" />
-                  Visa hanterade ({dismissedCount})
-                </>
-              )}
-            </Button>
-          )}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Intäktsinsikter
+            </CardTitle>
+            {dismissedCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDismissed(!showDismissed)}
+                className="text-xs"
+              >
+                {showDismissed ? (
+                  <>
+                    <Eye className="h-4 w-4 mr-1" />
+                    Visa aktiva ({Object.keys(insights || {}).length - dismissedCount})
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="h-4 w-4 mr-1" />
+                    Visa hanterade ({dismissedCount})
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+          
+          {/* Sorting Controls */}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Sortera efter:</span>
+            <div className="flex gap-1">
+              <Button
+                variant={sortBy === 'priority' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSortBy('priority')}
+                className="h-8 text-xs"
+              >
+                Prioritet
+              </Button>
+              <Button
+                variant={sortBy === 'impact' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSortBy('impact')}
+                className="h-8 text-xs"
+              >
+                Intäktsmöjlighet
+              </Button>
+            </div>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -245,7 +283,7 @@ export function InsightsSection({ days }: AIInsightsProps) {
                     <div className="flex items-center gap-2 text-sm">
                       <TrendingUp className="h-4 w-4 text-green-600" />
                       <span className="font-semibold text-green-600">
-                        Potential påverkan: +{Math.round(insight.impact).toLocaleString('sv-SE')} kr/månad
+                        Potentiell påverkan: +{Math.round(insight.impact).toLocaleString('sv-SE')} kr/månad
                       </span>
                     </div>
                   )}

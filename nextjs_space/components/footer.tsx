@@ -19,7 +19,7 @@ export function Footer() {
               <span className="font-bold text-lg">Flow</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              AI-driven revenue intelligence för skönhets- och hälsokliniker
+              Intelligent intäktsoptimering driven av Corex
             </p>
           </div>
 
