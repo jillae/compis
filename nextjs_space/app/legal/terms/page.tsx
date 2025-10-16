@@ -83,7 +83,62 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* 2. Specifika villkor för Dynamic Pricing */}
+      {/* 2. Sekretess och personuppgifter */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            2. Sekretess- och personuppgiftspolicy
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h3 className="font-semibold mb-2">2.1 Insamling av personuppgifter</h3>
+            <p className="text-sm text-muted-foreground">
+              Flow samlar in namn, e-post, organisationsnummer och transaktionsdata
+              för att tillhandahålla tjänsten.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2">2.2 Ändamål</h3>
+            <p className="text-sm text-muted-foreground">
+              Personuppgifter används för hantering av användarkonton, fakturering,
+              kundservice och juridisk efterlevnad.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2">2.3 Lagring och säkerhet</h3>
+            <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+              <li>Uppgifter lagras krypterat inom EU/EES</li>
+              <li>Regelbundna säkerhetsgranskningar genomförs</li>
+              <li>Incidentrapportering enligt GDPR</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2">2.4 Delning</h3>
+            <p className="text-sm text-muted-foreground">
+              Flow delar inte personuppgifter med tredje part utan samtycke, förutom
+              med underleverantörer som agerar enligt våra instruktioner.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2">2.5 Användarens rättigheter</h3>
+            <p className="text-sm text-muted-foreground">
+              Du har rätt att begära tillgång till, rättelse eller radering av dina
+              personuppgifter enligt GDPR. Kontakta{" "}
+              <a href="mailto:privacy@klinikflow.se" className="text-primary hover:underline">
+                privacy@klinikflow.se
+              </a>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 3. Specifika villkor för Dynamic Pricing */}
       <Card className="border-2 border-primary">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
           <CardTitle className="flex items-center gap-2">
