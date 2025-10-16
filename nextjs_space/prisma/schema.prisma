@@ -94,6 +94,7 @@ model Clinic {
   metaEnabled               Boolean @default(false) // Toggle for Meta API integration
   corexEnabled              Boolean @default(false) // Toggle for Corex integration (SMS/Communication)
   dynamicPricingEnabled     Boolean @default(false) // Toggle for Dynamic Pricing recommendations
+  dynamicPricingLastToggled DateTime? // Last time Dynamic Pricing was toggled
   retentionAutopilotEnabled Boolean @default(false) // Toggle for Retention Autopilot campaigns
   aiActionsEnabled          Boolean @default(true) // Toggle for AI Action Recommendations
 
@@ -155,6 +156,9 @@ model Clinic {
 
   // Unlayer License Management
   unlayerLicense UnlayerLicense?
+
+  // Dynamic Pricing Logs
+  dynamicPricingLogs DynamicPricingLog[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -1983,4 +1987,34 @@ enum UnlayerLicenseStatus {
   SUSPENDED     // License is suspended (payment issue)
   CANCELLED     // License cancelled by admin
   PENDING       // License pending activation
+}
+
+// Dynamic Pricing Intelligence Log
+model DynamicPricingLog {
+  id        String   @id @default(cuid())
+  clinicId  String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  // Action details
+  action      DynamicPricingAction // ENABLED or DISABLED
+  toggledBy   String?              // User ID who toggled (optional for admin tracking)
+  toggledByName String?            // User name for easier tracking
+
+  // Legal compliance tracking
+  daysSinceLastToggle Int?         // Days since previous toggle (for 28-day rule)
+  
+  // Timestamps
+  toggledAt DateTime @default(now())
+
+  // Metadata
+  metadata  Json?    // Additional context (e.g., warning shown, user acknowledged)
+
+  @@index([clinicId])
+  @@index([toggledAt])
+  @@index([action])
+}
+
+enum DynamicPricingAction {
+  ENABLED
+  DISABLED
 }

@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { AlertCircle, Check, Loader2, Settings, Zap } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { DynamicPricingToggle } from '@/components/dynamic-pricing/dynamic-pricing-toggle';
 
 interface FeatureToggles {
   bokadirektEnabled: boolean;
@@ -241,30 +242,16 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Dynamic Pricing */}
+          {/* Dynamic Pricing - ENHANCED with legal compliance */}
           <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="dynamic-pricing" className="text-base font-semibold cursor-pointer">
-                    Dynamic Pricing Intelligence
-                  </Label>
-                  {settings.dynamicPricingEnabled && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                      Aktiv
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  AI-baserade prisrekommendationer baserat på efterfrågan och konkurrens
-                </p>
-              </div>
-              <Switch
-                id="dynamic-pricing"
-                checked={settings.dynamicPricingEnabled}
-                onCheckedChange={() => handleToggle('dynamicPricingEnabled')}
-              />
-            </div>
+            <DynamicPricingToggle
+              onStatusChange={(status) => {
+                setSettings((prev) => ({
+                  ...prev,
+                  dynamicPricingEnabled: status.enabled,
+                }));
+              }}
+            />
           </div>
 
           {/* Retention Autopilot */}

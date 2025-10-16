@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, TrendingUp } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -19,7 +20,8 @@ export default function SignupPage() {
     firstName: '',
     lastName: '',
     companyName: '',
-    jobTitle: ''
+    jobTitle: '',
+    acceptTerms: false
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -29,6 +31,13 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Validate terms acceptance
+    if (!formData.acceptTerms) {
+      setError('Du måste acceptera användarvillkoren för att fortsätta')
+      setLoading(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/signup', {
@@ -173,10 +182,46 @@ export default function SignupPage() {
                 />
               </div>
 
+              {/* Terms and Conditions Acceptance */}
+              <div className="flex items-start space-x-2 border p-3 rounded-lg bg-gray-50">
+                <Checkbox
+                  id="acceptTerms"
+                  checked={formData.acceptTerms}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, acceptTerms: checked === true })
+                  }
+                  disabled={loading}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <Label
+                    htmlFor="acceptTerms"
+                    className="text-sm font-normal leading-relaxed cursor-pointer"
+                  >
+                    Jag accepterar{" "}
+                    <Link
+                      href="/legal/terms"
+                      target="_blank"
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      användarvillkoren
+                    </Link>{" "}
+                    och{" "}
+                    <Link
+                      href="/legal/privacy"
+                      target="_blank"
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      integritetspolicyn
+                    </Link>
+                  </Label>
+                </div>
+              </div>
+
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || !formData.acceptTerms}
               >
                 {loading ? 'Skapar konto...' : 'Skapa konto'}
               </Button>
