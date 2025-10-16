@@ -105,7 +105,16 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<string>('30');
   const [workdays, setWorkdays] = useState<'5' | '7'>('7');
-  const [simulatedRole, setSimulatedRole] = useState<UserRole>(UserRole.ADMIN);
+  const [simulatedRole, setSimulatedRole] = useState<UserRole>(() => {
+    // Initialize from localStorage or default to user's actual role
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('simulatedRole');
+      if (saved && Object.values(UserRole).includes(saved as UserRole)) {
+        return saved as UserRole;
+      }
+    }
+    return UserRole.ADMIN;
+  });
 
   // Helper function to convert timePeriod to days
   const getDaysFromTimePeriod = (period: string): number => {
@@ -118,6 +127,25 @@ export default function DashboardPage() {
     }
     return parseInt(period) || 30;
   };
+
+  // Initialize simulatedRole from user's actual role when session loads
+  useEffect(() => {
+    if (session?.user?.role) {
+      const saved = localStorage.getItem('simulatedRole');
+      if (!saved) {
+        // First time: set to user's actual role
+        setSimulatedRole(session.user.role);
+        localStorage.setItem('simulatedRole', session.user.role);
+      }
+    }
+  }, [session?.user?.role]);
+
+  // Save simulatedRole to localStorage whenever it changes
+  useEffect(() => {
+    if (simulatedRole) {
+      localStorage.setItem('simulatedRole', simulatedRole);
+    }
+  }, [simulatedRole]);
 
   useEffect(() => {
     fetchDashboardData();

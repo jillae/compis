@@ -14,7 +14,7 @@ import {
   Volume2, 
   VolumeX,
   Loader2,
-  Sparkles
+  Bot
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -151,12 +151,12 @@ export function CorexChatWidget() {
         <Button
           size="lg"
           onClick={() => setIsOpen(true)}
-          className="rounded-full h-16 w-16 shadow-lg"
+          className="rounded-full h-16 w-16 shadow-lg bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all"
         >
-          <Sparkles className="h-6 w-6" />
+          <Bot className="h-7 w-7 animate-pulse" />
         </Button>
-        <Badge className="absolute -top-2 -right-2 bg-primary">
-          Corex
+        <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-600 to-blue-600 border-0">
+          Corex AI
         </Badge>
       </div>
     );
@@ -165,10 +165,10 @@ export function CorexChatWidget() {
   return (
     <div className="fixed bottom-6 right-6 z-50 w-96 max-h-[600px] shadow-2xl">
       <Card className="h-full flex flex-col">
-        <CardHeader className="border-b bg-primary text-primary-foreground">
+        <CardHeader className="border-b bg-gradient-to-r from-purple-600 to-blue-600 text-white">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
+              <Bot className="h-5 w-5" />
               Corex AI Assistent
             </CardTitle>
             <div className="flex items-center gap-2">
@@ -176,6 +176,7 @@ export function CorexChatWidget() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsSpeaking(!isSpeaking)}
+                className="hover:bg-white/20 text-white"
               >
                 {isSpeaking ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
               </Button>
@@ -183,6 +184,7 @@ export function CorexChatWidget() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
+                className="hover:bg-white/20 text-white"
               >
                 ✕
               </Button>
@@ -193,10 +195,12 @@ export function CorexChatWidget() {
         <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
-              <Sparkles className="h-12 w-12 mx-auto mb-4 text-primary" />
-              <p className="font-medium">Hej! Jag är Corex 👋</p>
+              <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-full p-4 w-fit mx-auto mb-4">
+                <Bot className="h-12 w-12 text-white animate-pulse" />
+              </div>
+              <p className="font-medium text-lg">Hej! Jag är Corex 👋</p>
               <p className="text-sm mt-2">
-                Din intelligenta assistent som kommer ihåg tidigare konversationer.
+                Din intelligenta AI-assistent som kommer ihåg tidigare konversationer och hjälper dig att optimera din klinik.
               </p>
             </div>
           )}

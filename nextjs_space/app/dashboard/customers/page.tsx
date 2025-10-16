@@ -34,7 +34,14 @@ export default function CustomersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                router.push('/dashboard/at-risk'); 
+              }}
+            >
               Visa Customer Health →
             </Button>
           </CardContent>
