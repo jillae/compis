@@ -143,14 +143,14 @@ Ge ett hjälpsamt, vänligt och professionellt svar på svenska.`;
 
   try {
     // Använd AbacusAI API (redan konfigurerad i .env)
-    const response = await fetch('https://abacus.ai/api/v0/chatllm', {
+    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }

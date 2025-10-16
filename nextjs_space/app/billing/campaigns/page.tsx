@@ -41,7 +41,7 @@ export default function CampaignsPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/payatt/stats');
+      const res = await fetch('/api/billing/stats');
       if (res.ok) {
         const data = await res.json();
         setStats({
@@ -61,7 +61,7 @@ export default function CampaignsPage() {
     setSelectedSuggestion(null);
 
     try {
-      const response = await fetch('/api/payatt/generate-sms', {
+      const response = await fetch('/api/billing/generate-sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -128,7 +128,7 @@ export default function CampaignsPage() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Button variant="ghost" onClick={() => router.push('/payatt')}>
+          <Button variant="ghost" onClick={() => router.push('/billing')}>
             ← Tillbaka
           </Button>
           <h1 className="text-3xl font-bold mt-2">AI SMS Kampanjgenerator</h1>

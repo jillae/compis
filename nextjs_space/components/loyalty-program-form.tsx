@@ -32,8 +32,8 @@ export default function LoyaltyProgramForm({ onSuccess, initialData }: LoyaltyPr
 
     try {
       const url = initialData?.id 
-        ? `/api/payatt/programs/${initialData.id}`
-        : '/api/payatt/programs';
+        ? `/api/billing/programs/${initialData.id}`
+        : '/api/billing/programs';
       
       const method = initialData?.id ? 'PATCH' : 'POST';
 

@@ -86,7 +86,7 @@ export default function KioskStampDisplay({ program }: KioskStampDisplayProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/payatt/stamp/register', {
+      const response = await fetch('/api/billing/stamp/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

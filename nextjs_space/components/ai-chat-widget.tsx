@@ -43,7 +43,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/payatt/ai/chat', {
+      const response = await fetch('/api/billing/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
 
     try {
       setIsSpeaking(true);
-      const response = await fetch('/api/payatt/ai/tts', {
+      const response = await fetch('/api/billing/ai/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

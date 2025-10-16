@@ -23,7 +23,7 @@ export default function KioskPage() {
 
   const fetchProgram = async () => {
     try {
-      const res = await fetch(`/api/payatt/programs/${programId}`);
+      const res = await fetch(`/api/billing/programs/${programId}`);
       if (res.ok) {
         const data = await res.json();
         setProgram(data);

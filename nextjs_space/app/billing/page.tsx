@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Users, MessageSquare, TrendingUp, Target, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function PayAttPage() {
+export default function BillingPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const [stats, setStats] = useState({
@@ -32,7 +32,7 @@ export default function PayAttPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/payatt/stats');
+      const res = await fetch('/api/billing/stats');
       if (res.ok) {
         const data = await res.json();
         setStats(data);
@@ -51,7 +51,7 @@ export default function PayAttPage() {
     formData.append('type', fileType);
 
     try {
-      const res = await fetch('/api/payatt/import', {
+      const res = await fetch('/api/billing/import', {
         method: 'POST',
         body: formData,
       });
@@ -84,7 +84,7 @@ export default function PayAttPage() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">PayAtt - Lojalitetsprogram</h1>
+          <h1 className="text-3xl font-bold">Kundlojalitet & Kampanjer</h1>
           <p className="text-muted-foreground">Återvinn inaktiva kunder med AI-driven SMS-marknadsföring</p>
         </div>
       </div>
@@ -253,7 +253,7 @@ export default function PayAttPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => router.push('/payatt/campaigns')}>
+              <Button onClick={() => router.push('/billing/campaigns')}>
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Skapa kampanj med AI
               </Button>

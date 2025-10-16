@@ -207,7 +207,7 @@ model Customer {
   noShowCount   Int       @default(0)
   totalSpent    Decimal   @default(0) @db.Decimal(10, 2)
 
-  // PayAtt additions
+  // Billing & Customer additions
   source                  String                           @default("bokadirekt")
   sourceId                String?
   importedAt              DateTime?
@@ -708,11 +708,7 @@ enum AlertSeverity {
 }
 
 // ============================================================================
-// PAYATT-MODULEN: LOYALTY, SMS, CAMPAIGNS (additions)
-// ============================================================================
-
-// ============================================================================
-// PAYATT-MODULEN: LOYALTY, SMS, CAMPAIGNS
+// LOYALTY, SMS & CAMPAIGNS MODULE
 // ============================================================================
 
 // CustomerStatus - från Zoezi (Stammis, Terminare, Dansare)

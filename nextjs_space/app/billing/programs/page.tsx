@@ -17,7 +17,7 @@ export default function ProgramsPage() {
 
   const fetchPrograms = async () => {
     try {
-      const response = await fetch('/api/payatt/programs');
+      const response = await fetch('/api/billing/programs');
       const data = await response.json();
       setPrograms(data.programs || []);
     } catch (error) {
@@ -33,7 +33,7 @@ export default function ProgramsPage() {
 
   const toggleProgramStatus = async (programId: string, currentStatus: boolean) => {
     try {
-      await fetch(`/api/payatt/programs/${programId}`, {
+      await fetch(`/api/billing/programs/${programId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

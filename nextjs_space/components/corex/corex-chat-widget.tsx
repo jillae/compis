@@ -92,7 +92,7 @@ export function CorexChatWidget() {
 
   const speakText = async (text: string) => {
     try {
-      const res = await fetch('/api/payatt/ai/tts', {
+      const res = await fetch('/api/billing/ai/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })

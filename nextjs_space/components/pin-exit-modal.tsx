@@ -49,7 +49,7 @@ export default function PinExitModal({ isOpen, onClose }: PinExitModalProps) {
       localStorage.removeItem('kioskMode');
       
       // Redirect to admin
-      router.push('/payatt');
+      router.push('/billing');
     } else {
       setAttempts(prev => prev + 1);
       setError(`Fel PIN-kod. Försök ${MAX_ATTEMPTS - attempts - 1} kvar.`);

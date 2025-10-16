@@ -18,7 +18,7 @@ export default function AIAssistantPage() {
 
     try {
       // Fetch customer by phone
-      const response = await fetch(`/api/payatt/cards?phone=${phone}`);
+      const response = await fetch(`/api/billing/cards?phone=${phone}`);
       const data = await response.json();
       
       if (data.cards && data.cards.length > 0) {
