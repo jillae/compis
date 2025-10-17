@@ -375,140 +375,152 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* Overview Cards - Colorful & Clear */}
+        {/* Overview Cards - Information Only (Not Clickable) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" data-tour="overview-cards">
-          {/* Total Bookings - Blue */}
-          <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50">
+          {/* Total Bookings - Blue - STATIC */}
+          <Card className="bg-white border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-900">Bokningar</CardTitle>
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <Calendar className="h-4 w-4 text-white" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Bokningar</CardTitle>
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Calendar className="h-4 w-4 text-blue-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-blue-700">{overview.totalBookings}</div>
-              <p className="text-xs text-blue-600 mt-1 font-medium">
+              <div className="text-3xl font-bold text-foreground">{overview.totalBookings}</div>
+              <p className="text-xs text-muted-foreground mt-1">
                 {overview.onlineBookingPercentage}% online
               </p>
             </CardContent>
           </Card>
 
-          {/* Total Revenue - Green */}
-          <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100/50">
+          {/* Total Revenue - Green - STATIC */}
+          <Card className="bg-white border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-900">Intäkt (kr)</CardTitle>
-              <div className="p-2 bg-green-500 rounded-lg">
-                <DollarSign className="h-4 w-4 text-white" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Intäkt (kr)</CardTitle>
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <DollarSign className="h-4 w-4 text-green-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-green-700">
+              <div className="text-3xl font-bold text-foreground">
                 {overview.totalRevenue.toLocaleString('sv-SE')}
               </div>
-              <p className="text-xs text-green-600 mt-1 font-medium">
+              <p className="text-xs text-muted-foreground mt-1">
                 Från {overview.completedBookings} klara
               </p>
             </CardContent>
           </Card>
 
-          {/* Completion Rate - Emerald */}
-          <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/50">
+          {/* Completion Rate - Emerald - STATIC */}
+          <Card className="bg-white border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-emerald-900">Genomfört</CardTitle>
-              <div className="p-2 bg-emerald-500 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-white" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Genomfört</CardTitle>
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-emerald-700">{overview.completionRate}%</div>
-              <p className="text-xs text-emerald-600 mt-1 font-medium">
+              <div className="text-3xl font-bold text-foreground">{overview.completionRate}%</div>
+              <p className="text-xs text-muted-foreground mt-1">
                 {overview.completedBookings} / {overview.totalBookings} bokningar
               </p>
             </CardContent>
           </Card>
 
-          {/* Cancellation Rate - Orange */}
-          <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100/50">
+          {/* Cancellation Rate - Orange - STATIC */}
+          <Card className="bg-white border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-orange-900">Avbokningar</CardTitle>
-              <div className="p-2 bg-orange-500 rounded-lg">
-                <XCircle className="h-4 w-4 text-white" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Avbokningar</CardTitle>
+              <div className="p-2 bg-orange-500/10 rounded-lg">
+                <XCircle className="h-4 w-4 text-orange-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-orange-700">{overview.cancellationRate}%</div>
-              <p className="text-xs text-orange-600 mt-1 font-medium">
+              <div className="text-3xl font-bold text-foreground">{overview.cancellationRate}%</div>
+              <p className="text-xs text-muted-foreground mt-1">
                 {overview.cancelledBookings} avbokade, {overview.noShowBookings} no-show
               </p>
             </CardContent>
           </Card>
 
-          {/* At-Risk Bookings - Red - Expandable */}
+          {/* At-Risk Bookings - Red - Expandable - INTERACTIVE */}
           {atRiskMetrics && (
             <ExpandableRiskZone 
               metrics={atRiskMetrics}
               timeRange={14}
             />
           )}
+        </div>
 
-          {/* Capacity Forecast - Purple */}
-          <Link href="/dashboard/capacity">
-            <Card className="cursor-pointer hover:shadow-lg transition-all border-purple-200 bg-gradient-to-br from-purple-50 to-pink-100/50">
+        {/* Quick Action Cards - CLEARLY CLICKABLE */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Capacity Forecast - CLICKABLE */}
+          <Link href="/dashboard/capacity" className="group">
+            <Card className="cursor-pointer border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 hover:border-purple-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-purple-900">Kapacitetsprognos</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
-                  <Calendar className="h-4 w-4 text-white" />
+                <CardTitle className="text-sm font-semibold text-purple-900 flex items-center gap-2">
+                  Kapacitetsprognos
+                  <ArrowRight className="h-4 w-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
+                </CardTitle>
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-md">
+                  <Calendar className="h-5 w-5 text-white" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-700">
                   4 veckor framåt
                 </div>
-                <p className="text-xs text-purple-600 mt-1 font-medium">
-                  Optimera lediga slots →
+                <p className="text-xs text-purple-600 mt-2 font-medium flex items-center gap-1">
+                  Optimera lediga slots
+                  <ExternalLink className="h-3 w-3" />
                 </p>
               </CardContent>
             </Card>
           </Link>
-        </div>
 
-        {/* Retention & Marketing Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Retention Autopilot - Indigo */}
-          <Link href="/dashboard/retention">
-            <Card className="cursor-pointer hover:shadow-lg transition-all border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-100/50">
+          {/* Retention Autopilot - CLICKABLE */}
+          <Link href="/dashboard/retention" className="group">
+            <Card className="cursor-pointer border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 hover:border-indigo-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-indigo-900">Retention Autopilot</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
-                  <Users className="h-4 w-4 text-white" />
+                <CardTitle className="text-sm font-semibold text-indigo-900 flex items-center gap-2">
+                  Retention Autopilot
+                  <ArrowRight className="h-4 w-4 text-indigo-600 group-hover:translate-x-1 transition-transform" />
+                </CardTitle>
+                <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg shadow-md">
+                  <Users className="h-5 w-5 text-white" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-indigo-700">
                   Identifiera at-risk
                 </div>
-                <p className="text-xs text-indigo-600 mt-1 font-medium">
-                  Rädda kunder innan de churnar →
+                <p className="text-xs text-indigo-600 mt-2 font-medium flex items-center gap-1">
+                  Rädda kunder innan de churnar
+                  <ExternalLink className="h-3 w-3" />
                 </p>
               </CardContent>
             </Card>
           </Link>
 
-          {/* Marketing Intelligence - Cyan */}
-          <Link href="/dashboard/marketing">
-            <Card className="cursor-pointer hover:shadow-lg transition-all border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-100/50">
+          {/* Marketing Intelligence - CLICKABLE */}
+          <Link href="/dashboard/marketing" className="group">
+            <Card className="cursor-pointer border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 hover:border-cyan-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-cyan-900">Marketing Intelligence</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-white" />
+                <CardTitle className="text-sm font-semibold text-cyan-900 flex items-center gap-2">
+                  Marketing Intelligence
+                  <ArrowRight className="h-4 w-4 text-cyan-600 group-hover:translate-x-1 transition-transform" />
+                </CardTitle>
+                <div className="p-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg shadow-md">
+                  <TrendingUp className="h-5 w-5 text-white" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-cyan-700">
                   Meta Ads-optimering
                 </div>
-                <p className="text-xs text-cyan-600 mt-1 font-medium">
-                  ROAS, CPL, Budget AI →
+                <p className="text-xs text-cyan-600 mt-2 font-medium flex items-center gap-1">
+                  ROAS, CPL, Budget AI
+                  <ExternalLink className="h-3 w-3" />
                 </p>
               </CardContent>
             </Card>
