@@ -94,6 +94,25 @@ export const authOptions: NextAuthOptions = {
         session.user.clinicId = token.clinicId as string | undefined
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      // After sign in, redirect based on user role
+      if (url.startsWith(baseUrl)) {
+        // If redirect is to /dashboard, check user role
+        if (url.includes('/dashboard')) {
+          try {
+            // Get the token to check role (this is during callback)
+            // For now, let client-side handle the redirect
+            return url
+          } catch (error) {
+            return baseUrl + '/dashboard'
+          }
+        }
+        return url
+      } else if (url.startsWith('/')) {
+        return new URL(url, baseUrl).toString()
+      }
+      return baseUrl
     }
   }
 }

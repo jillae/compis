@@ -36,10 +36,16 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else {
-        // Check session and redirect
+        // Check session and redirect based on role
         const session = await getSession()
-        if (session) {
-          router.replace('/dashboard')
+        if (session?.user) {
+          // SUPER_ADMIN goes to superadmin dashboard
+          if (session.user.role === 'SUPER_ADMIN') {
+            router.replace('/superadmin')
+          } else {
+            // All other roles go to regular dashboard
+            router.replace('/dashboard')
+          }
         }
       }
     } catch (error) {
