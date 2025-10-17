@@ -140,7 +140,24 @@ async function seed() {
   try {
     console.log('🌱 Starting database seed...')
 
-    // Create default admin user (for testing)
+    // Create superadmin user
+    const superadminPassword = await bcrypt.hash('superadmin123', 10)
+    await prisma.user.upsert({
+      where: { email: 'superadmin@klinikflow.se' },
+      update: {},
+      create: {
+        email: 'superadmin@klinikflow.se',
+        password: superadminPassword,
+        firstName: 'Super',
+        lastName: 'Admin',
+        companyName: 'Klinik Flow Control',
+        jobTitle: 'Platform Administrator',
+        name: 'Super Admin',
+        role: 'ADMIN'
+      }
+    })
+
+    // Create default admin user
     const hashedPassword = await bcrypt.hash('admin123', 10)
     await prisma.user.upsert({
       where: { email: 'admin@flowclinic.com' },
@@ -152,23 +169,25 @@ async function seed() {
         lastName: 'User',
         companyName: 'Flow Beauty Clinic',
         jobTitle: 'Operations Manager',
-        name: 'Admin User'
+        name: 'Admin User',
+        role: 'ADMIN'
       }
     })
 
-    // Create default test user
-    const testPassword = await bcrypt.hash('johndoe123', 10)
+    // Create demo user
+    const demoPassword = await bcrypt.hash('demo123', 10)
     await prisma.user.upsert({
-      where: { email: 'john@doe.com' },
+      where: { email: 'demo@flowclinic.com' },
       update: {},
       create: {
-        email: 'john@doe.com',
-        password: testPassword,
-        firstName: 'John',
-        lastName: 'Doe',
+        email: 'demo@flowclinic.com',
+        password: demoPassword,
+        firstName: 'Demo',
+        lastName: 'User',
         companyName: 'Flow Beauty Clinic',
-        jobTitle: 'Clinic Owner',
-        name: 'John Doe'
+        jobTitle: 'Demo Account',
+        name: 'Demo User',
+        role: 'STAFF'
       }
     })
 
@@ -280,7 +299,7 @@ async function seed() {
 
     console.log('✨ Database seeded successfully!')
     console.log(`Created:`)
-    console.log(`  - 2 admin users`)
+    console.log(`  - 3 users (superadmin, admin, demo)`)
     console.log(`  - ${staff.length} staff members`)
     console.log(`  - ${rooms.length} treatment rooms`)  
     console.log(`  - ${customers.length} customers`)
