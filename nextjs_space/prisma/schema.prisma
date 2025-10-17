@@ -191,10 +191,9 @@ model Clinic {
   activeDisplayMode     DisplayMode @default(FULL)
   displayModeConfigs    DisplayModeConfig[]
   
-  // Bank Integration (WAVE 11) - GoCardless
-  bankConnections       BankConnection[]
-  gocardlessAccessToken String? // GoCardless API access token
-  gocardlessEnabled     Boolean @default(false)
+  // Bank Integration (WAVE 11) - Plaid
+  bankConnections BankConnection[]
+  plaidEnabled    Boolean @default(false) // Toggle for Plaid bank integration
 
   @@index([bokadirektId])
   @@index([name])
@@ -2717,31 +2716,31 @@ enum ModuleStatus {
 }
 
 // ============================================================================
-// WAVE 11: REVENUE INTELLIGENCE PRO + GOCARDLESS BANK INTEGRATION
+// WAVE 11: REVENUE INTELLIGENCE PRO + PLAID BANK INTEGRATION
 // ============================================================================
 
-// BankConnection - GoCardless bank account connections
+// BankConnection - Plaid bank account connections
 model BankConnection {
   id              String   @id @default(cuid())
   clinicId        String
   clinic          Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   
-  // GoCardless requisition data
-  requisitionId   String   @unique // GoCardless requisition ID
-  institutionId   String   // Bank institution ID (e.g., "NORDEA_NDEASES1")
-  institutionName String   // Human-readable bank name
+  // Plaid Item data
+  itemId          String   @unique // Plaid Item ID (unique per bank connection)
+  accessToken     String   // Plaid Access Token (encrypted)
+  institutionId   String   // Bank institution ID (e.g., "ins_109508")
+  institutionName String   // Human-readable bank name (e.g., "Chase")
   
   // Connection status
   status          BankConnectionStatus @default(PENDING)
-  redirectUrl     String?  // URL user was redirected to for auth
-  reference       String?  // User reference for this connection
   
-  // Account IDs (multiple accounts can be linked per requisition)
-  accountIds      String[] @default([]) // Array of GoCardless account IDs
+  // Account IDs (multiple accounts can be linked per item)
+  accountIds      String[] @default([]) // Array of Plaid account IDs
   
   // Metadata
-  agreementId     String?  // End-user agreement ID
-  expiresAt       DateTime? // Requisition expiration (90 days)
+  cursor          String?  // Cursor for incremental transaction sync
+  lastSyncedAt    DateTime? // Last time transactions were synced
+  expiresAt       DateTime? // Access token expiration (if applicable)
   
   // Sync tracking
   lastSyncAt      DateTime?
@@ -2756,7 +2755,7 @@ model BankConnection {
   
   @@index([clinicId])
   @@index([status])
-  @@index([requisitionId])
+  @@index([itemId])
 }
 
 // BankTransaction - Transactions from connected bank accounts
@@ -2766,9 +2765,9 @@ model BankTransaction {
   bankConnection        BankConnection @relation(fields: [bankConnectionId], references: [id], onDelete: Cascade)
   clinicId              String
   
-  // GoCardless transaction data
-  transactionId         String         @unique // GoCardless transaction ID
-  accountId             String         // Which account this transaction belongs to
+  // Plaid transaction data
+  transactionId         String         @unique // Plaid transaction ID
+  accountId             String         // Which Plaid account this transaction belongs to
   
   // Transaction details
   amount                Decimal        @db.Decimal(12, 2)
@@ -2795,7 +2794,7 @@ model BankTransaction {
   aiSuggestions         Json?          // AI suggestions for categorization
   
   // Metadata
-  metadata              Json?          // Raw data from GoCardless
+  metadata              Json?          // Raw data from Plaid
   
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
