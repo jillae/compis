@@ -9,10 +9,19 @@ import { authOptions } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    // SECURITY: Get clinicId from session for multi-tenant isolation
+    const clinicId = (session.user as any).clinicId;
+    if (!clinicId) {
+      return NextResponse.json(
+        { success: false, error: 'No clinic associated with user' },
+        { status: 403 }
       );
     }
 
@@ -23,9 +32,10 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Get historical daily revenue and bookings
+    // Get historical daily revenue and bookings - FILTERED BY CLINICID
     const historicalData = await prisma.booking.findMany({
       where: {
+        clinicId: clinicId, // SECURITY: Multi-tenant isolation
         bookedAt: { gte: startDate },
         status: 'completed',
       },

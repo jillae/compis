@@ -321,7 +321,7 @@ export default function DashboardPage() {
 
           {/* 2. Intäktssimulator - SECONDARY */}
           <Link href="/dashboard/simulator" data-tour="simulator-card">
-            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
+            <Card className="bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
               <CardContent className="p-6">
                 <div className="flex flex-col h-full">
                   <div className="space-y-3 flex-1">
@@ -346,7 +346,7 @@ export default function DashboardPage() {
 
           {/* 3. Marketing Intelligence - TERTIARY (PRO+) */}
           <Link href="/dashboard/marketing" data-tour="marketing-card">
-            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
+            <Card className="bg-purple-600 text-white hover:bg-purple-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
               <CardContent className="p-6">
                 <div className="flex flex-col h-full">
                   <div className="space-y-3 flex-1">
@@ -456,7 +456,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Capacity Forecast - CLICKABLE */}
           <Link href="/dashboard/capacity" className="group">
-            <Card className="cursor-pointer border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 hover:border-purple-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+            <Card className="cursor-pointer border-2 border-purple-200 bg-purple-50 hover:border-purple-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-semibold text-purple-900 flex items-center gap-2">
                   Kapacitetsprognos
@@ -480,7 +480,7 @@ export default function DashboardPage() {
 
           {/* Retention Autopilot - CLICKABLE */}
           <Link href="/dashboard/retention" className="group">
-            <Card className="cursor-pointer border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 hover:border-indigo-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+            <Card className="cursor-pointer border-2 border-indigo-200 bg-indigo-50 hover:border-indigo-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-semibold text-indigo-900 flex items-center gap-2">
                   Retention Autopilot

@@ -14,6 +14,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // SECURITY: Get clinicId from session for multi-tenant isolation
+    const clinicId = (session.user as any).clinicId;
+    if (!clinicId) {
+      return NextResponse.json(
+        { error: 'No clinic associated with user' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -23,7 +32,8 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit
 
-    const where: any = {}
+    // SECURITY: Always filter by clinicId from session
+    const where: any = { clinicId }
     
     if (status) {
       where.status = status

@@ -1,13 +1,32 @@
 
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+export const dynamic = 'force-dynamic';
 
-const prisma = new PrismaClient();
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Get session and validate user
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // SECURITY: Get clinicId from session for multi-tenant isolation
+    const clinicId = (session.user as any).clinicId;
+    if (!clinicId) {
+      return NextResponse.json(
+        { success: false, error: 'No clinic associated with user' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
-    const clinicId = searchParams.get('clinicId');
     const days = parseInt(searchParams.get('days') || '30');
 
     // Calculate date range
@@ -15,7 +34,8 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const whereClause = clinicId ? { clinicId } : {};
+    // SECURITY: Always filter by clinicId from session
+    const whereClause = { clinicId };
 
     // Get total bookings
     const totalBookings = await prisma.booking.count({

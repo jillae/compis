@@ -7,9 +7,15 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, DollarSign, Users, Calendar, AlertCircle, ArrowLeft, Target } from 'lucide-react';
+import { TrendingUp, DollarSign, Users, Calendar, AlertCircle, ArrowLeft, Target, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '@/components/ui/back-button';
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { OptimalCorridorControls } from '@/components/dashboard/optimal-corridor-controls';
 import { CapacityUtilizationChart } from '@/components/dashboard/capacity-utilization-chart';
 import { ChartDisplayControls } from '@/components/dashboard/chart-display-controls';
@@ -367,7 +373,19 @@ export default function SimulatorPage() {
             {/* Retention rate */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Retention rate</Label>
+                <div className="flex items-center gap-2">
+                  <Label>Retention rate</Label>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Andel kunder som återkommer efter första besöket. Högre retention = mer återkommande intäkter.</p>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
+                </div>
                 <span className="text-2xl font-bold text-primary">{retentionRate}%</span>
               </div>
               <Slider
