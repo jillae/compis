@@ -11,11 +11,13 @@ import { PRICING_TIERS, formatPrice } from '@/lib/billing';
 import { SubscriptionTier } from '@prisma/client';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { PricingToggle, PriceDisplay } from '@/components/pricing/pricing-toggle';
 
 export default function UpgradePage() {
   const router = useRouter();
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null);
   const [upgrading, setUpgrading] = useState(false);
+  const [isYearly, setIsYearly] = useState(false);
 
   const handleUpgrade = async (tier: SubscriptionTier) => {
     try {
@@ -63,6 +65,11 @@ export default function UpgradePage() {
         </Link>
       </div>
 
+      {/* Pricing Toggle */}
+      <div className="flex justify-center">
+        <PricingToggle onToggle={setIsYearly} />
+      </div>
+
       {/* Pricing Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* BASIC */}
@@ -70,11 +77,8 @@ export default function UpgradePage() {
           <CardHeader>
             <CardTitle className="text-2xl">{PRICING_TIERS.BASIC.name}</CardTitle>
             <CardDescription>För mindre kliniker som börjar digitalisera</CardDescription>
-            <div className="pt-4">
-              <div className="text-4xl font-bold text-blue-600">
-                {formatPrice(PRICING_TIERS.BASIC.price)}
-              </div>
-              <p className="text-sm text-muted-foreground">/månad</p>
+            <div className="pt-4 text-blue-600">
+              <PriceDisplay monthlyPrice={PRICING_TIERS.BASIC.price} isYearly={isYearly} />
             </div>
           </CardHeader>
           <CardContent>
@@ -113,11 +117,8 @@ export default function UpgradePage() {
               {PRICING_TIERS.PROFESSIONAL.name}
             </CardTitle>
             <CardDescription>För växande kliniker som vill maximera intäkter</CardDescription>
-            <div className="pt-4">
-              <div className="text-4xl font-bold text-purple-600">
-                {formatPrice(PRICING_TIERS.PROFESSIONAL.price)}
-              </div>
-              <p className="text-sm text-purple-700">/månad</p>
+            <div className="pt-4 text-purple-600">
+              <PriceDisplay monthlyPrice={PRICING_TIERS.PROFESSIONAL.price} isYearly={isYearly} />
             </div>
           </CardHeader>
           <CardContent className="pt-6">
@@ -149,11 +150,8 @@ export default function UpgradePage() {
           <CardHeader>
             <CardTitle className="text-2xl">{PRICING_TIERS.ENTERPRISE.name}</CardTitle>
             <CardDescription>För etablerade kliniker med flera enheter</CardDescription>
-            <div className="pt-4">
-              <div className="text-4xl font-bold text-indigo-600">
-                {formatPrice(PRICING_TIERS.ENTERPRISE.price)}
-              </div>
-              <p className="text-sm text-muted-foreground">/månad</p>
+            <div className="pt-4 text-indigo-600">
+              <PriceDisplay monthlyPrice={PRICING_TIERS.ENTERPRISE.price} isYearly={isYearly} />
             </div>
           </CardHeader>
           <CardContent>
