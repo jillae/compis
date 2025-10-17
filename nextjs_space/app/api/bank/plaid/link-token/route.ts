@@ -32,18 +32,24 @@ export async function POST(req: NextRequest) {
 
     const plaidClient = createPlaidClient()
 
-    // Create link token
+    // Get the base URL for OAuth redirect
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const redirectUri = `${baseUrl}/settings/bank/plaid-oauth-callback`
+
+    // Create link token with OAuth redirect URI for Swedish banks
     const linkToken = await plaidClient.createLinkToken({
       userId: user.id,
       clientName: user.clinic.name || 'Flow App',
       language: 'sv',
       countryCodes: ['SE' as any],
       products: ['transactions' as any],
+      redirectUri, // Required for OAuth with Swedish banks
     })
 
     return NextResponse.json({
       linkToken: linkToken.link_token,
       expiration: linkToken.expiration,
+      redirectUri, // Return redirect URI to frontend for debugging
     })
   } catch (error: any) {
     console.error('Error creating link token:', error)

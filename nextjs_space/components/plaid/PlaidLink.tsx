@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { usePlaidLink, PlaidLinkOptions, PlaidLinkOnSuccess } from 'react-plaid-link'
 import { Button } from '@/components/ui/button'
 import { Loader2, Building2 } from 'lucide-react'
@@ -15,6 +15,7 @@ interface PlaidLinkProps {
 export function PlaidLinkButton({ onSuccess, onExit, disabled }: PlaidLinkProps) {
   const [linkToken, setLinkToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [shouldOpen, setShouldOpen] = useState(false)
 
   // Fetch link token when button is clicked
   const fetchLinkToken = async () => {
@@ -29,7 +30,13 @@ export function PlaidLinkButton({ onSuccess, onExit, disabled }: PlaidLinkProps)
       }
 
       const data = await response.json()
-      setLinkToken(data.linkToken)
+      
+      // Store link token in localStorage for OAuth callback
+      if (data.linkToken) {
+        localStorage.setItem('plaid_link_token', data.linkToken)
+        setLinkToken(data.linkToken)
+        setShouldOpen(true)
+      }
     } catch (error) {
       console.error('Error fetching link token:', error)
       alert('Failed to initialize bank connection. Please try again.')
@@ -59,6 +66,9 @@ export function PlaidLinkButton({ onSuccess, onExit, disabled }: PlaidLinkProps)
 
         const data = await response.json()
         
+        // Clear stored link token after successful connection
+        localStorage.removeItem('plaid_link_token')
+        
         if (onSuccess) {
           onSuccess(publicToken, metadata)
         } else {
@@ -68,15 +78,32 @@ export function PlaidLinkButton({ onSuccess, onExit, disabled }: PlaidLinkProps)
       } catch (error) {
         console.error('Error exchanging token:', error)
         alert('Failed to connect bank account. Please try again.')
+        localStorage.removeItem('plaid_link_token')
       }
     },
     [onSuccess]
   )
 
+  const handleOnExit = useCallback(
+    (error: any, metadata: any) => {
+      if (error) {
+        console.error('Plaid Link exit error:', error)
+      }
+      
+      // Don't clear token on exit - user might be in OAuth flow
+      // Token will be cleared on success or after timeout
+      
+      if (onExit) {
+        onExit()
+      }
+    },
+    [onExit]
+  )
+
   const config: PlaidLinkOptions = {
     token: linkToken,
     onSuccess: handleOnSuccess,
-    onExit: onExit,
+    onExit: handleOnExit,
   }
 
   const { open, ready } = usePlaidLink(config)
@@ -84,16 +111,18 @@ export function PlaidLinkButton({ onSuccess, onExit, disabled }: PlaidLinkProps)
   const handleClick = async () => {
     if (!linkToken) {
       await fetchLinkToken()
-    }
-    if (ready && linkToken) {
+    } else if (ready) {
       open()
     }
   }
 
-  // Auto-open when link token is ready
-  if (linkToken && ready) {
-    setTimeout(() => open(), 100)
-  }
+  // Auto-open when link token is ready and shouldOpen is true
+  useEffect(() => {
+    if (linkToken && ready && shouldOpen) {
+      setShouldOpen(false) // Reset flag
+      setTimeout(() => open(), 100)
+    }
+  }, [linkToken, ready, shouldOpen, open])
 
   return (
     <Button
