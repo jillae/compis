@@ -140,20 +140,20 @@ async function seed() {
   try {
     console.log('🌱 Starting database seed...')
 
-    // Create superadmin user
+    // Create superadmin user (Gilbert)
     const superadminPassword = await bcrypt.hash('superadmin123', 10)
     await prisma.user.upsert({
-      where: { email: 'superadmin@klinikflow.se' },
+      where: { email: 'gilbert@archacademy.se' },
       update: {},
       create: {
-        email: 'superadmin@klinikflow.se',
+        email: 'gilbert@archacademy.se',
         password: superadminPassword,
-        firstName: 'Super',
-        lastName: 'Admin',
+        firstName: 'Gilbert',
+        lastName: 'Oswald',
         companyName: 'Klinik Flow Control',
-        jobTitle: 'Platform Administrator',
-        name: 'Super Admin',
-        role: 'ADMIN'
+        jobTitle: 'Platform Owner',
+        name: 'Gilbert Oswald',
+        role: 'SUPER_ADMIN'
       }
     })
 
@@ -188,6 +188,29 @@ async function seed() {
         jobTitle: 'Demo Account',
         name: 'Demo User',
         role: 'STAFF'
+      }
+    })
+
+    console.log('🏥 Creating Arch Clinic (testbench)...')
+    const archClinic = await prisma.clinic.upsert({
+      where: { id: 'arch-clinic-main' },
+      update: {},
+      create: {
+        id: 'arch-clinic-main',
+        name: 'Arch Clinic',
+        description: 'Testbänk för Flow - alla features aktiverade',
+        address: 'Stockholm, Sweden',
+        email: 'info@archacademy.se',
+        phone: '+46 70 123 45 67',
+        tier: 'INTERNAL',
+        subscriptionStatus: 'ACTIVE',
+        isActive: true,
+        bokadirektEnabled: true,
+        metaEnabled: true,
+        corexEnabled: true,
+        dynamicPricingEnabled: true,
+        retentionAutopilotEnabled: true,
+        aiActionsEnabled: true
       }
     })
 
@@ -299,11 +322,14 @@ async function seed() {
 
     console.log('✨ Database seeded successfully!')
     console.log(`Created:`)
-    console.log(`  - 3 users (superadmin, admin, demo)`)
+    console.log(`  - 1 SUPER_ADMIN (gilbert@archacademy.se)`)
+    console.log(`  - 2 other users (admin, demo)`)
+    console.log(`  - 1 clinic (Arch Clinic - INTERNAL tier)`)
     console.log(`  - ${staff.length} staff members`)
     console.log(`  - ${rooms.length} treatment rooms`)  
     console.log(`  - ${customers.length} customers`)
     console.log(`  - 250 bookings with realistic patterns`)
+    console.log(`\n🎯 Next: Sanna can signup at goto.klinikflow.app/auth/signup`)
 
   } catch (error) {
     console.error('Error seeding database:', error)
