@@ -15,8 +15,8 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/',
     '/auth',
-    '/login',
-    '/signup',
+    '/auth/login',
+    '/auth/signup',
     '/pricing',
     '/contact',
     '/docs',
@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
 
   // Require authentication for protected routes
   if (!token) {
-    const loginUrl = new URL('/login', request.url)
+    const loginUrl = new URL('/auth/login', request.url)
     loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)
   }
