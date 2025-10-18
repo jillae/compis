@@ -316,7 +316,19 @@ export default function SimulatorPage() {
             {/* Bookings per day */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Bokningar per dag</Label>
+                <div className="flex items-center gap-2">
+                  <Label>Bokningar per dag</Label>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Antal bokningar din klinik tar emot per dag. Högre antal = mer intäkter men kräver mer kapacitet.</p>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
+                </div>
                 <span className="text-2xl font-bold text-primary">{bookingsPerDay.toFixed(1)}</span>
               </div>
               <Slider
@@ -335,7 +347,19 @@ export default function SimulatorPage() {
             {/* Avg booking value */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Genomsnittligt bokningsvärde</Label>
+                <div className="flex items-center gap-2">
+                  <Label>Genomsnittligt bokningsvärde</Label>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Medelvärde per bokning. Öka genom att sälja premium-tjänster eller tilläggsprodukter.</p>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
+                </div>
                 <span className="text-2xl font-bold text-primary">{avgBookingValue.toFixed(0)} kr</span>
               </div>
               <Slider
@@ -354,7 +378,19 @@ export default function SimulatorPage() {
             {/* New customers */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Nya kunder per månad</Label>
+                <div className="flex items-center gap-2">
+                  <Label>Nya kunder per månad</Label>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Antal nya kunder som kommer till kliniken varje månad. Öka genom marknadsföring och rekommendationer.</p>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
+                </div>
                 <span className="text-2xl font-bold text-primary">{newCustomersPerMonth}</span>
               </div>
               <Slider
@@ -404,7 +440,19 @@ export default function SimulatorPage() {
             {/* No-show rate */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>No-show rate</Label>
+                <div className="flex items-center gap-2">
+                  <Label>No-show rate</Label>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Andel bokningar där kunden inte dyker upp. Minska genom påminnelser och bekräftelser.</p>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
+                </div>
                 <span className="text-2xl font-bold text-orange-600">{noShowRate.toFixed(1)}%</span>
               </div>
               <Slider
