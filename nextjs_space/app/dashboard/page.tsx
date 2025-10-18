@@ -106,16 +106,27 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [timePeriod, setTimePeriod] = useState<string>('30');
   const [workdays, setWorkdays] = useState<'5' | '7'>('7');
-  const [simulatedRole, setSimulatedRole] = useState<UserRole>(() => {
-    // Initialize from localStorage or default to user's actual role
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('simulatedRole');
-      if (saved && Object.values(UserRole).includes(saved as UserRole)) {
-        return saved as UserRole;
-      }
+  const [simulatedRole, setSimulatedRole] = useState<UserRole>(UserRole.ADMIN);
+  const [weekNumber, setWeekNumber] = useState<number>(1);
+  const [isClient, setIsClient] = useState(false);
+
+  // Mark when we're on client to avoid hydration mismatches
+  useEffect(() => {
+    setIsClient(true);
+    
+    // Calculate week number on client only
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1);
+    const diff = now.getTime() - start.getTime();
+    const oneWeek = 1000 * 60 * 60 * 24 * 7;
+    setWeekNumber(Math.ceil(diff / oneWeek));
+
+    // Initialize from localStorage
+    const saved = localStorage.getItem('simulatedRole');
+    if (saved && Object.values(UserRole).includes(saved as UserRole)) {
+      setSimulatedRole(saved as UserRole);
     }
-    return UserRole.ADMIN;
-  });
+  }, []);
 
   // Helper function to convert timePeriod to days
   const getDaysFromTimePeriod = (period: string): number => {
@@ -129,28 +140,18 @@ export default function DashboardPage() {
     return parseInt(period) || 30;
   };
 
-  // Initialize simulatedRole from user's actual role when session loads
-  useEffect(() => {
-    if (session?.user?.role) {
-      const saved = localStorage.getItem('simulatedRole');
-      if (!saved) {
-        // First time: set to user's actual role
-        setSimulatedRole(session.user.role);
-        localStorage.setItem('simulatedRole', session.user.role);
-      }
-    }
-  }, [session?.user?.role]);
-
   // Save simulatedRole to localStorage whenever it changes
   useEffect(() => {
-    if (simulatedRole) {
+    if (simulatedRole && isClient) {
       localStorage.setItem('simulatedRole', simulatedRole);
     }
-  }, [simulatedRole]);
+  }, [simulatedRole, isClient]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [timePeriod]);
+    if (isClient) {
+      fetchDashboardData();
+    }
+  }, [timePeriod, isClient]);
 
   const fetchDashboardData = async () => {
     try {
@@ -296,13 +297,7 @@ export default function DashboardPage() {
                           <span className="text-lg">✨</span>
                         </div>
                         <p className="text-xs text-white/70 mt-0.5 tracking-wide">
-                          NYA V{(() => {
-                            const now = new Date();
-                            const start = new Date(now.getFullYear(), 0, 1);
-                            const diff = now.getTime() - start.getTime();
-                            const oneWeek = 1000 * 60 * 60 * 24 * 7;
-                            return Math.ceil(diff / oneWeek);
-                          })()}
+                          NYA V{weekNumber}
                         </p>
                       </div>
                     </div>
