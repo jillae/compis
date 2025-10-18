@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,9 +15,11 @@ import {
   Volume2, 
   VolumeX,
   Loader2,
-  Bot
+  Bot,
+  LogIn
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -25,6 +28,7 @@ interface Message {
 }
 
 export function CorexChatWidget() {
+  const { data: session, status } = useSession() || {};
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -33,6 +37,11 @@ export function CorexChatWidget() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Visa inte widget:en om användaren inte är inloggad
+  if (status === 'unauthenticated' || !session) {
+    return null;
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -82,9 +91,11 @@ export function CorexChatWidget() {
         }
       } else {
         toast.error('Kunde inte få svar från Corex');
+        console.error('Corex API error:', data);
       }
     } catch (error) {
-      toast.error('Ett fel uppstod');
+      console.error('Corex chat error:', error);
+      toast.error('Ett fel uppstod vid kommunikation med Corex');
     } finally {
       setLoading(false);
     }
@@ -102,10 +113,20 @@ export function CorexChatWidget() {
         const audioBlob = await res.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
-        audio.play();
+        
+        audio.onerror = () => {
+          console.error('Audio playback error');
+          toast.error('Kunde inte spela upp ljudet');
+        };
+        
+        await audio.play();
+      } else {
+        console.error('TTS API error:', await res.text());
+        toast.error('Text-till-tal misslyckades');
       }
     } catch (error) {
       console.error('TTS error:', error);
+      toast.error('Kunde inte konvertera text till tal');
     }
   };
 
