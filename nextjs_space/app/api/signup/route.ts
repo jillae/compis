@@ -30,23 +30,45 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create clinic first (every new user gets their own clinic)
-    const clinicName = companyName || `${firstName || ''} ${lastName || ''}'s Clinic`.trim() || 'Min Klinik'
+    // Special case: Link sanna@archacademy.se to existing Arch Clinic
+    let clinicId: string
     
-    const clinic = await prisma.clinic.create({
-      data: {
-        name: clinicName,
-        tier: 'BASIC', // New users start with BASIC tier
-        subscriptionStatus: 'TRIAL', // 30-day trial
-        trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-        isActive: true,
-        bokadirektEnabled: false, // Can be enabled during onboarding
-        metaEnabled: false,
-        corexEnabled: false,
+    if (email.toLowerCase() === 'sanna@archacademy.se') {
+      // Link Sanna to the existing Arch Clinic
+      clinicId = 'arch-clinic-main'
+      
+      // Verify that Arch Clinic exists
+      const archClinic = await prisma.clinic.findUnique({
+        where: { id: clinicId }
+      })
+      
+      if (!archClinic) {
+        return NextResponse.json(
+          { error: "Arch Clinic not found" },
+          { status: 500 }
+        )
       }
-    })
+    } else {
+      // Create clinic first (every new user gets their own clinic)
+      const clinicName = companyName || `${firstName || ''} ${lastName || ''}'s Clinic`.trim() || 'Min Klinik'
+      
+      const clinic = await prisma.clinic.create({
+        data: {
+          name: clinicName,
+          tier: 'BASIC', // New users start with BASIC tier
+          subscriptionStatus: 'TRIAL', // 30-day trial
+          trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          isActive: true,
+          bokadirektEnabled: false, // Can be enabled during onboarding
+          metaEnabled: false,
+          corexEnabled: false,
+        }
+      })
+      
+      clinicId = clinic.id
+    }
 
-    // Create user and link to the new clinic
+    // Create user and link to the clinic
     const user = await prisma.user.create({
       data: {
         email,
@@ -57,7 +79,7 @@ export async function POST(request: NextRequest) {
         jobTitle,
         name: `${firstName || ''} ${lastName || ''}`.trim() || email,
         role: 'ADMIN', // First user of a clinic is always ADMIN
-        clinicId: clinic.id,
+        clinicId: clinicId,
       }
     })
 
@@ -65,7 +87,7 @@ export async function POST(request: NextRequest) {
       { 
         message: "User created successfully", 
         userId: user.id,
-        clinicId: clinic.id 
+        clinicId: clinicId 
       },
       { status: 201 }
     )
