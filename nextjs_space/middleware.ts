@@ -23,6 +23,7 @@ export async function middleware(request: NextRequest) {
     '/faq',
     '/legal',
     '/api/auth',
+    '/api/signup',
   ]
 
   // Check if route is public
