@@ -87,7 +87,7 @@ export default function SuperAdminPage() {
     )
   }
 
-  if (!data) {
+  if (!data || !Array.isArray(data.clinics)) {
     return <div>Fel vid laddning av data</div>
   }
 
