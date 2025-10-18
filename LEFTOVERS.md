@@ -1,138 +1,45 @@
 
 # LEFTOVERS - Kvarvarande Tasks
 
-**Senast uppdaterat:** 2025-10-18 (Kväll)
+**Senast uppdaterat:** 2025-10-18 (Kväll - Efter Task 1-5)
 
 ---
 
-## 📊 Status - Vad som är KLART denna session
+## ✅ KLART - Task 1-5 (VECKA 1 Critical Security)
 
-### ✅ STT (Speech-to-Text) - KLART
-1. ✅ KB-Whisper uppdaterad till port 5001 (Flow-Speak, telefoni-optimerad)
-2. ✅ OpenAI Whisper fullständig konfiguration implementerad:
-   - Model: whisper-1
-   - Language: Swedish (sv)
-   - Response format: verbose_json (timestamps + metadata)
-   - Temperature: 0.0 (deterministic)
-   - Timestamp granularities: word-level
-   - Prompt: Svensk medicinsk terminologi (Bokadirekt, Botox, etc.)
-3. ✅ STT service uppdaterad med alla OpenAI-parametrar
-4. ✅ Quality metrics extraction (avgLogprob, compressionRatio, confidence)
+### Task 1: Superadmin Dashboard ✅
+- ✅ Förbättrad SuperAdmin layout med proper navigation
+- ✅ Sticky header
+- ✅ ClinicSelector dropdown
+- ✅ ViewingBanner för clinic impersonation
 
----
+### Task 2: Clinic Selector & Impersonation ✅
+- ✅ ClinicContext skapad för state management
+- ✅ ClinicSelector dropdown implementerad
+- ✅ ViewingBanner för att visa vilken klinik SA tittar på
+- ✅ "Exit Clinic View" knapp
 
-## 🔴 PRIORITET 1: Kritiska säkerhetsproblem (Login Routing)
+### Task 3: Role Switch with Dynamic Routing ✅
+- ✅ RoleToggle redirectar nu korrekt:
+  - SUPER_ADMIN → `/superadmin`
+  - ADMIN & STAFF → `/dashboard`
 
-### 1.1 Superadmin Dashboard - SAKNAS HELT
-**Problem:** SA har ingen dedicated dashboard, kan bara nå via GoCardless-sidan
+### Task 4: Remove GoCardless, Create Billing ✅
+- ✅ `/superadmin/gocardless/page.tsx` borttagen
+- ✅ `/superadmin/billing/page.tsx` skapad med Plaid integration
+- ✅ Navigation uppdaterad
 
-**Åtgärd:**
-- [ ] Skapa `/app/superadmin/dashboard/page.tsx`
-- [ ] Innehåll:
-  - System health metrics
-  - Lista över alla clinics med quick stats
-  - Recent activity logs
-  - Billing overview (Plaid-status)
-  - Quick actions (add clinic, view logs, etc.)
-- [ ] Uppdatera middleware för att redirecta SA till `/superadmin/dashboard` efter login
+### Task 5: Remove "Landningssida" från menyn ✅
+- ✅ "Landningssida" link borttagen från HamburgerMenu
+- ✅ Endast tillgänglig via direktlänk (/)
 
-**Filer att skapa:**
-```
-/app/superadmin/dashboard/page.tsx
-/components/superadmin/system-metrics.tsx
-/components/superadmin/clinic-list.tsx
-/components/superadmin/recent-activity.tsx
-```
+**Dokumentation:** Se `TASK_1_5_IMPLEMENTATION_SUMMARY.md`
 
 ---
 
-### 1.2 Clinic Selector & Impersonation - SAKNAS
-**Problem:** SA kan inte välja klinik för att se clinic user view
+## 🔴 PRIORITET 1: Kvarvarande Kritiska Tasks
 
-**Åtgärd:**
-- [ ] Skapa Clinic Context (`/context/ClinicContext.tsx`)
-- [ ] Implementera clinic selector dropdown i header (för SA)
-- [ ] Visa "Viewing as: [Clinic Name]" banner när klinik är vald
-- [ ] "Exit SA Mode" knapp för att återgå till SA view
-
-**UI Mockup:**
-```
-┌────────────────────────────────────────┐
-│ Flow | 👤 Gilbert (SA)                 │
-│                                        │
-│ [🔧 SA Mode ▼] | Clinic: [Dropdown ▼] │
-│                                        │
-│ SA Mode:                               │
-│  ✓ Superadmin View                     │
-│  ○ Clinic User View (requires clinic)  │
-│                                        │
-│ Clinic Selector (när i User View):     │
-│  ○ None (SA-only view)                 │
-│  ✓ ArchClinic                          │
-│  ○ MockClinic A                        │
-│  ○ MockClinic B                        │
-└────────────────────────────────────────┘
-```
-
-**Filer att skapa/uppdatera:**
-```
-/context/ClinicContext.tsx
-/components/superadmin/clinic-selector.tsx
-/components/superadmin/viewing-banner.tsx
-/components/layout/header.tsx (uppdatera med clinic selector för SA)
-```
-
----
-
-### 1.3 Role Switch - Fungerar inte
-**Problem:** När SA växlar roll i menyn händer ingenting
-
-**Åtgärd:**
-- [ ] Implementera role context med state management (Zustand eller React Context)
-- [ ] Role switch ska:
-  - Uppdatera UI permissions dynamiskt
-  - Re-route till korrekt dashboard (/superadmin vs /dashboard)
-  - Uppdatera sidebar menu items baserat på role
-  - Persist role selection i localStorage
-
-**Implementation:**
-```typescript
-// /lib/role-context.tsx
-export const RoleContext = createContext({
-  currentRole: 'SUPER_ADMIN',
-  selectedClinic: null,
-  isSuperadminMode: true,
-  switchRole: (role: string) => {},
-  selectClinic: (clinicId: string) => {},
-  exitSuperadminMode: () => {}
-});
-```
-
----
-
-### 1.4 Ta bort GoCardless routes
-**Problem:** `/superadmin/gocardless` är den ENDA vägen till SA dashboard just nu
-
-**Åtgärd:**
-- [ ] Ta bort `/app/superadmin/gocardless/page.tsx`
-- [ ] Skapa `/app/superadmin/billing/page.tsx` istället
-- [ ] Integrera Plaid-status (ersätt GoCardless med Plaid)
-- [ ] Uppdatera alla länkar som pekar på gocardless
-
-**Filer att ta bort:**
-```
-/app/superadmin/gocardless/page.tsx
-```
-
-**Filer att skapa:**
-```
-/app/superadmin/billing/page.tsx
-/components/superadmin/plaid-status.tsx
-```
-
----
-
-### 1.5 Onboarding upstream error
+### 1.5 Onboarding upstream error ⚠️
 **Problem:** `/onboarding` ger "upstream connect error"
 
 **Åtgärd:**
@@ -150,24 +57,6 @@ ls -la app/onboarding/
 curl https://goto.klinikflow.app/onboarding
 
 # Kontrollera Next.js routing logs
-# Kolla efter upstream connection errors i deployment logs
-```
-
----
-
-### 1.6 Ta bort "Landningssida" från menyn för inloggade användare
-**Problem:** Inloggade användare ser "Landningssida" i menyn som leder till onboarding → simulator
-
-**Åtgärd:**
-- [ ] Hitta sidebar/navigation component
-- [ ] Conditional rendering: visa INTE "Landningssida" för inloggade clinic users
-- [ ] För SA: "Landningssida" kan länka till marketing preview (goto.klinikflow.app)
-- [ ] Intäktssimulator ska nås via huvudmenyn direkt, EJ via onboarding
-
-**Filer att uppdatera:**
-```
-/components/layout/sidebar.tsx (eller motsvarande)
-/components/layout/navigation.tsx
 ```
 
 ---
@@ -238,10 +127,10 @@ curl https://goto.klinikflow.app/onboarding
 
 ## 🟡 PRIORITET 3: Payatt Terminologi - Byt "billing" till "Engagement Hub"
 
+**DECISION:** User valde **Option A: `/engagement/*`** (Customer Engagement Hub) ✅
+
 ### 3.1 Background från prompt
 **Problem:** "billing" skapar förvirring - betyder fakturering i SaaS, inte loyalty
-
-**Rekommendation:** Byt till "Customer Engagement Hub" eller "Growth Suite"
 
 **Rationale:**
 - "Billing" i SaaS = betalningshantering och fakturering
@@ -250,7 +139,7 @@ curl https://goto.klinikflow.app/onboarding
 
 ---
 
-### 3.2 Routing-ändringar
+### 3.2 Routing-ändringar (STOR REFACTORING) 🚨
 **Åtgärd:**
 - [ ] Byt URL från `/app/billing/*` till `/app/engagement/*`
 - [ ] Uppdatera API routes från `/api/billing/*` till `/api/engagement/*`
@@ -267,25 +156,32 @@ Before:                          After:
 /api/billing/ai/chat          →  /api/engagement/ai/chat
 ```
 
-**OBS:** Detta påverkar MÅNGA filer - behöver systematisk refactoring!
+**⚠️ OBS:** Detta påverkar MÅNGA filer - behöver systematisk refactoring!
+
+**Script för att hitta alla references:**
+```bash
+cd /home/ubuntu/flow/nextjs_space
+grep -r "billing" app/ lib/ components/ | grep -v "Invoice" | grep -v "Payment" | grep -v "Subscription"
+```
 
 ---
 
 ### 3.3 UI-terminologi
 **Åtgärd:**
 - [ ] Uppdatera modulnamn i navigation: "Customer Engagement Hub"
-- [ ] Svenska översättning: "Kundengagemang" eller "Tillväxt & Retention"
+- [ ] Svenska översättning: "Kundengagemang"
 - [ ] Undermeny:
-  - Loyalty Programs
-  - Campaigns
-  - SMS & Messaging
-  - Analytics
+  - Loyalty Programs → Lojalitetsprogram
+  - Campaigns → Kampanjer
+  - SMS & Messaging → SMS & Meddelanden
+  - Analytics → Analys
 
 **Filer att uppdatera:**
 ```
-/components/layout/sidebar.tsx
-/components/layout/navigation.tsx
-/app/engagement/layout.tsx (header/title)
+/components/layout/sidebar.tsx (om den finns)
+/components/layout/navigation.tsx (om den finns)
+/components/dashboard/hamburger-menu.tsx
+/app/engagement/layout.tsx (ny header/title)
 ```
 
 ---
@@ -296,38 +192,16 @@ Before:                          After:
 - [ ] Uppdatera interfaces, types, function names
 - [ ] Kontrollera att ÄKTA billing (Invoice, Payment, Subscription) INTE påverkas
 
-**Script för att hitta filer:**
-```bash
-# Hitta alla references till "billing" som INTE är fakturering
-cd /home/ubuntu/flow/nextjs_space
-grep -r "billing" app/ lib/ components/ | grep -v "Invoice" | grep -v "Payment" | grep -v "Subscription"
-```
+**Important:** Behåll "billing" för:
+- Invoice-relaterade funktioner
+- Payment processing
+- Subscription management (för SaaS billing)
 
----
-
-### 3.5 Alternativa namn (från prompt)
-**Om "Engagement" inte fungerar, andra förslag:**
-
-**Option A: Engagement-fokuserad** (mest rekommenderad)
-```
-Modulnamn: "Customer Engagement Hub"
-Routes: /app/engagement/*
-Svenska: "Kundengagemang"
-```
-
-**Option B: Growth-fokuserad**
-```
-Modulnamn: "Growth & Retention Suite"
-Routes: /app/growth/*
-Svenska: "Tillväxt & Retention"
-```
-
-**Option C: Loyalty-fokuserad** (mest konservativt)
-```
-Modulnamn: "Loyalty & Campaigns Platform"
-Routes: /app/loyalty/*
-Svenska: "Lojalitet & Kampanjer"
-```
+Byt till "engagement" för:
+- Payatt-relaterade funktioner
+- Loyalty programs
+- SMS campaigns
+- Customer engagement features
 
 ---
 
@@ -335,7 +209,7 @@ Svenska: "Lojalitet & Kampanjer"
 
 ### 4.1 Visningsläge / Display preferences
 **Åtgärd:**
-- [ ] Implementera dark/light mode toggle
+- [ ] Implementera dark/light mode toggle (finns redan?)
 - [ ] Compact vs Expanded view
 - [ ] Användarinställningar för display preferences
 - [ ] Länk i huvudmenyn: "Inställningar" → "Display Preferences"
@@ -362,12 +236,12 @@ Svenska: "Lojalitet & Kampanjer"
 
 ## 📋 Implementation Checklist - Rekommenderad ordning
 
-**VECKA 1: Kritisk säkerhet & SA funktionalitet**
-- [ ] 1.1 - Skapa Superadmin Dashboard
-- [ ] 1.2 - Implementera Clinic Selector
-- [ ] 1.3 - Fixa Role Switch
-- [ ] 1.4 - Ta bort GoCardless, skapa Billing page
-- [ ] 1.6 - Ta bort "Landningssida" från meny
+**✅ VECKA 1: Kritisk säkerhet & SA funktionalitet (KLART!)**
+- ✅ 1.1 - Skapa Superadmin Dashboard
+- ✅ 1.2 - Implementera Clinic Selector
+- ✅ 1.3 - Fixa Role Switch
+- ✅ 1.4 - Ta bort GoCardless, skapa Billing page
+- ✅ 1.6 - Ta bort "Landningssida" från meny
 
 **VECKA 2: STT UI & Payatt terminologi**
 - [ ] 2.1 - OpenAI Configuration UI
@@ -394,17 +268,19 @@ Svenska: "Lojalitet & Kampanjer"
 **Tekniska specs:**
 - KB-Whisper: `/home/ubuntu/Uploads/KB_Whisper_Access_Guide_v2.pdf`
 - STT Implementation: `/home/ubuntu/flow/STT_IMPLEMENTATION_SUMMARY.md`
+- **Task 1-5 Summary:** `/home/ubuntu/flow/TASK_1_5_IMPLEMENTATION_SUMMARY.md` ✅
 
 ---
 
 ## 💬 Frågor till användaren
 
-1. **Payatt terminologi:** Vill du gå vidare med "Engagement Hub" eller föredrar du "Growth Suite" eller "Loyalty Platform"?
-2. **SA clinic association:** Ska Gilbert (SA) vara kopplad till ArchClinic eller ha egen org ("KlinikFlow Admin")?
-3. **Onboarding flow:** Ska onboarding vara en one-time setup eller kunna nås igen senare?
+1. ✅ **Payatt terminologi:** User valde **Option A: "Engagement Hub"**
+2. **SA clinic association:** Ska Gilbert (SA) vara kopplad till ArchClinic eller ha egen org ("KlinikFlow Admin")? (Ej besvarad)
+3. **Onboarding flow:** Ska onboarding vara en one-time setup eller kunna nås igen senare? (Ej besvarad)
 
 ---
 
 **Dokumenterat av:** DeepAgent  
-**Session:** 2025-10-18 (Kväll)  
-**Nästa session:** Se prioriteringar ovan och börja med VECKA 1 tasks
+**Session:** 2025-10-18 (Kväll - Efter Task 1-5)  
+**Nästa session:** Börja med VECKA 2 tasks (STT UI + Payatt refactoring)
+

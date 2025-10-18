@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +19,8 @@ interface RoleToggleProps {
 }
 
 export function RoleToggle({ currentRole, onRoleChange }: RoleToggleProps) {
+  const router = useRouter()
+
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case UserRole.SUPER_ADMIN:
@@ -41,6 +43,18 @@ export function RoleToggle({ currentRole, onRoleChange }: RoleToggleProps) {
     }
   }
 
+  const handleRoleChange = (role: UserRole) => {
+    onRoleChange(role)
+    
+    // Redirect based on role
+    if (role === UserRole.SUPER_ADMIN) {
+      router.push('/superadmin')
+    } else {
+      // ADMIN and STAFF go to dashboard
+      router.push('/dashboard')
+    }
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -51,15 +65,15 @@ export function RoleToggle({ currentRole, onRoleChange }: RoleToggleProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onRoleChange(UserRole.SUPER_ADMIN)}>
+        <DropdownMenuItem onClick={() => handleRoleChange(UserRole.SUPER_ADMIN)}>
           <Shield className="mr-2 h-4 w-4" />
           SuperAdmin (SA)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onRoleChange(UserRole.ADMIN)}>
+        <DropdownMenuItem onClick={() => handleRoleChange(UserRole.ADMIN)}>
           <Users className="mr-2 h-4 w-4" />
           Admin (A)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onRoleChange(UserRole.STAFF)}>
+        <DropdownMenuItem onClick={() => handleRoleChange(UserRole.STAFF)}>
           <User className="mr-2 h-4 w-4" />
           Personal (S)
         </DropdownMenuItem>

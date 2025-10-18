@@ -49,6 +49,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Redirect SuperAdmin to their dashboard when accessing root dashboard
+  if (pathname === '/dashboard' && token.role === 'SUPER_ADMIN') {
+    // Allow SA to view dashboard (for impersonation)
+    // Don't redirect automatically
+  }
+
   // Dashboard route protection - require authentication
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding')) {
     // Already authenticated, allow access

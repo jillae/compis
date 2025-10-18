@@ -149,7 +149,7 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             </Link>
           </div>
 
-          {/* LABS Features (only for INTERNAL tier) */}
+          {/* LABS Features (only for SUPER_ADMIN) */}
           {userRole === UserRole.SUPER_ADMIN && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-yellow-600 uppercase tracking-wide">
@@ -161,27 +161,8 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
                   Revenue Intelligence Pro
                 </Button>
               </Link>
-              <Link href="/superadmin/gocardless" onClick={() => setOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Building className="h-4 w-4 mr-2" />
-                  GoCardless Config
-                </Button>
-              </Link>
             </div>
           )}
-
-          {/* External Links */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Länkar
-            </h3>
-            <Link href="/" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Landningssida
-              </Button>
-            </Link>
-          </div>
 
           {/* Role Toggle for Super Admin */}
           {userRole === UserRole.SUPER_ADMIN && simulatedRole && onRoleChange && (

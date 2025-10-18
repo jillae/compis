@@ -6,6 +6,8 @@ import { UserRole } from "@prisma/client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Home, Building2, Users, Settings, BarChart3, MessageSquare, Phone, CreditCard, Mic } from "lucide-react"
+import { ClinicSelector } from "@/components/superadmin/clinic-selector"
+import { ViewingBanner } from "@/components/superadmin/viewing-banner"
 
 export default async function SuperAdminLayout({
   children,
@@ -22,7 +24,7 @@ export default async function SuperAdminLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* SuperAdmin Header */}
-      <div className="border-b bg-card">
+      <div className="border-b bg-card sticky top-0 z-50">
         <div className="flex items-center justify-between px-8 py-4">
           <div className="flex items-center gap-6">
             <Link href="/superadmin" className="flex items-center gap-2">
@@ -35,7 +37,7 @@ export default async function SuperAdminLayout({
               <Link href="/superadmin">
                 <Button variant="ghost" size="sm">
                   <Home className="mr-2 h-4 w-4" />
-                  Overview
+                  Dashboard
                 </Button>
               </Link>
               <Link href="/superadmin/clinics">
@@ -74,15 +76,16 @@ export default async function SuperAdminLayout({
                   Analytics
                 </Button>
               </Link>
-              <Link href="/superadmin/plaid">
+              <Link href="/superadmin/billing">
                 <Button variant="ghost" size="sm">
                   <CreditCard className="mr-2 h-4 w-4" />
-                  Billing & Payments
+                  Billing
                 </Button>
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <ClinicSelector />
             <Link href="/dashboard">
               <Button variant="outline" size="sm">
                 View as User
@@ -92,8 +95,11 @@ export default async function SuperAdminLayout({
         </div>
       </div>
 
-      {/* Content */}
-      <main>{children}</main>
+      {/* Content with ViewingBanner */}
+      <main className="p-8">
+        <ViewingBanner />
+        {children}
+      </main>
     </div>
   )
 }
