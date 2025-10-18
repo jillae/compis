@@ -90,6 +90,12 @@ export const translations = {
     required: 'Detta fält är obligatoriskt',
     invalidEmail: 'Ogiltig e-postadress',
     invalidPhone: 'Ogiltigt telefonnummer',
+    networkError: 'Nätverksfel - försök igen',
+    timeout: 'Förfrågan tog för lång tid',
+    unknown: 'Ett okänt fel uppstod',
+    corexError: 'Corex AI kunde inte svara just nu',
+    ttsError: 'Kunde inte generera röst',
+    sttError: 'Kunde inte höra dig',
   },
   
   // Success messages
@@ -98,6 +104,9 @@ export const translations = {
     updated: 'Uppdaterad!',
     deleted: 'Borttagen!',
     created: 'Skapad!',
+    synced: 'Synkroniserad!',
+    sent: 'Skickad!',
+    scheduled: 'Schemalagd!',
   },
 };
 

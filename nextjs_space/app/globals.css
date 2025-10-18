@@ -1,6 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  /* Mobile overflow fixes */
+  .mobile-safe {
+    @apply max-w-full overflow-x-hidden;
+  }
+  
+  .text-truncate {
+    @apply truncate max-w-full;
+  }
+  
+  /* Smooth transitions for interactive elements */
+  .interactive-card {
+    @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-xl cursor-pointer;
+  }
+  
+  /* Tooltip styles */
+  .tooltip {
+    @apply absolute z-50 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap;
+  }
+  
+  /* Scrollbar styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded hover:bg-gray-500;
+  }
+}
  
 @layer base {
   :root {

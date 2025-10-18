@@ -111,7 +111,7 @@ export function CorexChatWidget() {
 
   const startListening = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error('Röststöd finns inte i din webbläsare');
+      toast.error('Röststöd finns inte i din webbläsare. Prova Chrome eller Edge.');
       return;
     }
 
@@ -124,17 +124,25 @@ export function CorexChatWidget() {
 
     recognition.onstart = () => {
       setIsListening(true);
-      toast.info('🎤 Lyssnar...');
+      toast('🎤 Lyssnar... Tala nu!', { duration: 3000 });
     };
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
       setIsListening(false);
+      toast.success('✓ Uppfattat!');
     };
 
-    recognition.onerror = () => {
-      toast.error('Kunde inte höra dig');
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'no-speech') {
+        toast.error('Ingen röst hördes - försök igen');
+      } else if (event.error === 'network') {
+        toast.error('Nätverksfel - kontrollera anslutningen');
+      } else {
+        toast.error('Kunde inte höra dig - försök igen');
+      }
       setIsListening(false);
     };
 
