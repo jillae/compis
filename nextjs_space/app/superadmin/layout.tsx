@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { UserRole } from "@prisma/client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Home, Building2, Users, Settings, BarChart3, MessageSquare, Phone, CreditCard } from "lucide-react"
+import { Home, Building2, Users, Settings, BarChart3, MessageSquare, Phone, CreditCard, Mic } from "lucide-react"
 
 export default async function SuperAdminLayout({
   children,
@@ -60,6 +60,12 @@ export default async function SuperAdminLayout({
                 <Button variant="ghost" size="sm">
                   <Phone className="mr-2 h-4 w-4" />
                   Voice & TTS
+                </Button>
+              </Link>
+              <Link href="/superadmin/stt-providers">
+                <Button variant="ghost" size="sm">
+                  <Mic className="mr-2 h-4 w-4" />
+                  STT Providers
                 </Button>
               </Link>
               <Link href="/superadmin/analytics">
