@@ -38,7 +38,7 @@ export default function OnboardingPage() {
         const response = await fetch('/api/user/onboarding-status')
         const data = await response.json()
         if (data.completed) {
-          router.push('/dashboard/simulator')
+          router.push('/dashboard')
         } else if (data.step === 2) {
           setStep(2)
         }
@@ -103,7 +103,7 @@ export default function OnboardingPage() {
       })
 
       if (response.ok) {
-        router.push('/dashboard/simulator')
+        router.push('/dashboard')
       } else {
         const data = await response.json()
         setError(data.error || 'Något gick fel. Kontrollera dina uppgifter och försök igen.')

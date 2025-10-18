@@ -2,11 +2,14 @@
 'use client';
 
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { Separator } from '@/components/ui/separator';
 import { HeartPulse } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { data: session } = useSession() || {};
+  const isAuthenticated = !!session?.user;
 
   return (
     <footer className="border-t bg-muted/50 mt-auto">
@@ -23,32 +26,60 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Product */}
-          <div>
-            <h3 className="font-semibold mb-3 text-sm">Produkt</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard/insights" className="text-muted-foreground hover:text-primary transition-colors">
-                  Revenue Intelligence
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard/customers" className="text-muted-foreground hover:text-primary transition-colors">
-                  Customer Health
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard/marketing" className="text-muted-foreground hover:text-primary transition-colors">
-                  Marketing Automation
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Product - Only show dashboard links for authenticated users */}
+          {isAuthenticated ? (
+            <div>
+              <h3 className="font-semibold mb-3 text-sm">Produkt</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard/insights" className="text-muted-foreground hover:text-primary transition-colors">
+                    Revenue Intelligence
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard/customers" className="text-muted-foreground hover:text-primary transition-colors">
+                    Customer Health
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard/marketing" className="text-muted-foreground hover:text-primary transition-colors">
+                    Marketing Automation
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <div>
+              <h3 className="font-semibold mb-3 text-sm">Produkt</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/#features" className="text-muted-foreground hover:text-primary transition-colors">
+                    Funktioner
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing" className="text-muted-foreground hover:text-primary transition-colors">
+                    Priser
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs" className="text-muted-foreground hover:text-primary transition-colors">
+                    Dokumentation
+                  </Link>
+                </li>
+                <li>
+                  <a href="mailto:support@klinikflow.se" className="text-muted-foreground hover:text-primary transition-colors">
+                    Kontakt
+                  </a>
+                </li>
+              </ul>
+            </div>
+          )}
 
           {/* Support */}
           <div>
