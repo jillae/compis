@@ -33,15 +33,17 @@ export function CorexChatWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string>(`session_${Date.now()}`);
+  const [sessionId, setSessionId] = useState<string>('');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  // Visa inte widget:en om användaren inte är inloggad
-  if (status === 'unauthenticated' || !session) {
-    return null;
-  }
+
+  // Initialize sessionId on client side only to avoid hydration errors
+  useEffect(() => {
+    if (!sessionId) {
+      setSessionId(`session_${Date.now()}`);
+    }
+  }, [sessionId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,6 +52,11 @@ export function CorexChatWidget() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+  
+  // Visa inte widget:en om användaren inte är inloggad
+  if (status === 'unauthenticated' || !session) {
+    return null;
+  }
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
