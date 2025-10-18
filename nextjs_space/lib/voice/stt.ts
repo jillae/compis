@@ -132,17 +132,49 @@ export class STTProviderService {
   }
 
   /**
-   * OpenAI Whisper implementation
+   * OpenAI Whisper implementation with full parameter support
    */
   private async transcribeWithOpenAI(
     audioFile: File | Blob,
     provider: STTProviderConfig
   ): Promise<any> {
     
+    const config = provider.config_json;
+    
     const formData = new FormData();
     formData.append('file', audioFile, 'audio.mp3');
-    formData.append('model', provider.config_json.model || 'whisper-1');
-    formData.append('language', provider.config_json.language || 'sv');
+    formData.append('model', config.model || 'whisper-1');
+    
+    // Language (optional but recommended for Swedish)
+    if (config.language) {
+      formData.append('language', config.language);
+    }
+    
+    // Prompt for better accuracy with clinic-specific terminology
+    if (config.prompt) {
+      const truncatedPrompt = this.truncatePrompt(config.prompt, 224);
+      formData.append('prompt', truncatedPrompt);
+    }
+    
+    // Response format (verbose_json for timestamps + metadata)
+    const responseFormat = config.response_format || 'verbose_json';
+    formData.append('response_format', responseFormat);
+    
+    // Temperature (0.0 = deterministic, recommended for transcription)
+    if (config.temperature !== undefined) {
+      formData.append('temperature', config.temperature.toString());
+    }
+    
+    // Timestamp granularities (word-level timestamps)
+    if (config.timestamp_granularities && responseFormat === 'verbose_json') {
+      const granularities = Array.isArray(config.timestamp_granularities) 
+        ? config.timestamp_granularities 
+        : [config.timestamp_granularities];
+      
+      granularities.forEach((granularity: string) => {
+        formData.append('timestamp_granularities[]', granularity);
+      });
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), provider.timeout_seconds * 1000);
@@ -166,10 +198,20 @@ export class STTProviderService {
 
       const data = await response.json();
 
+      // Extract quality metrics from verbose_json response
+      const qualityMetrics = responseFormat === 'verbose_json' 
+        ? this.extractQualityMetrics(data) 
+        : null;
+
       return {
         text: data.text,
-        language: provider.config_json.language || 'sv',
-        duration: data.duration
+        language: data.language || config.language || 'sv',
+        duration: data.duration,
+        segments: data.segments,
+        words: data.words,
+        confidence: qualityMetrics?.confidence,
+        word_count: data.words?.length || data.text?.split(' ').length,
+        quality_metrics: qualityMetrics
       };
     } catch (error: any) {
       clearTimeout(timeoutId);
@@ -180,6 +222,39 @@ export class STTProviderService {
       
       throw error;
     }
+  }
+  
+  /**
+   * Truncate prompt to max tokens (approximation: ~4 chars per token)
+   */
+  private truncatePrompt(prompt: string, maxTokens: number): string {
+    const maxChars = maxTokens * 4;
+    if (prompt.length <= maxChars) return prompt;
+    return prompt.substring(0, maxChars);
+  }
+  
+  /**
+   * Extract quality metrics from OpenAI verbose_json response
+   */
+  private extractQualityMetrics(data: any): any {
+    if (!data.segments || data.segments.length === 0) return null;
+    
+    const segments = data.segments;
+    const avgLogprob = segments.reduce((sum: number, seg: any) => 
+      sum + seg.avg_logprob, 0) / segments.length;
+    
+    const avgCompressionRatio = segments.reduce((sum: number, seg: any) => 
+      sum + seg.compression_ratio, 0) / segments.length;
+    
+    const avgNoSpeechProb = segments.reduce((sum: number, seg: any) => 
+      sum + seg.no_speech_prob, 0) / segments.length;
+    
+    return {
+      avgLogprob, // Closer to 0 = better
+      avgCompressionRatio, // 1.5-2.5 = normal, >3.0 = hallucinations
+      avgNoSpeechProb, // Closer to 0 = speech detected
+      confidence: Math.exp(avgLogprob) // Convert to 0-1 confidence score
+    };
   }
 
   /**

@@ -194,6 +194,9 @@ model Clinic {
   // Bank Integration (WAVE 11) - Plaid
   bankConnections BankConnection[]
   plaidEnabled    Boolean @default(false) // Toggle for Plaid bank integration
+  
+  // STT (Speech-to-Text) relations
+  sttUsageLogs    SttProviderUsageLog[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -2852,4 +2855,52 @@ model RevenueIntelligence {
   @@index([clinicId])
   @@index([periodStart])
   @@index([periodEnd])
+}
+
+// STT Provider Configuration
+model SttProviderConfig {
+  id                  String   @id @default(cuid())
+  providerName        String   @map("provider_name")
+  displayName         String   @map("display_name")
+  apiEndpoint         String?  @map("api_endpoint")
+  port                Int?
+  isActive            Boolean  @default(true) @map("is_active")
+  priority            Int      @unique @map("priority_order")
+  maxRetryAttempts    Int      @default(3) @map("max_retry_attempts")
+  timeoutSeconds      Int      @default(30) @map("timeout_seconds")
+  configJson          Json?    @map("config_json")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+  
+  usageLogs           SttProviderUsageLog[]
+  
+  @@map("stt_provider_config")
+}
+
+// STT Provider Usage Logs
+model SttProviderUsageLog {
+  id                     String   @id @default(cuid())
+  clinicId               String?  @map("clinic_id")
+  providerId             String   @map("provider_id")
+  audioDurationSeconds   Decimal? @db.Decimal(10, 2) @map("audio_duration_seconds")
+  processingTimeSeconds  Decimal? @db.Decimal(10, 2) @map("processing_time_seconds")
+  success                Boolean
+  errorMessage           String?  @map("error_message")
+  fallbackUsed           Boolean  @default(false) @map("fallback_used")
+  createdAt              DateTime @default(now()) @map("created_at")
+  
+  clinic                 Clinic?  @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  provider               SttProviderConfig @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  
+  @@index([clinicId])
+  @@index([providerId])
+  @@index([createdAt])
+  @@map("stt_provider_usage_logs")
+}
+
+// STT Provider Enum
+enum STTProvider {
+  OPENAI
+  KB_WHISPER_PUDUN
+  KB_WHISPER_FLOW_SPEAK
 }
