@@ -15,8 +15,10 @@ import {
   XCircle, 
   Activity,
   AlertCircle,
-  Loader2
+  Loader2,
+  Settings
 } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 interface Provider {
@@ -291,6 +293,15 @@ export function STTProviderManager() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-3">
+                    {provider.provider_name === 'openai' && (
+                      <Link href={`/superadmin/stt-providers/${provider.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Configure
+                        </Button>
+                      </Link>
+                    )}
+
                     <Button
                       variant="outline"
                       size="sm"

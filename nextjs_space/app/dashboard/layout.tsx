@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   
   // Require authentication
   if (!session) {
-    redirect('/login')
+    redirect('/auth/login')
   }
 
   // Redirect superadmins to their dashboard
