@@ -21,8 +21,8 @@ export default async function LandingPage() {
     })
     
     if (user?.clinicId) {
-      // Has clinic -> onboarding complete -> go to simulator (main page)
-      redirect('/dashboard/simulator')
+      // Has clinic -> onboarding complete -> go to dashboard
+      redirect('/dashboard')
     } else {
       // No clinic -> needs onboarding
       redirect('/onboarding')
