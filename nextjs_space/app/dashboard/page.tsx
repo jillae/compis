@@ -26,7 +26,6 @@ import { WeekdayChart } from '@/components/dashboard/weekday-chart';
 import { InsightsSection } from '@/components/dashboard/insights-section';
 import { MetaAlerts } from '@/components/dashboard/meta-alerts';
 import { SyncButton } from '@/components/dashboard/sync-button';
-import { OnboardingBanner } from '@/components/dashboard/onboarding-banner';
 import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
 import { TimePeriodSelector } from '@/components/time-period-selector';
 import { HamburgerMenu } from '@/components/dashboard/hamburger-menu';
@@ -224,11 +223,6 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto">
-        {/* Onboarding Banner */}
-        <div className="p-6 pb-0">
-          <OnboardingBanner />
-        </div>
-        
         {/* Sticky Header */}
         <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
           <div className="p-4 md:p-6">

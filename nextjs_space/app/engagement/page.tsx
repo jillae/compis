@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Users, MessageSquare, TrendingUp, Target, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function BillingPage() {
+export default function EngagementPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const [stats, setStats] = useState({
@@ -32,7 +32,7 @@ export default function BillingPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/billing/stats');
+      const res = await fetch('/api/engagement/stats');
       if (res.ok) {
         const data = await res.json();
         setStats(data);
@@ -51,7 +51,7 @@ export default function BillingPage() {
     formData.append('type', fileType);
 
     try {
-      const res = await fetch('/api/billing/import', {
+      const res = await fetch('/api/engagement/import', {
         method: 'POST',
         body: formData,
       });
@@ -253,7 +253,7 @@ export default function BillingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => router.push('/billing/campaigns')}>
+              <Button onClick={() => router.push('/engagement/campaigns')}>
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Skapa kampanj med AI
               </Button>

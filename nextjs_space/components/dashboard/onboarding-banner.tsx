@@ -1,73 +1,111 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Sparkles, X } from 'lucide-react';
-import { OnboardingTour } from '../onboarding-tour';
+import { X, AlertCircle, Settings } from 'lucide-react';
+import Link from 'next/link';
 
-export function OnboardingBanner() {
-  const [showBanner, setShowBanner] = useState(false);
-  const [runTour, setRunTour] = useState(false);
+interface OnboardingBannerProps {
+  userId: string;
+  onboardingStep: number | null;
+  onboardingCompletedAt: Date | null;
+}
 
+export function OnboardingBanner({ userId, onboardingStep, onboardingCompletedAt }: OnboardingBannerProps) {
+  const [dismissed, setDismissed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Check if user dismissed banner in this session
   useEffect(() => {
-    // Check if user has completed onboarding tour
-    const tourCompleted = localStorage.getItem('flow-tour-completed');
-    if (!tourCompleted) {
-      setShowBanner(true);
+    const isDismissed = sessionStorage.getItem(`onboarding-banner-dismissed-${userId}`);
+    if (isDismissed === 'true') {
+      setDismissed(true);
     }
-  }, []);
+  }, [userId]);
 
-  const handleStartTour = () => {
-    setShowBanner(false);
-    setRunTour(true);
-  };
+  // Don't show if onboarding is complete (step 2 done)
+  const isComplete = onboardingStep === 2 && onboardingCompletedAt;
 
-  const handleDismiss = () => {
-    setShowBanner(false);
-    localStorage.setItem('flow-tour-completed', 'true');
-  };
-
-  const handleTourComplete = () => {
-    localStorage.setItem('flow-tour-completed', 'true');
-  };
-
-  if (!showBanner) {
-    return <OnboardingTour run={runTour} onComplete={handleTourComplete} />;
+  if (isComplete || dismissed) {
+    return null;
   }
 
+  const handleDismiss = () => {
+    sessionStorage.setItem(`onboarding-banner-dismissed-${userId}`, 'true');
+    setDismissed(true);
+  };
+
+  const handlePermanentDismiss = async () => {
+    setLoading(true);
+    try {
+      // Mark onboarding as complete to permanently hide banner
+      await fetch('/api/user/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          step: 2,
+          skipStep2: true // Flag to skip step 2
+        })
+      });
+      setDismissed(true);
+    } catch (error) {
+      console.error('Failed to dismiss onboarding:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <>
-      <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Sparkles className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-purple-900">Välkommen till Flow!</h3>
-                <p className="text-sm text-purple-700">
-                  Ta en snabb genomgång och lär dig hur du maximerar intäkter med Flow (2 min)
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleStartTour}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                Starta guiden
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleDismiss}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+    <Alert className="border-orange-600 bg-orange-50 mb-4">
+      <AlertCircle className="h-4 w-4 text-orange-600" />
+      <AlertDescription className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-orange-900">
+              Slutför din onboarding för att få full tillgång till alla funktioner
+            </span>
           </div>
-        </CardContent>
-      </Card>
-      <OnboardingTour run={runTour} onComplete={handleTourComplete} />
-    </>
+          <p className="text-sm text-orange-700">
+            Anslut Bokadirekt och Meta API för att synka din bokningsdata och aktivera AI-driven marknadsföring.
+          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <Link href="/onboarding">
+              <Button size="sm" variant="default" className="bg-orange-600 hover:bg-orange-700">
+                <Settings className="mr-2 h-3 w-3" />
+                Slutför onboarding
+              </Button>
+            </Link>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleDismiss}
+              className="border-orange-300 text-orange-700 hover:bg-orange-100"
+            >
+              Dölj denna session
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handlePermanentDismiss}
+              disabled={loading}
+              className="text-orange-600 hover:text-orange-800"
+            >
+              {loading ? 'Stänger...' : 'Stäng av permanent'}
+            </Button>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDismiss}
+          className="text-orange-600 hover:text-orange-800"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </AlertDescription>
+    </Alert>
   );
 }

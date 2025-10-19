@@ -52,7 +52,9 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 60 * 60 * 8, // 8 hours of inactivity before logout
+    updateAge: 60 * 30, // Update session every 30 minutes
   },
   pages: {
     signIn: "/auth/login"

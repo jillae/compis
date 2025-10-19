@@ -41,7 +41,7 @@ export default function CampaignsPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/billing/stats');
+      const res = await fetch('/api/engagement/stats');
       if (res.ok) {
         const data = await res.json();
         setStats({
@@ -61,7 +61,7 @@ export default function CampaignsPage() {
     setSelectedSuggestion(null);
 
     try {
-      const response = await fetch('/api/billing/generate-sms', {
+      const response = await fetch('/api/engagement/generate-sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

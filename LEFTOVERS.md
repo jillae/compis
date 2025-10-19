@@ -158,6 +158,58 @@ export function Footer() {
 ### 1.3 Onboarding upstream error ✅
 **Status:** KLART - Onboarding fungerar korrekt! Upstream error var tillfälligt.
 
+---
+
+### 1.4 Onboarding Banner för Steg 2 ✅
+**Status:** KLART - Implementerad 2025-10-19
+
+**Vad vi skapade:**
+- ✅ OnboardingBanner komponent i `/components/dashboard/onboarding-banner.tsx`
+- ✅ Integrerad i `/app/dashboard/layout.tsx`
+- ✅ Visar banner om steg 2 inte är klart
+- ✅ Tre alternativ för användaren:
+  - **"Slutför onboarding"** - Går till /onboarding
+  - **"Dölj denna session"** - Döljer banner tills nästa inloggning (sessionStorage)
+  - **"Stäng av permanent"** - Markerar onboarding som skippad (databasen)
+
+**Funktionalitet:**
+```typescript
+// Banner visas om:
+- onboardingStep !== 2 ELLER
+- onboardingCompletedAt === null
+
+// Banner döljs om:
+- Användaren klickar "Dölj denna session" (sessionStorage)
+- Användaren klickar "Stäng av permanent" (database update)
+- Onboarding är klart (step 2 done)
+```
+
+---
+
+### 1.5 Session Timeout Konfiguration ✅
+**Status:** KLART - Implementerad 2025-10-19
+
+**Vad vi fixade:**
+- ✅ Lagt till session timeout i `/lib/auth.ts`
+- ✅ Konfigurerad NextAuth session:
+  - **maxAge:** 8 timmar (28800 sekunder) vid inaktivitet
+  - **updateAge:** 30 minuter (1800 sekunder) för session refresh
+
+**Implementation:**
+```typescript
+// lib/auth.ts
+session: {
+  strategy: "jwt",
+  maxAge: 60 * 60 * 8, // 8 hours of inactivity before logout
+  updateAge: 60 * 30, // Update session every 30 minutes
+}
+```
+
+**Beteende:**
+- Användaren loggas ut automatiskt efter 8 timmar inaktivitet
+- Session uppdateras varje 30:e minut vid aktivitet
+- JWT token förfaller och kräver ny inloggning
+
 **Vad vi verifierade:**
 - ✅ `/app/onboarding/page.tsx` existerar med komplett 2-stegs onboarding flow
 - ✅ API-endpoints finns och fungerar:
@@ -278,14 +330,24 @@ const testProvider = async (provider: Provider) => {
 
 ## 🟡 PRIORITET 3: Dynamic Pricing Intelligence
 
-### 3.1 Dynamic Pricing Toggle med Disclaimer
-**Feature:** Aktivera/avaktivera dynamisk prissättning med laglig disclaimer
+### 3.1 Dynamic Pricing Toggle med Disclaimer ✅
+**Status:** KLART - Redan fullständigt implementerad!
 
-**Åtgärd:**
-- [ ] Modal vid aktivering: Varning om svensk lag (28-dagarsregel för "rea", "rabatt")
-- [ ] Modal vid avaktivering (inom 28 dagar): Påminnelse om prisstabilitet
-- [ ] Ingen varning vid avaktivering efter 28+ dagar
-- [ ] Whitepaper popup med fullständig laglig information (PDF)
+**Vad som finns:**
+- ✅ Modal vid aktivering med 28-dagarsregel disclaimer
+- ✅ Modal vid avaktivering med prisstabilitetspåminnelse (inom 28 dagar)
+- ✅ Ingen varning vid avaktivering efter 28+ dagar
+- ✅ Whitepaper popup med fullständig laglig information
+- ✅ Visuell indikator: "Aktivt i X dagar" / "Inaktivt i X dagar"
+- ✅ Alert när <28 dagar: "För att marknadsföra med prisjämförelser behöver priset vara stabilt i minst 28 dagar"
+- ✅ Success alert när ≥28 dagar: "Du kan nu använda prisjämförelser i marknadsföringen"
+- ✅ Database tracking via `/api/clinic/dynamic-pricing`
+
+**Filer:**
+- `/components/dynamic-pricing/dynamic-pricing-toggle.tsx` (279 rader)
+- `/components/dynamic-pricing/dynamic-pricing-whitepaper.tsx`
+- `/app/api/clinic/dynamic-pricing/route.ts`
+- Används i `/app/dashboard/settings/page.tsx`
 
 **UI-komponenter:**
 ```
@@ -325,8 +387,9 @@ const testProvider = async (provider: Provider) => {
 ## 🟡 PRIORITET 4: Payatt Terminologi - Byt "billing" till "Engagement Hub"
 
 **DECISION:** User valde **Option A: `/engagement/*`** (Customer Engagement Hub) ✅
+**STATUS:** ✅ KLART - Refactoring genomförd 2025-10-19
 
-### 3.1 Background från prompt
+### 4.1 Background från prompt ✅
 **Problem:** "billing" skapar förvirring - betyder fakturering i SaaS, inte loyalty
 
 **Rationale:**
@@ -336,69 +399,51 @@ const testProvider = async (provider: Provider) => {
 
 ---
 
-### 3.2 Routing-ändringar (STOR REFACTORING) 🚨
-**Åtgärd:**
-- [ ] Byt URL från `/app/billing/*` till `/app/engagement/*`
-- [ ] Uppdatera API routes från `/api/billing/*` till `/api/engagement/*`
+### 4.2 Routing-ändringar ✅ (STOR REFACTORING KLAR)
+**Vad vi gjorde:**
+- ✅ Bytte `/app/billing/*` → `/app/engagement/*`
+- ✅ Flyttade `/app/api/billing/payatt/*` → `/app/api/engagement/payatt/*`
+- ✅ Flyttade `/app/api/billing/ai/*` → `/app/api/engagement/ai/*`
+- ✅ Uppdaterade alla API-anrop i `app/engagement/`
+- ✅ Uppdaterade alla route references (`/billing/` → `/engagement/`)
+- ✅ Bytte funktionsnamn: `BillingPage` → `EngagementPage`
 
-**Filer att byta namn på:**
-```
-Before:                          After:
-/app/billing/                 →  /app/engagement/
-/app/billing/campaigns/       →  /app/engagement/campaigns/
-/app/billing/loyalty/         →  /app/engagement/loyalty/
-/app/billing/sms/             →  /app/engagement/sms/
+**Vad vi BEHÖLL som "billing":**
+- `/app/dashboard/billing/*` - SaaS subscription/pricing management
+- `/app/superadmin/billing/*` - Plaid/Bank integration
+- `/app/api/billing/invoices` - Invoice management
+- `/app/api/billing/subscription` - Subscription management
+- `/app/api/billing/upgrade` - Tier upgrades
 
-/api/billing/payatt/*         →  /api/engagement/payatt/*
-/api/billing/ai/chat          →  /api/engagement/ai/chat
-```
-
-**⚠️ OBS:** Detta påverkar MÅNGA filer - behöver systematisk refactoring!
-
-**Script för att hitta alla references:**
+**Testresultat:**
 ```bash
-cd /home/ubuntu/flow/nextjs_space
-grep -r "billing" app/ lib/ components/ | grep -v "Invoice" | grep -v "Payment" | grep -v "Subscription"
+✓ TypeScript compilation: 0 errors
+✓ Production build: successful
+✓ Runtime test: ✅ PASS
+✓ API routes verified: /api/engagement/payatt/cards working
 ```
+
+### 4.3 UI-terminologi ✅
+**Status:** KLART - Alla funktionsnamn uppdaterade
+
+**Vad vi gjorde:**
+- ✅ `BillingPage` → `EngagementPage` i alla engagement-filer
+- ✅ Route references uppdaterade överallt
+
+**Future work (low priority):**
+- [ ] Navigation labels: "Customer Engagement Hub" / "Kundengagemang"
+- [ ] Undermeny med svenska översättningar (när navigation implementeras)
 
 ---
 
-### 3.3 UI-terminologi
-**Åtgärd:**
-- [ ] Uppdatera modulnamn i navigation: "Customer Engagement Hub"
-- [ ] Svenska översättning: "Kundengagemang"
-- [ ] Undermeny:
-  - Loyalty Programs → Lojalitetsprogram
-  - Campaigns → Kampanjer
-  - SMS & Messaging → SMS & Meddelanden
-  - Analytics → Analys
+### 4.4 Database & Type updates ✅
+**Status:** KLART - Separation mellan SaaS billing och Engagement
 
-**Filer att uppdatera:**
-```
-/components/layout/sidebar.tsx (om den finns)
-/components/layout/navigation.tsx (om den finns)
-/components/dashboard/hamburger-menu.tsx
-/app/engagement/layout.tsx (ny header/title)
-```
-
----
-
-### 3.4 Database & Type updates
-**Åtgärd:**
-- [ ] Sök igenom alla TypeScript-filer för "billing" som INTE refererar till faktiska fakturor
-- [ ] Uppdatera interfaces, types, function names
-- [ ] Kontrollera att ÄKTA billing (Invoice, Payment, Subscription) INTE påverkas
-
-**Important:** Behåll "billing" för:
-- Invoice-relaterade funktioner
-- Payment processing
-- Subscription management (för SaaS billing)
-
-Byt till "engagement" för:
-- Payatt-relaterade funktioner
-- Loyalty programs
-- SMS campaigns
-- Customer engagement features
+**Verifiering:**
+- ✅ SaaS Billing behålls: Invoice, Payment, Subscription endpoints
+- ✅ Engagement flyttat: Payatt, Loyalty, SMS, Campaigns
+- ✅ TypeScript compilation 0 errors
+- ✅ Ingen breaking changes för befintliga features
 
 ---
 
@@ -722,18 +767,20 @@ Byt till "engagement" för:
 - ✅ 1.4 - Ta bort GoCardless, skapa Billing page
 - ✅ 1.5 - Ta bort "Landningssida" från meny
 
-**VECKA 2: Kritisk säkerhet (fortsättning) + STT UI**
-- [ ] 1.1 - Auth Middleware på /dashboard/* routes 🔴
-- [ ] 1.2 - Footer conditional rendering 🔴
-- [ ] 1.3 - Debug onboarding upstream error
-- [ ] 2.1 - OpenAI Configuration UI
-- [ ] 2.2 - STT Test-funktion
+**✅ VECKA 2: Kritisk säkerhet (fortsättning) + STT UI (KLART!)**
+- ✅ 1.1 - Auth Middleware på /dashboard/* routes
+- ✅ 1.2 - Footer conditional rendering
+- ✅ 1.3 - Debug onboarding upstream error
+- ✅ 1.4 - Onboarding banner för steg 2
+- ✅ 1.5 - Session timeout konfiguration
+- ✅ 2.1 - OpenAI Configuration UI
+- ✅ 2.2 - STT Test-funktion
 
-**VECKA 3: Dynamic Pricing + Payatt terminologi**
-- [ ] 3.1 - Dynamic Pricing Toggle med Disclaimer
-- [ ] 4.2 - Routing-ändringar (billing → engagement)
-- [ ] 4.3 - UI-terminologi uppdatering
-- [ ] 4.4 - Database & Type updates
+**✅ VECKA 3: Dynamic Pricing + Payatt terminologi (KLART!)**
+- ✅ 3.1 - Dynamic Pricing Toggle med Disclaimer (var redan implementerad)
+- ✅ 4.2 - Routing-ändringar (billing → engagement)
+- ✅ 4.3 - UI-terminologi uppdatering
+- ✅ 4.4 - Database & Type updates
 
 **VECKA 4-6: Revenue Intelligence (Wave 5A)**
 - [ ] 5.1 - Business Metrics Dashboard (MRR/ARR)
@@ -775,8 +822,26 @@ Byt till "engagement" för:
 ## 💬 Frågor till användaren
 
 1. ✅ **Payatt terminologi:** User valde **Option A: "Engagement Hub"**
-2. **SA clinic association:** Ska Gilbert (SA) vara kopplad till ArchClinic eller ha egen org ("KlinikFlow Admin")? (Ej besvarad)
-3. **Onboarding flow:** Ska onboarding vara en one-time setup eller kunna nås igen senare? (Ej besvarad)
+
+2. ✅ **SA clinic association:** BESVARAD 2025-10-19
+   - Gilbert (SA) ska INTE ha egen org
+   - SA ska kunna växla till Admin-vy på alla anslutna kliniker
+   - SA ska kunna köra SA-läge på Arch Clinic för att testa nya funktioner
+   - Feature Matrix i SA inställningar: Funktioner 1-6 (exempel)
+     - 1-5: Aktiverade (togglade) → synliga för Admin/Staff
+     - 6: Avaktiverad (ur togglad) → synlig endast för SA, inte Admin/Staff
+   - SA växlar mellan:
+     - **SA-läge på Arch Clinic:** Ser allt (1-6)
+     - **Admin-läge på Arch Clinic:** Ser aktiverade (1-5)
+
+3. ✅ **Onboarding flow:** BESVARAD 2025-10-19
+   - **Steg 1:** KRAV för att komma till dashboard
+   - **Steg 2:** Om de hoppar över → banner larmar i dashboard
+   - **Banner:** Visar onboarding steg 2 om inte klart
+   - **Åtkomst:** Kan gå tillbaka via banner tills allt klart
+   - **Inställningar:** User kan släcka banner manuellt
+   - **Default:** Banner tänds vid varje ny inloggning om steg 2 ej klart
+   - **Session timeout:** Alla sessioner loggas ut efter X tid vid inaktivitet
 
 ---
 
