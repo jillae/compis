@@ -24,10 +24,15 @@ export default function UpgradePage() {
       setUpgrading(true);
       setSelectedTier(tier);
 
+      const billingInterval = isYearly ? 'YEARLY' : 'MONTHLY';
+
       const response = await fetch('/api/billing/upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newTier: tier }),
+        body: JSON.stringify({ 
+          newTier: tier,
+          billingInterval 
+        }),
       });
 
       const result = await response.json();
@@ -71,7 +76,46 @@ export default function UpgradePage() {
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* FREE */}
+        <Card className="border-2 hover:border-gray-300 transition-all relative">
+          <CardHeader>
+            <CardTitle className="text-2xl">{PRICING_TIERS.FREE.name}</CardTitle>
+            <CardDescription>Perfekt för att testa Flow</CardDescription>
+            <div className="pt-4 text-gray-900">
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-bold">0</span>
+                <span className="text-gray-600">kr/månad</span>
+              </div>
+              <p className="text-sm text-green-600 mt-2 font-semibold">
+                Alltid gratis
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {PRICING_TIERS.FREE.features.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-2 text-sm">
+                    <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => handleUpgrade(SubscriptionTier.FREE)}
+                disabled={upgrading}
+              >
+                {upgrading && selectedTier === SubscriptionTier.FREE
+                  ? 'Byter till Free...'
+                  : 'Välj Free'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* BASIC */}
         <Card className="border-2 hover:border-blue-300 transition-all relative">
           <CardHeader>

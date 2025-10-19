@@ -1,7 +1,8 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useClinic } from '@/context/ClinicContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,16 +10,20 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { 
   Save, 
-  TestTube2, 
+  TestTube, 
+  Loader2, 
   CheckCircle2, 
   XCircle, 
-  Eye, 
-  EyeOff,
-  Loader2 
+  AlertCircle,
+  Key,
+  MapPin,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { GHLConnectionStatus } from '@/components/ghl/ghl-connection-status';
 
 interface GHLConfig {
   enabled: boolean;
@@ -27,260 +32,341 @@ interface GHLConfig {
   lastSync: string | null;
 }
 
-interface GHLConfigFormProps {
-  clinicId: string;
-  clinicName: string;
-}
-
-export function GHLConfigForm({ clinicId, clinicName }: GHLConfigFormProps) {
-  const [config, setConfig] = useState<GHLConfig | null>(null);
+export function GHLConfigForm() {
+  const { selectedClinic } = useClinic();
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  
   const [enabled, setEnabled] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [locationId, setLocationId] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
+  
+  const [existingConfig, setExistingConfig] = useState<GHLConfig | null>(null);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  // Fetch current config on mount
-  React.useEffect(() => {
-    fetchConfig();
-  }, [clinicId]);
+  // Fetch existing config when clinic changes
+  useEffect(() => {
+    if (selectedClinic) {
+      fetchConfig();
+    } else {
+      setLoading(false);
+      setExistingConfig(null);
+    }
+  }, [selectedClinic]);
 
-  // Fetch current config
   const fetchConfig = async () => {
+    if (!selectedClinic) return;
+    
     setLoading(true);
     try {
-      const res = await fetch(`/api/ghl/config?clinicId=${clinicId}`);
+      const res = await fetch(`/api/ghl/config?clinicId=${selectedClinic}`);
       const data = await res.json();
       
-      if (data.success) {
-        setConfig(data.config);
+      if (data.success && data.config) {
+        setExistingConfig(data.config);
         setEnabled(data.config.enabled);
+        // Don't load actual API keys for security - show masked if exists
+        setApiKey('');
+        setLocationId('');
       }
     } catch (error) {
-      toast.error('Kunde inte hämta GHL-konfiguration');
+      toast.error('Kunde inte ladda GHL-konfiguration');
     } finally {
       setLoading(false);
     }
   };
 
-  // Save config
   const handleSave = async () => {
-    if (!apiKey && !config?.hasApiKey) {
-      toast.error('API Key krävs');
+    if (!selectedClinic) {
+      toast.error('Ingen klinik vald');
       return;
     }
 
-    if (!locationId && !config?.hasLocationId) {
-      toast.error('Location ID krävs');
+    if (enabled && (!apiKey && !existingConfig?.hasApiKey)) {
+      toast.error('API Key krävs när GHL är aktiverat');
       return;
     }
 
-    setLoading(true);
+    if (enabled && (!locationId && !existingConfig?.hasLocationId)) {
+      toast.error('Location ID krävs när GHL är aktiverat');
+      return;
+    }
+
+    setSaving(true);
     try {
-      const res = await fetch(`/api/ghl/config?clinicId=${clinicId}`, {
+      const payload: any = { enabled };
+      
+      // Only include keys if they're being updated (non-empty)
+      if (apiKey) payload.apiKey = apiKey;
+      if (locationId) payload.locationId = locationId;
+
+      const res = await fetch(`/api/ghl/config?clinicId=${selectedClinic}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          enabled,
-          apiKey: apiKey || undefined,
-          locationId: locationId || undefined
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
 
       if (data.success) {
         toast.success('GHL-konfiguration sparad!');
-        await fetchConfig(); // Refresh config
-        setApiKey(''); // Clear sensitive field
+        fetchConfig(); // Refresh
+        setApiKey(''); // Clear form
+        setLocationId('');
       } else {
-        toast.error('Kunde inte spara konfiguration');
+        toast.error(data.error || 'Kunde inte spara konfiguration');
       }
     } catch (error) {
       toast.error('Ett fel uppstod');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  // Test connection
   const handleTestConnection = async () => {
-    if (!apiKey && !config?.hasApiKey) {
-      toast.error('API Key krävs för att testa anslutning');
+    if (!selectedClinic) {
+      toast.error('Ingen klinik vald');
       return;
     }
 
-    setLoading(true);
+    if (!existingConfig?.hasApiKey || !existingConfig?.hasLocationId) {
+      toast.error('API Key och Location ID måste vara konfigurerade för att testa');
+      return;
+    }
+
+    setTesting(true);
     setTestResult(null);
 
     try {
-      // Test by fetching GHL location details
-      const testApiKey = apiKey || 'existing'; // Use existing if not changed
-      const res = await fetch(`https://rest.gohighlevel.com/v1/locations/${locationId || 'test'}`, {
-        headers: {
-          'Authorization': `Bearer ${testApiKey}`,
-          'Content-Type': 'application/json'
-        }
+      // Call a test endpoint (we need to create this)
+      const res = await fetch(`/api/ghl/test?clinicId=${selectedClinic}`, {
+        method: 'POST'
       });
+      
+      const data = await res.json();
 
-      if (res.ok) {
-        setTestResult('success');
-        toast.success('Anslutningen lyckades! ✅');
+      if (data.success) {
+        setTestResult({
+          success: true,
+          message: 'Anslutningen fungerar! GHL API svarar korrekt.'
+        });
+        toast.success('Test lyckades!');
       } else {
-        setTestResult('error');
-        toast.error('Anslutningen misslyckades. Kontrollera dina credentials.');
+        setTestResult({
+          success: false,
+          message: data.error || 'Anslutningen misslyckades'
+        });
+        toast.error('Test misslyckades');
       }
     } catch (error) {
-      setTestResult('error');
-      toast.error('Kunde inte ansluta till GoHighLevel');
+      setTestResult({
+        success: false,
+        message: 'Ett oväntat fel uppstod vid test'
+      });
+      toast.error('Ett fel uppstod');
     } finally {
-      setLoading(false);
+      setTesting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-6 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!selectedClinic) {
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Välj en klinik i dropdown-menyn för att konfigurera GoHighLevel.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>GoHighLevel Configuration</CardTitle>
-        <CardDescription>
-          Konfigurera GoHighLevel-integration för <strong>{clinicName}</strong>
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        {/* Enable/Disable Toggle */}
-        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-          <div className="space-y-0.5">
-            <Label htmlFor="ghl-enabled" className="text-base font-semibold">
-              Aktivera GHL Integration
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              Synkronisera bokningar och kunder med GoHighLevel CRM
-            </p>
+    <div className="space-y-6">
+      {/* Configuration Form */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>GHL Configuration</CardTitle>
+              <CardDescription>
+                Konfigurera GoHighLevel CRM-integration för synkronisering av kunder och bokningar
+              </CardDescription>
+            </div>
+            {existingConfig?.enabled && (
+              <Badge variant="default" className="gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Aktiv
+              </Badge>
+            )}
           </div>
-          <Switch
-            id="ghl-enabled"
-            checked={enabled}
-            onCheckedChange={setEnabled}
-          />
-        </div>
+        </CardHeader>
 
-        {enabled && (
-          <>
-            {/* API Key */}
+        <CardContent className="space-y-6">
+          {/* Enable/Disable Toggle */}
+          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div className="flex-1">
+              <Label htmlFor="ghl-enabled" className="text-base font-semibold">
+                Aktivera GHL Integration
+              </Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                Synkronisera automatiskt kunder och bokningar med GoHighLevel
+              </p>
+            </div>
+            <Switch
+              id="ghl-enabled"
+              checked={enabled}
+              onCheckedChange={setEnabled}
+            />
+          </div>
+
+          <Separator />
+
+          {/* API Configuration */}
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="ghl-api-key">
+              <Label htmlFor="api-key" className="flex items-center gap-2">
+                <Key className="h-4 w-4" />
                 API Key
-                {config?.hasApiKey && (
-                  <Badge variant="secondary" className="ml-2">Konfigurerad</Badge>
+                {existingConfig?.hasApiKey && (
+                  <Badge variant="outline" className="text-xs">Konfigurerad</Badge>
                 )}
               </Label>
-              <div className="relative">
+              <div className="flex gap-2">
                 <Input
-                  id="ghl-api-key"
+                  id="api-key"
                   type={showApiKey ? 'text' : 'password'}
+                  placeholder={existingConfig?.hasApiKey ? '••••••••••••••••' : 'Ange GHL API Key'}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={config?.hasApiKey ? '••••••••••••••••' : 'Ange GHL API Key'}
-                  className="pr-10"
+                  disabled={!enabled}
                 />
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3"
+                  variant="outline"
                   onClick={() => setShowApiKey(!showApiKey)}
+                  disabled={!enabled}
                 >
-                  {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showApiKey ? '🙈' : '👁️'}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Hitta din API Key i GoHighLevel → Settings → Integrations
+                Hitta din API Key i GoHighLevel → Settings → API
               </p>
             </div>
 
-            {/* Location ID */}
             <div className="space-y-2">
-              <Label htmlFor="ghl-location-id">
+              <Label htmlFor="location-id" className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
                 Location ID
-                {config?.hasLocationId && (
-                  <Badge variant="secondary" className="ml-2">Konfigurerad</Badge>
+                {existingConfig?.hasLocationId && (
+                  <Badge variant="outline" className="text-xs">Konfigurerad</Badge>
                 )}
               </Label>
               <Input
-                id="ghl-location-id"
+                id="location-id"
                 type="text"
+                placeholder={existingConfig?.hasLocationId ? '••••••••••••••••' : 'Ange GHL Location ID'}
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
-                placeholder={config?.hasLocationId ? 'abc123...' : 'Ange GHL Location ID'}
+                disabled={!enabled}
               />
               <p className="text-xs text-muted-foreground">
-                Hitta Location ID i GoHighLevel-URL:en (e.g., app.gohighlevel.com/location/<strong>abc123</strong>)
+                Din Location ID finns i URL:en när du är inloggad i GHL
               </p>
             </div>
+          </div>
 
-            {/* Test Result */}
-            {testResult && (
-              <Alert variant={testResult === 'success' ? 'default' : 'destructive'}>
-                {testResult === 'success' ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  <XCircle className="h-4 w-4" />
-                )}
-                <AlertDescription>
-                  {testResult === 'success'
-                    ? 'Anslutningen till GoHighLevel lyckades!'
-                    : 'Anslutningen misslyckades. Kontrollera API Key och Location ID.'}
-                </AlertDescription>
-              </Alert>
-            )}
+          {/* Test Result */}
+          {testResult && (
+            <Alert variant={testResult.success ? 'default' : 'destructive'}>
+              {testResult.success ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                <XCircle className="h-4 w-4" />
+              )}
+              <AlertDescription>{testResult.message}</AlertDescription>
+            </Alert>
+          )}
 
-            {/* Last Sync */}
-            {config?.lastSync && (
-              <div className="text-sm text-muted-foreground">
-                Senaste synk: {new Date(config.lastSync).toLocaleString('sv-SE')}
-              </div>
-            )}
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <Button
+              onClick={handleSave}
+              disabled={saving || (!apiKey && !locationId && enabled === existingConfig?.enabled)}
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sparar...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Spara Konfiguration
+                </>
+              )}
+            </Button>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={handleTestConnection}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <TestTube2 className="h-4 w-4 mr-2" />
-                )}
-                Testa Anslutning
-              </Button>
+            <Button
+              variant="outline"
+              onClick={handleTestConnection}
+              disabled={testing || !existingConfig?.hasApiKey || !existingConfig?.hasLocationId}
+            >
+              {testing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Testar...
+                </>
+              ) : (
+                <>
+                  <TestTube className="mr-2 h-4 w-4" />
+                  Test Connection
+                </>
+              )}
+            </Button>
 
-              <Button
-                onClick={handleSave}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                Spara Konfiguration
-              </Button>
-            </div>
-          </>
-        )}
+            <Button
+              variant="ghost"
+              onClick={() => window.open('https://app.gohighlevel.com', '_blank')}
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Öppna GHL
+            </Button>
+          </div>
 
-        {!enabled && (
+          {/* Help Text */}
           <Alert>
-            <AlertDescription>
-              Aktivera GHL-integration för att synkronisera bokningar och kunder med GoHighLevel CRM.
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              <strong>Så här hittar du dina GHL-uppgifter:</strong>
+              <ol className="list-decimal ml-4 mt-2 space-y-1">
+                <li>Logga in på <a href="https://app.gohighlevel.com" target="_blank" className="underline">GoHighLevel</a></li>
+                <li>Gå till Settings → API → Agency API Key</li>
+                <li>Kopiera API Key och Location ID</li>
+                <li>Klistra in uppgifterna här och spara</li>
+              </ol>
             </AlertDescription>
           </Alert>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Connection Status */}
+      {enabled && existingConfig?.hasApiKey && existingConfig?.hasLocationId && (
+        <GHLConnectionStatus />
+      )}
+    </div>
   );
 }

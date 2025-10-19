@@ -33,15 +33,13 @@ export function PricingToggle({ onToggle, defaultYearly = false }: PricingToggle
         className="px-6 relative"
       >
         Årsvis
-        {isYearly && (
-          <Badge className="absolute -top-2 -right-2 bg-green-500 text-white text-xs">
-            20% off
-          </Badge>
-        )}
+        <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-semibold px-2 py-0.5 shadow-md">
+          ⭐ BÄSTA VÄRDE
+        </Badge>
       </Button>
       {!isYearly && (
         <Badge variant="secondary" className="bg-green-100 text-green-700 ml-2">
-          Spara 20% med årsbetalning
+          Spara 20% med årsbetalning ✨
         </Badge>
       )}
     </div>

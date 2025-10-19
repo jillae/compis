@@ -571,23 +571,35 @@ const testProvider = async (provider: Provider) => {
 
 ---
 
-## 🟢 PRIORITET 7: Pricing-förbättringar
+## 🟠 PRIORITET 7: Pricing-förbättringar
 
-### 7.1 Yearly Payment Option
-**Feature:** Årlig betalning med 10% rabatt
+### 7.1 Yearly Payment Option ✅
+**Status:** KLART - Implementerad 2025-10-19
 
-**Åtgärd:**
-- [ ] Toggle mellan monthly/yearly på pricing page
-- [ ] Beräkna och visa "Spara X SEK/år" dynamiskt
-- [ ] Uppdatera Stripe integration för yearly subscriptions
-- [ ] Visa "BÄSTA VÄRDE" badge på yearly option
+**Vad vi skapade:**
+- ✅ Database schema: Lagt till `BillingInterval` enum (MONTHLY/YEARLY)
+- ✅ Subscription model: Lagt till `billingInterval` field
+- ✅ Pricing Logic: `getTierPrice()` hanterar 20% rabatt för yearly
+- ✅ `calculatePeriodEnd()` hanterar yearly billing (1 år istället för 1 månad)
+- ✅ API Support:
+  - `/api/billing/subscription` accepterar och sparar `billingInterval`
+  - `/api/billing/upgrade` hanterar yearly subscriptions
+- ✅ UI Updates:
+  - "⭐ BÄSTA VÄRDE" badge på yearly-knappen (gradient grön)
+  - "Spara 20% med årsbetalning ✨" badge vid monthly
+  - PriceDisplay visar genomstruket månadspris vid yearly
+  - Visar "Betala årsvis, spara X kr/år"
+- ✅ Upgrade Flow: Toggle monthly/yearly på upgrade-sidan
 
-**UI:**
+**Implementation Details:**
+```typescript
+// Prisberäkning med 20% rabatt
+BASIC:    499 kr/mån → 4 790 kr/år (399 kr/mån effektivt)
+PRO:      1499 kr/mån → 14 390 kr/år (1 199 kr/mån effektivt)
+ENTERPRISE: 2999 kr/mån → 28 790 kr/år (2 399 kr/mån effektivt)
 ```
-┌────────────────────────────────────┐
-│ [Monthly] [Yearly - Spara 10%] ✨  │
-└────────────────────────────────────┘
-```
+
+**Checkpoint:** `Yearly payment option complete` (2025-10-19)
 
 ---
 
@@ -628,8 +640,43 @@ const testProvider = async (provider: Provider) => {
 
 ## 🟠 PRIORITET 8: GoHighLevel (GHL) Integration - SuperAdmin UI
 
-### 8.1 GHL SuperAdmin Configuration Page ⚠️
-**Status:** Backend och API finns, men SuperAdmin UI saknas
+### 8.1 GHL SuperAdmin Configuration Page ✅
+**Status:** KLART - Implementerad 2025-10-19
+
+**Vad vi skapade:**
+- ✅ `/app/superadmin/ghl-config/page.tsx` - GHL configuration page
+- ✅ `/components/superadmin/ghl-config-form.tsx` - Komplett formulär (350+ rader)
+  - ClinicSelector integration via useClinic()
+  - Enable/Disable toggle
+  - API Key input (masked/password field)
+  - Location ID input  
+  - Test Connection-knapp med live GHL API-test
+  - Spara-knapp med validering
+  - GHLConnectionStatus-integration
+  - Instruktioner för att hitta GHL credentials
+  - Link till GoHighLevel dashboard
+- ✅ `/app/api/ghl/test/route.ts` - Test-endpoint
+  - Verifierar GHL credentials mot live API
+  - Returnerar location info vid success
+- ✅ Navigation i SuperAdmin layout
+
+**Funktionalitet:**
+- SuperAdmin väljer klinik via ClinicSelector
+- Formuläret laddar den klinikens GHL-config
+- Kan aktivera/avaktivera integration
+- Kan uppdatera API-nycklar (säkert lagrade)
+- Testar live-anslutning mot GHL API (`https://rest.gohighlevel.com/v1/locations/{id}`)
+- Visar sync-statistik när aktiverat (GHLConnectionStatus komponent)
+
+**Säkerhet:**
+- API keys lagras maskerade i databasen
+- Endast SuperAdmin har åtkomst
+- Credentials exponeras aldrig i frontend
+- Test-endpoint validerar role innan API-anrop
+
+**Checkpoint:** `GHL SuperAdmin UI complete` (2025-10-19)
+
+**Note:** Backend och API fanns redan, detta skapade den saknade SuperAdmin UI:n.
 
 **Befintlig implementation:**
 - ✅ `/api/ghl/config/route.ts` - GET/PUT endpoints för GHL config

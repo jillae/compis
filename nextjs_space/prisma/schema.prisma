@@ -579,6 +579,7 @@ enum UserRole {
 
 enum SubscriptionTier {
   INTERNAL // Arch Clinic testbench - all features
+  FREE // 0 SEK/month - 50 bookings limit
   BASIC // 499 SEK/month
   PROFESSIONAL // 1499 SEK/month
   ENTERPRISE // 2999+ SEK/month
@@ -590,6 +591,11 @@ enum SubscriptionStatus {
   PAST_DUE // Payment failed
   CANCELLED // Subscription cancelled
   EXPIRED // Trial/subscription expired
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
 }
 
 enum BookingStatus {
@@ -1794,8 +1800,9 @@ model Subscription {
   bookingsLimit     Int? // null = unlimited
 
   // Pricing
-  monthlyPrice Decimal @db.Decimal(10, 2)
-  currency     String  @default("SEK")
+  monthlyPrice    Decimal         @db.Decimal(10, 2)
+  billingInterval BillingInterval @default(MONTHLY)
+  currency        String          @default("SEK")
 
   // Relationships
   invoices      Invoice[]

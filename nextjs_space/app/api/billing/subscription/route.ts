@@ -67,10 +67,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tier, paymentMethod } = body;
+    const { tier, paymentMethod, billingInterval = 'MONTHLY' } = body;
 
     if (!tier || !Object.values(SubscriptionTier).includes(tier)) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+    }
+
+    // Validate billingInterval
+    if (!['MONTHLY', 'YEARLY'].includes(billingInterval)) {
+      return NextResponse.json({ error: 'Invalid billing interval' }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
@@ -86,8 +91,8 @@ export async function POST(request: NextRequest) {
     const trialStart = now;
     const trialEnd = calculateTrialEndDate();
     const periodStart = now;
-    const periodEnd = calculatePeriodEnd(now);
-    const monthlyPrice = getTierPrice(tier);
+    const periodEnd = calculatePeriodEnd(now, billingInterval as 'MONTHLY' | 'YEARLY');
+    const monthlyPrice = getTierPrice(tier, billingInterval as 'MONTHLY' | 'YEARLY');
 
     // Create or update subscription
     const subscription = await prisma.subscription.upsert({
@@ -101,11 +106,13 @@ export async function POST(request: NextRequest) {
         trialStart,
         trialEnd,
         monthlyPrice,
+        billingInterval: billingInterval as 'MONTHLY' | 'YEARLY',
         currency: 'SEK',
       },
       update: {
         tier,
         monthlyPrice,
+        billingInterval: billingInterval as 'MONTHLY' | 'YEARLY',
         updatedAt: now,
       },
     });

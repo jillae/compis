@@ -22,6 +22,21 @@ export const PRICING_TIERS = {
       'Testbench för nya features',
     ],
   },
+  FREE: {
+    name: 'Free',
+    price: 0,
+    currency: 'SEK',
+    interval: 'month',
+    bookingsLimit: 50,
+    features: [
+      'Upp till 50 bokningar/månad',
+      'Grundläggande dashboard',
+      'Enkel bokningsöversikt',
+      'No-show påminnelser',
+      'E-postnotiser',
+      'Community support',
+    ],
+  },
   BASIC: {
     name: 'Basic',
     price: 499,
@@ -75,7 +90,23 @@ export const PRICING_TIERS = {
   },
 } as const;
 
-export function getTierPrice(tier: SubscriptionTier): number {
+export function getTierPrice(tier: SubscriptionTier, billingInterval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'): number {
+  const monthlyPrice = PRICING_TIERS[tier].price;
+  
+  if (billingInterval === 'YEARLY') {
+    // 20% discount for yearly billing
+    const yearlyPrice = monthlyPrice * 12 * 0.8;
+    return Math.round(yearlyPrice);
+  }
+  
+  return monthlyPrice;
+}
+
+export function getEffectiveMonthlyPrice(tier: SubscriptionTier, billingInterval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'): number {
+  if (billingInterval === 'YEARLY') {
+    const yearlyPrice = getTierPrice(tier, 'YEARLY');
+    return Math.round(yearlyPrice / 12);
+  }
   return PRICING_TIERS[tier].price;
 }
 
@@ -94,9 +125,15 @@ export function calculateTrialEndDate(): Date {
   return endDate;
 }
 
-export function calculatePeriodEnd(startDate: Date): Date {
+export function calculatePeriodEnd(startDate: Date, billingInterval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'): Date {
   const endDate = new Date(startDate);
-  endDate.setMonth(endDate.getMonth() + 1);
+  
+  if (billingInterval === 'YEARLY') {
+    endDate.setFullYear(endDate.getFullYear() + 1);
+  } else {
+    endDate.setMonth(endDate.getMonth() + 1);
+  }
+  
   return endDate;
 }
 

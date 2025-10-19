@@ -15,7 +15,61 @@ export function PricingCards() {
     <div className="max-w-6xl mx-auto">
       <PricingToggle onToggle={setIsYearly} />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* FREE */}
+        <Card className="border-2 hover:border-gray-300 transition-all">
+          <CardContent className="p-8">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold">Free</h3>
+                <p className="text-sm text-gray-600 mt-1">Perfekt för att testa Flow</p>
+              </div>
+              <div className="text-gray-900">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-bold">0</span>
+                  <div className="flex flex-col">
+                    <span className="text-gray-600">kr/månad</span>
+                  </div>
+                </div>
+                <p className="text-sm text-green-600 mt-2 font-semibold">
+                  Alltid gratis
+                </p>
+              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span>Upp till 50 bokningar/månad</span>
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span>Grundläggande dashboard</span>
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span>Enkel bokningsöversikt</span>
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span>No-show påminnelser</span>
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span>E-postnotiser</span>
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <span>Community support</span>
+                </li>
+              </ul>
+              <Link href="/auth/signup" className="block">
+                <Button className="w-full" variant="outline">
+                  Kom igång gratis
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* BASIC */}
         <Card className="border-2 hover:border-blue-300 transition-all">
           <CardContent className="p-8">
