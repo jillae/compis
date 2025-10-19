@@ -1,7 +1,7 @@
 
 # LEFTOVERS - Kvarvarande Tasks
 
-**Senast uppdaterat:** 2025-10-18 (Kväll - Efter Task 1-5)
+**Senast uppdaterat:** 2025-10-19 (Prompt-avstämning - 7 filer genomgångna)
 
 ---
 
@@ -169,7 +169,53 @@ curl https://goto.klinikflow.app/onboarding
 
 ---
 
-## 🟡 PRIORITET 3: Payatt Terminologi - Byt "billing" till "Engagement Hub"
+## 🟡 PRIORITET 3: Dynamic Pricing Intelligence
+
+### 3.1 Dynamic Pricing Toggle med Disclaimer
+**Feature:** Aktivera/avaktivera dynamisk prissättning med laglig disclaimer
+
+**Åtgärd:**
+- [ ] Modal vid aktivering: Varning om svensk lag (28-dagarsregel för "rea", "rabatt")
+- [ ] Modal vid avaktivering (inom 28 dagar): Påminnelse om prisstabilitet
+- [ ] Ingen varning vid avaktivering efter 28+ dagar
+- [ ] Whitepaper popup med fullständig laglig information (PDF)
+
+**UI-komponenter:**
+```
+┌────────────────────────────────────────┐
+│ Aktivera Dynamic Pricing?              │
+├────────────────────────────────────────┤
+│ Kom ihåg: Vid dynamiska priser ska du  │
+│ undvika marknadsföring med 'rea',      │
+│ 'rabatt' eller 'ordinarie pris'.       │
+│ Prisjämförelser får endast användas om │
+│ priset varit stabilt i minst 28 dagar. │
+│                                        │
+│ [Läs mer - Whitepaper] (PDF popup)     │
+│                                        │
+│ [Avbryt]  [Aktivera]                   │
+└────────────────────────────────────────┘
+```
+
+**Visuell indikator:**
+- Visa "Aktivt i X dagar" eller "Inaktivt i X dagar" bredvid toggle
+
+**Database:**
+- Logga tidsstämpel för varje toggle event för att beräkna 28-dagarsperiod
+
+**Filer att skapa:**
+```
+/components/dashboard/dynamic-pricing-toggle.tsx
+/components/dashboard/dynamic-pricing-disclaimer-modal.tsx
+/public/whitepapers/dynamic-pricing-guide.pdf
+/app/api/settings/dynamic-pricing/route.ts (för att logga events)
+```
+
+**Dokumentation:** Se `/home/ubuntu/Uploads/Dynamic Pricing Intelligence i Flow`
+
+---
+
+## 🟡 PRIORITET 4: Payatt Terminologi - Byt "billing" till "Engagement Hub"
 
 **DECISION:** User valde **Option A: `/engagement/*`** (Customer Engagement Hub) ✅
 
@@ -249,9 +295,188 @@ Byt till "engagement" för:
 
 ---
 
-## 🟢 PRIORITET 4: Nice-to-have förbättringar
+## 🟡 PRIORITET 5: Wave 5A - Revenue Intelligence & Analytics
 
-### 4.1 Visningsläge / Display preferences
+### 5.1 Business Metrics Dashboard
+**Feature:** Komplett Revenue Intelligence dashboard för MRR/ARR tracking
+
+**Database utökning:**
+- [ ] RevenueMetric model med datum, MRR, ARR, churn_rate, customer_count per tier
+- [ ] DailyRevenue model för tracking av daglig tillväxt
+- [ ] CustomerJourney model för tracking av upgrade/downgrade patterns
+
+**API Endpoints:**
+- [ ] GET /api/analytics/revenue - MRR/ARR trends sista 12 månader
+- [ ] GET /api/analytics/customers - Customer distribution per tier
+- [ ] GET /api/analytics/churn - Churn rate och retention metrics
+- [ ] GET /api/analytics/cohorts - Cohort analysis för retention
+
+**UI Komponenter:**
+- [ ] Dashboard med 4 key metrics cards (MRR, ARR, Active Customers, Churn Rate)
+- [ ] Line chart för MRR growth över tid med React Recharts
+- [ ] Pie chart för customer distribution per tier
+- [ ] Table för top 10 most valuable customers
+- [ ] Cohort retention heatmap
+- [ ] Export function för CSV reports
+
+**Svenska labels:**
+- "Månadsvis Återkommande Intäkt", "Årlig Återkommande Intäkt"
+- "Kundfördelning", "Kundavhopp", "Retention Rate"
+
+**Dokumentation:** Se `/home/ubuntu/Uploads/old_eller`
+
+---
+
+### 5.2 Customer Health Score System
+**Feature:** Proaktiv kundhantring med automatisk health scoring
+
+**Database Models:**
+- [ ] CustomerHealthScore med score (0-100), faktorer som påverkar
+- [ ] HealthAlerts för automatiska varningar
+- [ ] CustomerActivity för tracking av användning
+
+**Beräkning av Health Score:**
+- Login frequency (30% av score) - sista 30 dagarna
+- Feature usage (25%) - andel aktiverade AI-funktioner
+- Booking volume vs limit (20%) - hur nära gränsen de är
+- Support tickets (15%) - antal klagomål
+- Payment history (10%) - försenade betalningar
+
+**Automatiska Alerts:**
+- Score under 30: Risk för churn, skicka retention email
+- Score 30-60: Watch list, erbjud support
+- Score över 80: Happy customer, erbjud upgrade eller referral
+
+**UI Dashboard:**
+- [ ] Customer health overview med färgkodade scores
+- [ ] Filtering per health score range
+- [ ] Action buttons: "Skicka retention email", "Erbjud support"
+- [ ] Drill-down på individuell kund med detaljerad health breakdown
+
+**Svenska interface:** "Kundhälsa", "Riskanalys", "Åtgärdsförslag"
+
+---
+
+### 5.3 Automated Marketing Triggers
+**Feature:** Email automation baserat på användarbeteende
+
+**Email Automation Flows:**
+- [ ] Trial Day 3: "Har du hittat dina AI-rekommendationer ännu?"
+- [ ] Trial Day 7: "Halvvägs genom din trial - här är vad du missat"
+- [ ] Trial Day 12: "Uppgradera nu och få 20% rabatt första månaden"
+- [ ] BASIC user >400 bookings: "Du närmar dig gränsen - uppgradera till PROFESSIONAL"
+- [ ] Efter 30 dagar PROFESSIONAL: "Kund-success story + referral program"
+
+**Database:**
+- [ ] EmailCampaign model för kampanjhantering
+- [ ] EmailTrigger för automatiska triggers baserat på events
+- [ ] EmailLog för delivery tracking
+
+**API Integration:**
+- [ ] Integration med 46elks eller Resend API för svenska email delivery
+- [ ] Template system för olika email types
+
+**Admin Interface:**
+- [ ] Email campaign dashboard med open rates, click rates
+- [ ] Template editor för anpassning av meddelanden
+- [ ] A/B test setup för subject lines och content
+- [ ] Opt-out management för GDPR compliance
+
+**Triggers:**
+- [ ] Webhook integration när subscription events sker
+- [ ] Cron jobs för periodic checks (daily health score updates)
+- [ ] Real-time triggers vid specifika user actions
+
+---
+
+## 🟢 PRIORITET 6: Wave 5B - Competitive Intelligence (Låg prioritet)
+
+### 6.1 Competitor Analysis Dashboard
+**Feature:** Competitive intelligence system för marknadspositioning
+
+**Web Scraping Setup:**
+- [ ] Automated price monitoring av konkurrenter (Bookify, TidyHQ, etc.)
+- [ ] Feature comparison matrix
+- [ ] Review sentiment från G2, Capterra, Trustpilot
+
+**Database:**
+- [ ] Competitor model med namn, priser, features, last_updated
+- [ ] MarketIntelligence för trends och insights
+- [ ] CompetitiveAlert för prisförändringar
+
+**Dashboard UI:**
+- [ ] Competitive pricing matrix med dina priser vs konkurrenter
+- [ ] Feature gap analysis - vad konkurrenter har som du saknar
+- [ ] Market positioning chart med pris vs features
+- [ ] Alerts när konkurrenter ändrar priser eller lanserar features
+
+**Actionable Insights:**
+- [ ] Automated recommendations för prisjusteringar
+- [ ] Feature prioritization baserat på competitive gaps
+- [ ] Market opportunity identification
+
+**Dokumentation:** Se `/home/ubuntu/Uploads/old_eller`
+
+---
+
+## 🟢 PRIORITET 7: Pricing-förbättringar
+
+### 7.1 Yearly Payment Option
+**Feature:** Årlig betalning med 10% rabatt
+
+**Åtgärd:**
+- [ ] Toggle mellan monthly/yearly på pricing page
+- [ ] Beräkna och visa "Spara X SEK/år" dynamiskt
+- [ ] Uppdatera Stripe integration för yearly subscriptions
+- [ ] Visa "BÄSTA VÄRDE" badge på yearly option
+
+**UI:**
+```
+┌────────────────────────────────────┐
+│ [Monthly] [Yearly - Spara 10%] ✨  │
+└────────────────────────────────────┘
+```
+
+---
+
+### 7.2 A/B Testing för Pricing Page
+**Feature:** Conversion rate optimization
+
+**Åtgärd:**
+- [ ] Variant A: Nuvarande pricing
+- [ ] Variant B: Begränsad tid erbjudande (första månaden 50% rabatt)
+- [ ] Tracking av conversion rate per variant
+- [ ] Admin dashboard för att se A/B-test resultat
+
+---
+
+### 7.3 Referral Program
+**Feature:** "Bjud in kollega, få 1 månad gratis"
+
+**Åtgärd:**
+- [ ] Referral link generation för varje användare
+- [ ] Tracking av referrals i database
+- [ ] Automated discount application vid successful referral
+- [ ] Referral dashboard för användare
+
+---
+
+### 7.4 Freemium Tier (Låg prioritet)
+**Feature:** 50 bokningar/månad gratis för att öka conversions
+
+**Åtgärd:**
+- [ ] Lägg till FREE tier i pricing table
+- [ ] Begränsningar: 50 bokningar/mån, basic features endast
+- [ ] Upgrade prompts när gräns nås
+- [ ] Conversion tracking från FREE → BASIC/PROFESSIONAL
+
+**Dokumentation:** Se `/home/ubuntu/Uploads/Tier_ARR`
+
+---
+
+## 🟢 PRIORITET 8: Nice-to-have förbättringar
+
+### 8.1 Visningsläge / Display preferences
 **Åtgärd:**
 - [ ] Implementera dark/light mode toggle (finns redan?)
 - [ ] Compact vs Expanded view
@@ -260,7 +485,7 @@ Byt till "engagement" för:
 
 ---
 
-### 4.2 Mock Clinics för SA testing
+### 8.2 Mock Clinics för SA testing
 **Åtgärd:**
 - [ ] Skapa 2-3 mock clinics med realistisk data
 - [ ] Använd för SA impersonation testing
@@ -268,7 +493,7 @@ Byt till "engagement" för:
 
 ---
 
-### 4.3 Onboarding steg 2 banner
+### 8.3 Onboarding steg 2 banner
 **Verifiering behövs:**
 - [ ] Kontrollera onboarding flow configuration
 - [ ] Steg 2 ska innehålla:
@@ -285,29 +510,50 @@ Byt till "engagement" för:
 - ✅ 1.2 - Implementera Clinic Selector
 - ✅ 1.3 - Fixa Role Switch
 - ✅ 1.4 - Ta bort GoCardless, skapa Billing page
-- ✅ 1.6 - Ta bort "Landningssida" från meny
+- ✅ 1.5 - Ta bort "Landningssida" från meny
 
-**VECKA 2: STT UI & Payatt terminologi**
+**VECKA 2: Kritisk säkerhet (fortsättning) + STT UI**
+- [ ] 1.1 - Auth Middleware på /dashboard/* routes 🔴
+- [ ] 1.2 - Footer conditional rendering 🔴
+- [ ] 1.3 - Debug onboarding upstream error
 - [ ] 2.1 - OpenAI Configuration UI
 - [ ] 2.2 - STT Test-funktion
-- [ ] 3.2 - Routing-ändringar (billing → engagement)
-- [ ] 3.3 - UI-terminologi uppdatering
 
-**VECKA 3: Refactoring & Polish**
-- [ ] 3.4 - Database & Type updates
-- [ ] 1.5 - Debug onboarding upstream error
-- [ ] 4.1 - Display preferences
-- [ ] 4.2 - Mock clinics
-- [ ] 4.3 - Onboarding steg 2 verification
+**VECKA 3: Dynamic Pricing + Payatt terminologi**
+- [ ] 3.1 - Dynamic Pricing Toggle med Disclaimer
+- [ ] 4.2 - Routing-ändringar (billing → engagement)
+- [ ] 4.3 - UI-terminologi uppdatering
+- [ ] 4.4 - Database & Type updates
+
+**VECKA 4-6: Revenue Intelligence (Wave 5A)**
+- [ ] 5.1 - Business Metrics Dashboard (MRR/ARR)
+- [ ] 5.2 - Customer Health Score System
+- [ ] 5.3 - Automated Marketing Triggers
+
+**VECKA 7-8: Pricing-förbättringar**
+- [ ] 7.1 - Yearly Payment Option
+- [ ] 7.2 - A/B Testing för Pricing Page
+- [ ] 7.3 - Referral Program
+
+**FRAMTID: Nice-to-have**
+- [ ] 6.1 - Competitor Analysis Dashboard (Wave 5B)
+- [ ] 7.4 - Freemium Tier
+- [ ] 8.1 - Display preferences
+- [ ] 8.2 - Mock clinics
+- [ ] 8.3 - Onboarding steg 2 verification
 
 ---
 
 ## 🔗 Relaterade dokument
 
-**Källa-promptar:**
-- `/home/ubuntu/Uploads/login routing` - Säkerhet & routing
-- `/home/ubuntu/Uploads/openai` - OpenAI Whisper config
-- `/home/ubuntu/Uploads/payatt term` - Terminologi-förslag
+**Källa-promptar (2025-10-19):**
+- `/home/ubuntu/Uploads/login routing` - Säkerhet & routing ✅
+- `/home/ubuntu/Uploads/Dynamic Pricing Intelligence i Flow` - Dynamic Pricing feature 🆕
+- `/home/ubuntu/Uploads/old_eller` - Wave 5A/5B Revenue Intelligence 🆕
+- `/home/ubuntu/Uploads/openai` - OpenAI Whisper config ✅
+- `/home/ubuntu/Uploads/konfiguera` - Gamla konfigurationsnoteringar (Voice, TTS, FAQ)
+- `/home/ubuntu/Uploads/payatt term` - Terminologi-förslag (billing → engagement) ✅
+- `/home/ubuntu/Uploads/Tier_ARR` - ARR-beräkning och pricing-strategi 🆕
 
 **Tekniska specs:**
 - KB-Whisper: `/home/ubuntu/Uploads/KB_Whisper_Access_Guide_v2.pdf`
