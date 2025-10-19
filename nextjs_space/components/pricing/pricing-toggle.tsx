@@ -58,28 +58,27 @@ export function PriceDisplay({ monthlyPrice, isYearly, currency = 'kr' }: PriceD
   // Calculate yearly pricing with 20% discount
   const yearlyPrice = monthlyPrice * 12 * 0.8;
   const effectiveMonthlyPrice = isYearly ? Math.round(yearlyPrice / 12) : monthlyPrice;
-  const displayPrice = isYearly ? Math.round(yearlyPrice) : monthlyPrice;
+  const savings = Math.round((monthlyPrice * 12) - yearlyPrice);
 
   return (
     <div>
       <div className="flex items-baseline gap-2">
-        <span className="text-5xl font-bold">{displayPrice.toLocaleString('sv-SE')}</span>
+        {isYearly && (
+          <span className="text-3xl font-bold text-gray-400 line-through mr-2">
+            {monthlyPrice.toLocaleString('sv-SE')}
+          </span>
+        )}
+        <span className="text-5xl font-bold">
+          {effectiveMonthlyPrice.toLocaleString('sv-SE')}
+        </span>
         <div className="flex flex-col">
-          <span className="text-gray-600">{currency}/{isYearly ? 'år' : 'månad'}</span>
-          {isYearly && (
-            <span className="text-sm text-green-600 font-medium">
-              {effectiveMonthlyPrice.toLocaleString('sv-SE')} {currency}/mån
-            </span>
-          )}
+          <span className="text-gray-600">{currency}/månad</span>
         </div>
       </div>
       {isYearly && (
         <div className="mt-2">
-          <span className="text-sm text-gray-500 line-through">
-            {(monthlyPrice * 12).toLocaleString('sv-SE')} {currency}/år
-          </span>
-          <span className="ml-2 text-sm font-semibold text-green-600">
-            Spara {((monthlyPrice * 12) - yearlyPrice).toLocaleString('sv-SE')} {currency}/år
+          <span className="text-sm font-semibold text-green-600">
+            Betala årsvis, spara {savings.toLocaleString('sv-SE')} {currency}/år
           </span>
         </div>
       )}

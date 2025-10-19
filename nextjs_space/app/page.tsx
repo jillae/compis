@@ -77,7 +77,7 @@ export default async function LandingPage() {
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Flow är din affärsdrivna coach som proaktivt analyserar din bokningsdata och ger dig konkreta åtgärder 
             som ökar intäkter direkt. Inte bara grafer – actionable insikter som driver tillväxt. 
-            Fullt integrerat med Bokadirekt.
+            Ansluts enkelt till ditt befintliga bokningssystem via API.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4">
@@ -146,11 +146,11 @@ export default async function LandingPage() {
           <Card className="border-2 hover:border-blue-300 transition-all hover:shadow-lg">
             <CardContent className="pt-6 space-y-4">
               <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-blue-600" />
+                <TrendingUp className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold">Risk-varningar</h3>
+              <h3 className="text-xl font-semibold">Revenue Intelligence</h3>
               <p className="text-gray-600">
-                Identifiera riskbokningar innan de blir no-shows. Få varningar i tid så du kan agera proaktivt.
+                Få konkreta intäktsförslag baserat på din bokhistorik. Se exakt vilka åtgärder som ger mest avkastning.
               </p>
             </CardContent>
           </Card>
@@ -158,11 +158,11 @@ export default async function LandingPage() {
           <Card className="border-2 hover:border-purple-300 transition-all hover:shadow-lg">
             <CardContent className="pt-6 space-y-4">
               <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
+                <Users className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold">Intäktssimulator</h3>
+              <h3 className="text-xl font-semibold">Customer Health Scoring</h3>
               <p className="text-gray-600">
-                Testa "what-if" scenarios: Se exakt hur +2 bokningar/dag påverkar årsintäkten.
+                Se vilka kunder som riskerar att försvinna och agera i tid. Få konkreta tips för att öka lojalitet.
               </p>
             </CardContent>
           </Card>
@@ -170,11 +170,11 @@ export default async function LandingPage() {
           <Card className="border-2 hover:border-indigo-300 transition-all hover:shadow-lg">
             <CardContent className="pt-6 space-y-4">
               <div className="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-6 w-6 text-indigo-600" />
+                <Target className="h-6 w-6 text-indigo-600" />
               </div>
-              <h3 className="text-xl font-semibold">Avancerad analys</h3>
+              <h3 className="text-xl font-semibold">Dynamic Pricing</h3>
               <p className="text-gray-600">
-                Djupdyk i kundbeteende, tjänsteprestanda och personaleffektivitet med visuella dashboards.
+                Optimera dina priser baserat på efterfrågan. "Öka priser 10% på fredagar kl 14-17" = +15k kr/mån.
               </p>
             </CardContent>
           </Card>
@@ -182,11 +182,11 @@ export default async function LandingPage() {
           <Card className="border-2 hover:border-green-300 transition-all hover:shadow-lg">
             <CardContent className="pt-6 space-y-4">
               <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Target className="h-6 w-6 text-green-600" />
+                <BarChart3 className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold">Actionable insikter</h3>
+              <h3 className="text-xl font-semibold">Meta Marketing ROI</h3>
               <p className="text-gray-600">
-                Få konkreta rekommendationer: "Öka priser 10% på fredagar kl 14-17" = +15k kr/mån.
+                Se exakt vilka annonser som ger bokningar, inte bara klick. Optimera din marknadsföring för maximal avkastning.
               </p>
             </CardContent>
           </Card>
@@ -194,11 +194,11 @@ export default async function LandingPage() {
           <Card className="border-2 hover:border-orange-300 transition-all hover:shadow-lg">
             <CardContent className="pt-6 space-y-4">
               <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Zap className="h-6 w-6 text-orange-600" />
+                <Sparkles className="h-6 w-6 text-orange-600" />
               </div>
-              <h3 className="text-xl font-semibold">Auto-synk</h3>
+              <h3 className="text-xl font-semibold">Risk-varningar för no-shows</h3>
               <p className="text-gray-600">
-                Anslut Bokadirekt-konto och få automatisk realtidssynk av alla bokningar och kunder.
+                Identifiera riskbokningar innan de blir no-shows. Få varningar i tid så du kan agera proaktivt och rädda bokningar.
               </p>
             </CardContent>
           </Card>
@@ -206,11 +206,11 @@ export default async function LandingPage() {
           <Card className="border-2 hover:border-pink-300 transition-all hover:shadow-lg">
             <CardContent className="pt-6 space-y-4">
               <div className="bg-pink-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-pink-600" />
+                <Zap className="h-6 w-6 text-pink-600" />
               </div>
-              <h3 className="text-xl font-semibold">Veckorapporter</h3>
+              <h3 className="text-xl font-semibold">Automatisk integration</h3>
               <p className="text-gray-600">
-                Få automatiska sammanfattningar via mail med nyckeltal och trender varje måndag.
+                Anslut ditt bokningssystem och få automatisk realtidssynk av alla bokningar och kunder. Ingen manuell administration.
               </p>
             </CardContent>
           </Card>

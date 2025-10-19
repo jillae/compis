@@ -34,7 +34,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-600 mt-0.5" />
-                  <span>Intäktssimulator</span>
+                  <span>Grundläggande intäktsanalys</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-600 mt-0.5" />
@@ -76,11 +76,19 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-600 mt-0.5" />
-                  <span>Marketing automation</span>
+                  <span>Revenue Intelligence</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-600 mt-0.5" />
-                  <span>Customer health scoring</span>
+                  <span>Customer Health Scoring</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 mt-0.5" />
+                  <span>Meta Marketing ROI</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-600 mt-0.5" />
+                  <span>Dynamic Pricing</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-600 mt-0.5" />

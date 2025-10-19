@@ -34,19 +34,19 @@ export function PricingCards() {
                 </li>
                 <li className="flex items-center gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>Grundläggande analys</span>
+                  <span>Grundläggande intäktsanalys</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>No-show förutsägelse</span>
+                  <span>Risk-varningar för no-shows</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>E-postrapporter</span>
+                  <span>Automatiska veckorapporter</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>Bokadirekt-integration</span>
+                  <span>Bokningssystem-integration</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
@@ -85,27 +85,27 @@ export function PricingCards() {
                 </li>
                 <li className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>Avancerad analys</span>
+                  <span>Revenue Intelligence</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>AI-rekommendationer</span>
+                  <span>Customer Health Scoring</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>Meta Ads-integration</span>
+                  <span>Meta Marketing ROI-analys</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>Kapacitetsplanering</span>
+                  <span>Kapacitetsoptimering</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>Dynamisk prissättning</span>
+                  <span>Dynamic Pricing</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  <span>Retention Autopilot</span>
+                  <span>Automatiska retentionskampanjer</span>
                 </li>
                 <li className="flex items-center gap-2 text-sm font-medium">
                   <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
