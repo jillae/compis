@@ -474,9 +474,112 @@ Byt till "engagement" för:
 
 ---
 
-## 🟢 PRIORITET 8: Nice-to-have förbättringar
+## 🟠 PRIORITET 8: GoHighLevel (GHL) Integration - SuperAdmin UI
 
-### 8.1 Visningsläge / Display preferences
+### 8.1 GHL SuperAdmin Configuration Page ⚠️
+**Status:** Backend och API finns, men SuperAdmin UI saknas
+
+**Befintlig implementation:**
+- ✅ `/api/ghl/config/route.ts` - GET/PUT endpoints för GHL config
+- ✅ `/api/ghl/sync/route.ts` - POST/GET för synkronisering
+- ✅ `/components/ghl/ghl-connection-status.tsx` - Status dashboard
+- ✅ Database: `ghlEnabled`, `ghlApiKey`, `ghlLocationId`, `ghlLastSync` på Clinic model
+
+**Saknas:**
+- [ ] `/app/superadmin/ghl-config/page.tsx` - SuperAdmin UI för GHL setup
+- [ ] Form för att konfigurera GHL per klinik:
+  - API Key input (masked/password field)
+  - Location ID input
+  - Enable/Disable toggle
+  - Test Connection knapp
+  - Sync status display (använd GHLConnectionStatus komponent)
+
+**UI Mockup:**
+```
+┌──────────────────────────────────────────────┐
+│ GoHighLevel Configuration                    │
+├──────────────────────────────────────────────┤
+│ Klinik: [ArchClinic ▼]                       │
+│                                              │
+│ ☑ Aktivera GHL Integration                  │
+│                                              │
+│ API Key: [••••••••••••••••] 🔑              │
+│                                              │
+│ Location ID: [abc123...] 📍                  │
+│                                              │
+│ [Test Connection] [Spara Konfiguration]     │
+│                                              │
+│ ─────────────────────────────────────────   │
+│                                              │
+│ <GHLConnectionStatus />                      │
+│   • Totalt synkningar: 45                   │
+│   • Lyckade: 43                              │
+│   • Misslyckade: 2                           │
+│   • Senaste synk: 2025-10-19 15:30          │
+│                                              │
+│ [Visa Sync-loggar]                           │
+└──────────────────────────────────────────────┘
+```
+
+**Filer att skapa:**
+```
+/app/superadmin/ghl-config/page.tsx
+/components/superadmin/ghl-config-form.tsx
+```
+
+**Integration med ClinicSelector:**
+- Använd ClinicContext för att hämta vald klinik
+- Visa GHL config för den valda kliniken
+- SuperAdmin kan konfigurera GHL för vilken klinik som helst
+
+---
+
+### 8.2 GHL Webhooks (Framtida förbättring)
+**Feature:** Ta emot webhooks från GHL när bokningar skapas/uppdateras i GHL
+
+**Åtgärd:**
+- [ ] Skapa `/api/ghl/webhooks/route.ts` för att ta emot GHL webhooks
+- [ ] Verifiera webhook signature från GHL
+- [ ] Mappta GHL appointments → Flow bookings
+- [ ] Mappta GHL contacts → Flow customers
+- [ ] Logga alla webhook events
+- [ ] Admin UI för att visa webhook-loggar
+
+**Dokumentation:** 
+- GHL Webhooks: https://highlevel.stoplight.io/docs/integrations/
+
+---
+
+## 🟢 PRIORITET 9: Corex Integration (Framtida Wave)
+
+### 9.1 Corex Voice Calls Integration
+**Feature:** Integration med Corex AI-telefoniassistent
+
+**Åtgärd:**
+- [ ] API integration med Corex endpoints
+- [ ] Call logging och recording
+- [ ] Transkribering med Whisper
+- [ ] Dashboard för call analytics
+- [ ] Admin UI för Corex-konfiguration
+
+**Dokumentation:** Se `/home/ubuntu/Uploads/Corex - omnichannel klinikassistent.md`
+
+---
+
+### 9.2 Corex Analytics Dashboard
+**Feature:** Visa call-statistik och AI-insights från Corex
+
+**Åtgärd:**
+- [ ] Call volume metrics
+- [ ] Conversion rates från calls → bokningar
+- [ ] Sentiment analysis av samtal
+- [ ] Integration med Flow Revenue Intelligence
+
+---
+
+## 🟢 PRIORITET 10: Nice-to-have förbättringar
+
+### 10.1 Visningsläge / Display preferences
 **Åtgärd:**
 - [ ] Implementera dark/light mode toggle (finns redan?)
 - [ ] Compact vs Expanded view
@@ -485,7 +588,7 @@ Byt till "engagement" för:
 
 ---
 
-### 8.2 Mock Clinics för SA testing
+### 10.2 Mock Clinics för SA testing
 **Åtgärd:**
 - [ ] Skapa 2-3 mock clinics med realistisk data
 - [ ] Använd för SA impersonation testing
@@ -493,7 +596,7 @@ Byt till "engagement" för:
 
 ---
 
-### 8.3 Onboarding steg 2 banner
+### 10.3 Onboarding steg 2 banner
 **Verifiering behövs:**
 - [ ] Kontrollera onboarding flow configuration
 - [ ] Steg 2 ska innehålla:

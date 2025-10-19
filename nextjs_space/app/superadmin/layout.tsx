@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { UserRole } from "@prisma/client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Home, Building2, Users, Settings, BarChart3, MessageSquare, Phone, CreditCard, Mic, Monitor } from "lucide-react"
+import { Home, Building2, Users, Settings, BarChart3, MessageSquare, Phone, CreditCard, Mic, Monitor, Webhook } from "lucide-react"
 import { ClinicSelector } from "@/components/superadmin/clinic-selector"
 import { ViewingBanner } from "@/components/superadmin/viewing-banner"
 
@@ -86,6 +86,12 @@ export default async function SuperAdminLayout({
                 <Button variant="ghost" size="sm">
                   <Monitor className="mr-2 h-4 w-4" />
                   Display Config
+                </Button>
+              </Link>
+              <Link href="/superadmin/ghl-config">
+                <Button variant="ghost" size="sm">
+                  <Webhook className="mr-2 h-4 w-4" />
+                  GHL Config
                 </Button>
               </Link>
             </nav>
