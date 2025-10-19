@@ -39,7 +39,51 @@
 
 ## 🔴 PRIORITET 1: Kvarvarande Kritiska Tasks
 
-### 1.5 Onboarding upstream error ⚠️
+### 1.1 Auth Middleware på /dashboard/* routes ⚠️
+**Problem:** Användare kan nå /dashboard/simulator UTAN inloggning
+
+**Säkerhetsbrist:** Alla routes under /dashboard/* måste kräva autentisering
+
+**Åtgärd:**
+- [ ] Implementera auth middleware som kontrollerar session
+- [ ] Redirecta till /auth/login om ej authenticated
+- [ ] Applicera på ALLA /dashboard/* routes
+- [ ] Testa att obehöriga användare blockeras
+
+**Teknisk implementation:**
+```typescript
+// middleware.ts eller app/dashboard/layout.tsx
+export const requireAuth = async (req, res, next) => {
+  const session = await getSession(req);
+  if (!session?.user) {
+    return res.redirect('/auth/login');
+  }
+  next();
+};
+```
+
+---
+
+### 1.2 Footer conditional rendering ⚠️
+**Problem:** Utloggade användare kan nå interna sidor via footer-länkar
+
+**Säkerhetsbrist:** Footer-menyn exponerar skyddade sidor för obehöriga
+
+**Åtgärd:**
+- [ ] Implementera conditional rendering i footer baserat på auth status
+- [ ] Ej inloggad: Visa endast publik landing, pricing, kontakt
+- [ ] Inloggad: Visa relevanta dashboard-länkar baserat på role
+- [ ] Testa att footer ändras korrekt vid login/logout
+
+**Filer att uppdatera:**
+```
+/components/layout/footer.tsx (eller motsvarande)
+/components/layout/navigation.tsx
+```
+
+---
+
+### 1.3 Onboarding upstream error ⚠️
 **Problem:** `/onboarding` ger "upstream connect error"
 
 **Åtgärd:**
