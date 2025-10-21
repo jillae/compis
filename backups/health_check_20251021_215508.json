@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-10-21T21:55:09.153Z",
+  "status": "HEALTHY",
+  "counts": {
+    "users": 5,
+    "clinics": 5,
+    "customers": 1137,
+    "bookings": 761
+  }
+}

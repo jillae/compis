@@ -1,7 +1,28 @@
 
 # LEFTOVERS - Kvarvarande Tasks
 
-**Senast uppdaterat:** 2025-10-19 (Prompt-avstämning - 7 filer genomgångna)
+**Senast uppdaterat:** 2025-10-21 (Deploy + 46elks/Fortnox påbörjat)
+
+## 🎉 DAGENS PROGRESS (2025-10-21)
+
+### ✅ System Deployment & Verification
+- ✅ **Deployed:** goto.klinikflow.app (179 routes, production-ready)
+- ✅ **Database:** Verified full recovery (5 users, 5 clinics, customers, bookings)
+- ✅ **Meta Token:** Refreshed with new long-lived credential
+- ✅ **Git Branch:** "flow-da" created and committed
+
+### ⏳ New Features (In Progress)
+- ⏳ **46elks Subaccounts:** Service layer komplett, återstår API + UI (3-4h)
+- ⏳ **Fortnox Integration:** Planerad, credentials mottagna (4-5h)
+
+### 📋 LEFTOVERS Analys
+- **Quick wins:** ✅ KLART (navigation, footer, auth)
+- **Big tasks:** Customer Health Score, Marketing Triggers, Competitor Analysis (8-12h total)
+- **Business decisions:** A/B testing, Referral, Freemium (kräver stakeholder input)
+
+---
+
+**Tidigare uppdateringar:** 2025-10-19 (Prompt-avstämning - 7 filer genomgångna)
 
 ---
 
@@ -449,31 +470,68 @@ const testProvider = async (provider: Provider) => {
 
 ## 🟡 PRIORITET 5: Wave 5A - Revenue Intelligence & Analytics
 
-### 5.1 Business Metrics Dashboard
+### 5.1 Business Metrics Dashboard ✅ KLART! (2025-10-19)
 **Feature:** Komplett Revenue Intelligence dashboard för MRR/ARR tracking
 
 **Database utökning:**
-- [ ] RevenueMetric model med datum, MRR, ARR, churn_rate, customer_count per tier
-- [ ] DailyRevenue model för tracking av daglig tillväxt
-- [ ] CustomerJourney model för tracking av upgrade/downgrade patterns
+- [x] RevenueMetric model med datum, MRR, ARR, churn_rate, customer_count per tier ✅
+- [x] DailyRevenue model för tracking av daglig tillväxt ✅
+- [x] CustomerJourney model för tracking av upgrade/downgrade patterns ✅
+- [x] CustomerJourneyEvent enum (SIGNUP, TRIAL_START, UPGRADE, CHURN, etc.) ✅
 
 **API Endpoints:**
-- [ ] GET /api/analytics/revenue - MRR/ARR trends sista 12 månader
-- [ ] GET /api/analytics/customers - Customer distribution per tier
-- [ ] GET /api/analytics/churn - Churn rate och retention metrics
-- [ ] GET /api/analytics/cohorts - Cohort analysis för retention
+- [x] GET /api/analytics/revenue - MRR/ARR trends sista 12 månader ✅
+  - Stödjer både real data och mock data för demo
+  - Visar MRR/ARR, nya kunder, churned kunder, tier breakdown
+- [x] GET /api/analytics/customers - Customer distribution per tier ✅
+  - Pie chart data med customer count och MRR per tier
+- [x] GET /api/analytics/churn - Churn rate och retention metrics ✅
+  - Monthly churn trends
+  - Churn by reason breakdown
+- [x] GET /api/analytics/cohorts - Cohort analysis för retention ✅
+  - Heatmap data med retention rates över tid
 
 **UI Komponenter:**
-- [ ] Dashboard med 4 key metrics cards (MRR, ARR, Active Customers, Churn Rate)
-- [ ] Line chart för MRR growth över tid med React Recharts
-- [ ] Pie chart för customer distribution per tier
-- [ ] Table för top 10 most valuable customers
-- [ ] Cohort retention heatmap
-- [ ] Export function för CSV reports
+- [x] Dashboard med 4 key metrics cards (MRR, ARR, Active Customers, Churn Rate) ✅
+- [x] Line chart för MRR growth över tid med React Recharts ✅
+- [x] Pie chart för customer distribution per tier ✅
+- [x] Table för top 10 most valuable customers ✅
+- [x] Cohort retention heatmap med färgkodning ✅
+- [x] Export function för CSV reports ✅
+- [x] Tabs för olika vyer (Overview, Kunder, Churn, Cohorts) ✅
+
+**Navigation:**
+- [x] Länk till /dashboard/analytics i HamburgerMenu ✅
+- [x] "Revenue Intelligence" sektion i menyn med TrendingUp-ikon ✅
 
 **Svenska labels:**
-- "Månadsvis Återkommande Intäkt", "Årlig Återkommande Intäkt"
-- "Kundfördelning", "Kundavhopp", "Retention Rate"
+- ✅ "Månadsvis Återkommande Intäkt", "Årlig Återkommande Intäkt"
+- ✅ "Kundfördelning", "Kundavhopp", "Retention Rate"
+- ✅ "Business Metrics", "Cohort Analysis", "Genomsnittlig Churn Rate"
+
+**Features:**
+- ✅ Mock data generation för demo när ingen real data finns
+- ✅ Demo-data banner som förklarar när mock data visas
+- ✅ SuperAdmin kan växla mellan clinics med ClinicSelector
+- ✅ CSV export av revenue metrics
+- ✅ Responsiv design för mobil och desktop
+- ✅ Cohort heatmap med färgkodning (grön = high retention, röd = low retention)
+
+**Filer skapade:**
+```
+✅ /app/api/analytics/revenue/route.ts
+✅ /app/api/analytics/customers/route.ts
+✅ /app/api/analytics/churn/route.ts
+✅ /app/api/analytics/cohorts/route.ts
+✅ /app/dashboard/analytics/page.tsx (476 rader)
+✅ /components/analytics/mrr-chart.tsx
+✅ /components/analytics/customer-distribution-chart.tsx
+✅ /components/analytics/churn-analysis.tsx
+✅ /components/analytics/cohort-heatmap.tsx
+✅ /components/analytics/top-customers-table.tsx
+```
+
+**Checkpoint:** `Wave 5A Task 5.1 - Business Metrics Dashboard complete` (2025-10-19)
 
 **Dokumentation:** Se `/home/ubuntu/Uploads/old_eller`
 
@@ -829,8 +887,8 @@ ENTERPRISE: 2999 kr/mån → 28 790 kr/år (2 399 kr/mån effektivt)
 - ✅ 4.3 - UI-terminologi uppdatering
 - ✅ 4.4 - Database & Type updates
 
-**VECKA 4-6: Revenue Intelligence (Wave 5A)**
-- [ ] 5.1 - Business Metrics Dashboard (MRR/ARR)
+**✅ VECKA 4: Revenue Intelligence (Wave 5A) - KLAR! (2025-10-19)**
+- [x] 5.1 - Business Metrics Dashboard (MRR/ARR) ✅
 - [ ] 5.2 - Customer Health Score System
 - [ ] 5.3 - Automated Marketing Triggers
 

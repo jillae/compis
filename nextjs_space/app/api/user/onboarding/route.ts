@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       metaAccessToken,
       metaAdAccountId,
       metaPixelId,
+      corexRemindersEnabled,
     } = await req.json()
 
     if (step === 1) {
@@ -81,6 +82,15 @@ export async function POST(req: NextRequest) {
         }
       } else {
         updateData.metaEnabled = false
+      }
+
+      // Handle Corex AI Reminders
+      if (corexRemindersEnabled) {
+        updateData.corexEnabled = true  // Enable Corex integration
+        updateData.corexRemindersEnabled = true
+        updateData.corexReminderTonality = 'professional'  // Default tonality
+      } else {
+        updateData.corexRemindersEnabled = false
       }
 
       // Update clinic with integration settings

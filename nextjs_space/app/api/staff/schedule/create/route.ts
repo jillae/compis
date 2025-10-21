@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import ClockifyClient from '@/lib/integrations/clockify-client';
+import { notifyShiftAssigned } from '@/lib/staff/notification-service';
 
 /**
  * POST /api/staff/schedule/create
@@ -120,6 +121,19 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // 📱 Send SMS notification to staff
+    try {
+      await notifyShiftAssigned(clinicId, staffId, {
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        shiftType,
+        notes,
+      });
+    } catch (notificationError) {
+      console.error('[SMS Notification] Failed:', notificationError);
+      // Don't fail the request if notification fails
+    }
 
     return NextResponse.json({
       success: true,

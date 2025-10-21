@@ -51,7 +51,7 @@ export default function SignupPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Something went wrong')
+        setError(data.error || 'Något gick fel')
         return
       }
 
@@ -63,12 +63,12 @@ export default function SignupPage() {
       })
 
       if (result?.error) {
-        setError('Account created but sign in failed. Please try logging in.')
+        setError('Konto skapat men inloggning misslyckades. Försök logga in.')
       } else {
         router.replace('/onboarding')
       }
     } catch (error) {
-      setError('Something went wrong. Please try again.')
+      setError('Något gick fel. Försök igen.')
     } finally {
       setLoading(false)
     }
@@ -100,11 +100,7 @@ export default function SignupPage() {
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {error === 'Something went wrong' || error === 'Something went wrong. Please try again.'
-                      ? 'Något gick fel. Försök igen.'
-                      : error === 'Account created but sign in failed. Please try logging in.'
-                      ? 'Konto skapat men inloggning misslyckades. Försök logga in.'
-                      : error}
+                    {error}
                   </AlertDescription>
                 </Alert>
               )}

@@ -10,6 +10,7 @@ import {
   mapResourcesBatch,
   mapServicesBatch,
 } from './mappers';
+import { syncStaffAvailabilities } from './availability-sync';
 import type { SyncResult, SyncOptions } from './types';
 
 interface SyncStatus {
@@ -398,6 +399,7 @@ export async function syncAll(): Promise<{
   customers: SyncResult;
   staff: SyncResult;
   services: SyncResult;
+  staffAvailabilities?: SyncResult;
   overall: {
     success: boolean;
     totalDuration: number;
@@ -445,6 +447,28 @@ export async function syncAll(): Promise<{
   console.log('[SyncService] Recalculating customer totalSpent...');
   await recalculateCustomerTotalSpent();
   
+  // 🆕 Sync staff availabilities → StaffSchedule → Clockify
+  console.log('[SyncService] Syncing staff availabilities...');
+  let staffAvailabilitiesResult: SyncResult | undefined;
+  try {
+    // Get Arch Clinic ID (or first clinic with BD enabled)
+    const clinic = await prisma.clinic.findFirst({
+      where: {
+        bokadirektEnabled: true,
+        bokadirektApiKey: { not: null },
+      },
+      select: { id: true },
+    });
+    
+    if (clinic) {
+      staffAvailabilitiesResult = await syncStaffAvailabilities(clinic.id, options);
+      console.log(`[SyncService] Staff availabilities: ${staffAvailabilitiesResult.recordsUpserted} schedules created`);
+    }
+  } catch (error) {
+    console.error('[SyncService] Staff availability sync failed:', error);
+    // Non-critical - don't fail overall sync
+  }
+  
   // Update last sync timestamp
   await updateSyncTimestamp(now);
   
@@ -454,19 +478,24 @@ export async function syncAll(): Promise<{
     ...staffResult.errors,
     ...servicesResult.errors,
     ...bookingsResult.errors,
+    ...(staffAvailabilitiesResult?.errors || []),
   ];
   
   const overallSuccess =
     customersResult.success &&
     staffResult.success &&
     servicesResult.success &&
-    bookingsResult.success;
+    bookingsResult.success &&
+    (staffAvailabilitiesResult?.success !== false);
   
   console.log(`[SyncService] Full sync completed in ${totalDuration}ms`);
   console.log(`[SyncService] Customers: ${customersResult.recordsUpserted} upserted`);
   console.log(`[SyncService] Staff: ${staffResult.recordsUpserted} upserted`);
   console.log(`[SyncService] Services: ${servicesResult.recordsUpserted} upserted`);
   console.log(`[SyncService] Bookings: ${bookingsResult.recordsUpserted} upserted`);
+  if (staffAvailabilitiesResult) {
+    console.log(`[SyncService] Staff Schedules: ${staffAvailabilitiesResult.recordsUpserted} created`);
+  }
   console.log(`[SyncService] Errors: ${allErrors.length}`);
   
   return {
@@ -474,6 +503,7 @@ export async function syncAll(): Promise<{
     customers: customersResult,
     staff: staffResult,
     services: servicesResult,
+    staffAvailabilities: staffAvailabilitiesResult,
     overall: {
       success: overallSuccess,
       totalDuration,

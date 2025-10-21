@@ -107,8 +107,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Forward to customer service or handle custom logic here
-    // For now, send a generic response
+    // 🤖 Use Corex AI to generate intelligent response
+    if (customer && customer.clinic?.corexEnabled) {
+      const { processInboundSMS } = await import('@/lib/corex-sms-service');
+      const aiResponse = await processInboundSMS(from, message);
+      
+      if (aiResponse) {
+        return new NextResponse(aiResponse, {
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
+      }
+    }
+
+    // Fallback: generic response if Corex is not enabled
     return new NextResponse(
       'Tack för ditt meddelande! Vi återkommer så snart som möjligt.',
       { headers: { 'Content-Type': 'text/plain; charset=utf-8' } }

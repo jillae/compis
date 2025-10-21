@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/weekly-report",
       "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/bokadirekt-sync",
+      "schedule": "0 * * * *"
     }
   ]
 }

@@ -148,6 +148,25 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // 📊 Track Meta Conversion - Booking Lead
+    const clinicId = (session.user as any).clinicId;
+    if (clinicId) {
+      try {
+        const { trackBookingLead } = await import('@/lib/meta-conversions-api');
+        await trackBookingLead(clinicId, {
+          customerId,
+          serviceId: booking.treatmentType || 'unknown',
+          totalPrice: price || 0,
+          eventSourceUrl: request.headers.get('referer') || request.url,
+          clientIpAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
+          clientUserAgent: request.headers.get('user-agent') || undefined
+        });
+      } catch (metaError) {
+        console.error('Meta tracking error:', metaError);
+        // Don't fail booking if tracking fails
+      }
+    }
+
     return NextResponse.json(booking, { status: 201 })
   } catch (error) {
     console.error("Create booking error:", error)

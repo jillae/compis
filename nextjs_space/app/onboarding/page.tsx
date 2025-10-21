@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { CheckCircle, ArrowRight, Loader2, Copy, Check, Calendar, TrendingUp } from 'lucide-react'
+import { CheckCircle, ArrowRight, Loader2, Copy, Check, Calendar, TrendingUp, MessageSquare, Info } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function OnboardingPage() {
@@ -30,6 +30,9 @@ export default function OnboardingPage() {
   const [metaAccessToken, setMetaAccessToken] = useState('')
   const [metaAdAccountId, setMetaAdAccountId] = useState('')
   const [metaPixelId, setMetaPixelId] = useState('')
+  
+  // Corex Reminders
+  const [corexRemindersEnabled, setCorexRemindersEnabled] = useState(false)
 
   useEffect(() => {
     // Check if user has already completed onboarding
@@ -99,6 +102,7 @@ export default function OnboardingPage() {
           metaAccessToken: metaEnabled ? metaAccessToken : null,
           metaAdAccountId: metaEnabled ? metaAdAccountId : null,
           metaPixelId: metaEnabled && metaPixelId ? metaPixelId : null,
+          corexRemindersEnabled,
         }),
       })
 
@@ -347,6 +351,57 @@ export default function OnboardingPage() {
             )}
           </div>
 
+          {/* Corex AI Reminders */}
+          <div className="border rounded-lg p-6 space-y-4 bg-white border-purple-200">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="bg-purple-100 p-3 rounded-lg">
+                  <MessageSquare className="h-6 w-6 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    Corex AI Påminnelser
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+                      NYA!
+                    </span>
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Intelligenta påminnelser som kan svara på kundfrågor via SMS
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={corexRemindersEnabled}
+                onCheckedChange={setCorexRemindersEnabled}
+                disabled={loading}
+              />
+            </div>
+
+            {corexRemindersEnabled && (
+              <div className="pl-14 space-y-4 animate-in fade-in-50">
+                <Alert className="bg-orange-50 border-orange-200">
+                  <Info className="h-4 w-4 text-orange-600" />
+                  <AlertDescription className="text-orange-900">
+                    <strong>Viktigt:</strong> Om du aktiverar Corex AI Påminnelser, kom ihåg att slå av automatiska påminnelser i Bokadirekt för att undvika dubbla meddelanden till kunder.
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="bg-purple-50 p-4 rounded-lg space-y-3">
+                  <h4 className="font-semibold text-sm">Vad kan Corex göra?</h4>
+                  <ul className="space-y-2 list-disc list-inside text-sm text-gray-700">
+                    <li>Skicka intelligenta påminnelser 24h innan bokad tid</li>
+                    <li>Svara på kundfrågor om öppettider, tjänster och pris</li>
+                    <li>Hantera ombokning och avbokning via SMS</li>
+                    <li>Anpassa tonalitet (professionell, vänlig, avslappnad)</li>
+                  </ul>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Du kan ändra tonalitet och mallar under Inställningar när som helst.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -366,7 +421,7 @@ export default function OnboardingPage() {
               onClick={handleStep2Complete}
               className="flex-1"
               size="lg"
-              disabled={loading || (!bokadirektEnabled && !metaEnabled)}
+              disabled={loading || (!bokadirektEnabled && !metaEnabled && !corexRemindersEnabled)}
             >
               {loading ? (
                 <>

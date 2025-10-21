@@ -1,0 +1,9 @@
+
+{
+  "crons": [
+    {
+      "path": "/api/cron/execute-triggers",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

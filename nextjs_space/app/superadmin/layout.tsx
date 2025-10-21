@@ -25,73 +25,73 @@ export default async function SuperAdminLayout({
     <div className="min-h-screen bg-background">
       {/* SuperAdmin Header */}
       <div className="border-b bg-card sticky top-0 z-50">
-        <div className="flex items-center justify-between px-8 py-4">
-          <div className="flex items-center gap-6">
+        <div className="flex items-center justify-between px-4 md:px-8 py-4">
+          <div className="flex items-center gap-2 md:gap-6">
             <Link href="/superadmin" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-primary-foreground font-bold">SA</span>
               </div>
-              <span className="font-semibold text-lg">SuperAdmin</span>
+              <span className="font-semibold text-base md:text-lg hidden sm:inline">SuperAdmin</span>
             </Link>
-            <nav className="flex items-center gap-2">
+            <nav className="flex items-center gap-1 md:gap-2 overflow-x-auto scrollbar-hide max-w-[50vw] md:max-w-none">
               <Link href="/superadmin">
-                <Button variant="ghost" size="sm">
-                  <Home className="mr-2 h-4 w-4" />
-                  Dashboard
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Home className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Dashboard</span>
                 </Button>
               </Link>
               <Link href="/superadmin/clinics">
-                <Button variant="ghost" size="sm">
-                  <Building2 className="mr-2 h-4 w-4" />
-                  Clinics
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Building2 className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Clinics</span>
                 </Button>
               </Link>
               <Link href="/superadmin/users">
-                <Button variant="ghost" size="sm">
-                  <Users className="mr-2 h-4 w-4" />
-                  Users
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Users className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Users</span>
                 </Button>
               </Link>
               <Link href="/superadmin/sms">
-                <Button variant="ghost" size="sm">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  SMS & Kampanjer
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <MessageSquare className="h-4 w-4 md:mr-2" />
+                  <span className="hidden lg:inline">SMS & Kampanjer</span>
                 </Button>
               </Link>
               <Link href="/superadmin/voice-settings">
-                <Button variant="ghost" size="sm">
-                  <Phone className="mr-2 h-4 w-4" />
-                  Voice & TTS
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Phone className="h-4 w-4 md:mr-2" />
+                  <span className="hidden lg:inline">Voice & TTS</span>
                 </Button>
               </Link>
               <Link href="/superadmin/stt-providers">
-                <Button variant="ghost" size="sm">
-                  <Mic className="mr-2 h-4 w-4" />
-                  STT Providers
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Mic className="h-4 w-4 md:mr-2" />
+                  <span className="hidden lg:inline">STT Providers</span>
                 </Button>
               </Link>
               <Link href="/superadmin/analytics">
-                <Button variant="ghost" size="sm">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Analytics
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <BarChart3 className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Analytics</span>
                 </Button>
               </Link>
               <Link href="/superadmin/billing">
-                <Button variant="ghost" size="sm">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Billing
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <CreditCard className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Billing</span>
                 </Button>
               </Link>
               <Link href="/superadmin/display-config">
-                <Button variant="ghost" size="sm">
-                  <Monitor className="mr-2 h-4 w-4" />
-                  Display Config
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Monitor className="h-4 w-4 md:mr-2" />
+                  <span className="hidden lg:inline">Display Config</span>
                 </Button>
               </Link>
               <Link href="/superadmin/ghl-config">
-                <Button variant="ghost" size="sm">
-                  <Webhook className="mr-2 h-4 w-4" />
-                  GHL Config
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Webhook className="h-4 w-4 md:mr-2" />
+                  <span className="hidden lg:inline">GHL Config</span>
                 </Button>
               </Link>
             </nav>
@@ -100,7 +100,7 @@ export default async function SuperAdminLayout({
             <ClinicSelector />
             <Link href="/dashboard">
               <Button variant="outline" size="sm">
-                View as User
+                Visa som användare
               </Button>
             </Link>
           </div>

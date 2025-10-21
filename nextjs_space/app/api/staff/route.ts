@@ -2,14 +2,18 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
+import { getAuthSession, getClinicFilter, unauthorizedResponse, errorResponse } from '@/lib/multi-tenant-security';
 
 export async function GET(request: NextRequest) {
   try {
+    // 🔒 Authentication & Multi-tenant Security
+    const session = await getAuthSession();
+    const clinicFilter = getClinicFilter(session);
+
     const staff = await prisma.staff.findMany({
       where: {
+        ...clinicFilter,
         isActive: true,
       },
       orderBy: {
@@ -19,10 +23,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, staff });
   } catch (error) {
-    console.error('[Staff API] Error:', error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    return errorResponse(error, 'Failed to fetch staff');
   }
 }

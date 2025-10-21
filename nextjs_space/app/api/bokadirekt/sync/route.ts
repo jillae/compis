@@ -2,10 +2,19 @@
 // Manual sync trigger endpoint
 import { NextRequest, NextResponse } from 'next/server';
 import { syncAll } from '@/lib/bokadirekt/sync-service';
+import { getAuthSession, unauthorizedResponse, forbiddenResponse, errorResponse } from '@/lib/multi-tenant-security';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('[API] Manual Bokadirekt sync triggered');
+    // 🔒 Authentication & Authorization - Only SuperAdmin can trigger sync
+    const session = await getAuthSession();
+    
+    // TODO: Make sync clinic-specific instead of syncing all clinics
+    if (session.user.role !== 'SUPER_ADMIN') {
+      return forbiddenResponse();
+    }
+
+    console.log('[API] Manual Bokadirekt sync triggered by SuperAdmin:', session.user.email);
     
     const result = await syncAll();
     
@@ -33,6 +42,11 @@ export async function POST(request: NextRequest) {
             upserted: result.services.recordsUpserted,
             duration: result.services.duration,
           },
+          staffAvailabilities: result.staffAvailabilities ? {
+            fetched: result.staffAvailabilities.recordsFetched,
+            upserted: result.staffAvailabilities.recordsUpserted,
+            duration: result.staffAvailabilities.duration,
+          } : null,
         },
         totalDuration: result.overall.totalDuration,
         errors: result.overall.errors,
@@ -40,13 +54,9 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('[API] Sync failed:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    return errorResponse(error, 'Bokadirekt sync failed');
   }
 }

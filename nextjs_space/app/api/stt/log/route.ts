@@ -5,9 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getAuthSession, unauthorizedResponse, forbiddenResponse, errorResponse } from '@/lib/multi-tenant-security';
 
 export async function POST(req: NextRequest) {
   try {
+    // 🔒 Authentication & Authorization
+    const session = await getAuthSession();
+
     const body = await req.json();
     const {
       clinicId,
@@ -18,6 +22,11 @@ export async function POST(req: NextRequest) {
       fallback_used,
       error_message
     } = body;
+
+    // Verify user has access to this clinic
+    if (session.user.role !== 'SUPER_ADMIN' && session.user.clinicId !== clinicId) {
+      return forbiddenResponse();
+    }
 
     await prisma.$executeRaw`
       INSERT INTO stt_provider_usage_logs 
@@ -38,10 +47,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
 
   } catch (error: any) {
-    console.error('[STT Log API] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to log usage' },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    return errorResponse(error, 'Failed to log STT usage');
   }
 }

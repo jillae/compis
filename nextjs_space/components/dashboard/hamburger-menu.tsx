@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -61,6 +61,19 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
               <Button variant="ghost" className="w-full justify-start">
                 <Sparkles className="h-4 w-4 mr-2" />
                 Corex Rekommendationer
+              </Button>
+            </Link>
+          </div>
+
+          {/* Revenue Intelligence */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Revenue Intelligence
+            </h3>
+            <Link href="/dashboard/analytics" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Business Metrics
               </Button>
             </Link>
           </div>

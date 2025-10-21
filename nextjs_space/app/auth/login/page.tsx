@@ -34,7 +34,7 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        setError('Ogiltig e-post eller lösenord')
       } else {
         // Check session and redirect based on role
         const session = await getSession()
@@ -49,7 +49,7 @@ export default function LoginPage() {
         }
       }
     } catch (error) {
-      setError('Something went wrong. Please try again.')
+      setError('Något gick fel. Försök igen.')
     } finally {
       setLoading(false)
     }
@@ -81,11 +81,7 @@ export default function LoginPage() {
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {error === 'Invalid email or password' 
-                      ? 'Ogiltig e-post eller lösenord' 
-                      : error === 'Something went wrong. Please try again.'
-                      ? 'Något gick fel. Försök igen.'
-                      : error}
+                    {error}
                   </AlertDescription>
                 </Alert>
               )}

@@ -9,15 +9,32 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, Check, Loader2, Settings, Zap } from 'lucide-react';
+import { AlertCircle, Check, Loader2, Settings, Zap, MessageSquare, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { DynamicPricingToggle } from '@/components/dynamic-pricing/dynamic-pricing-toggle';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Textarea } from '@/components/ui/textarea';
 
 interface FeatureToggles {
   bokadirektEnabled: boolean;
   metaEnabled: boolean;
   corexEnabled: boolean;
+  corexRemindersEnabled: boolean;
+  corexReminderTonality: string;
+  corexReminderTemplate: string | null;
   dynamicPricingEnabled: boolean;
   retentionAutopilotEnabled: boolean;
   aiActionsEnabled: boolean;
@@ -31,6 +48,9 @@ export default function SettingsPage() {
     bokadirektEnabled: true,
     metaEnabled: false,
     corexEnabled: false,
+    corexRemindersEnabled: false,
+    corexReminderTonality: 'professional',
+    corexReminderTemplate: null,
     dynamicPricingEnabled: false,
     retentionAutopilotEnabled: false,
     aiActionsEnabled: true,
@@ -60,6 +80,13 @@ export default function SettingsPage() {
     setSettings((prev) => ({
       ...prev,
       [key]: !prev[key],
+    }));
+  };
+
+  const handleSettingChange = (key: keyof FeatureToggles, value: any) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: value,
     }));
   };
 
@@ -177,6 +204,101 @@ export default function SettingsPage() {
               />
             </div>
           </div>
+
+          {/* Corex Reminders - Only show if Corex is enabled */}
+          {settings.corexEnabled && (
+            <div className="p-4 border-2 border-purple-200 rounded-lg bg-gradient-to-br from-purple-50 to-blue-50">
+              <div className="space-y-4">
+                {/* Toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="corex-reminders" className="text-base font-semibold cursor-pointer">
+                        Corex AI Påminnelser
+                      </Label>
+                      {settings.corexRemindersEnabled && (
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                          Aktiv
+                        </span>
+                      )}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="text-sm">
+                              Om du vill använda Corex AI påminnelser, kom ihåg att slå av automatiska påminnelser i Bokadirekt för att undvika dubbla meddelanden.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Intelligenta påminnelser med AI som kan svara på kundfrågor
+                    </p>
+                  </div>
+                  <Switch
+                    id="corex-reminders"
+                    checked={settings.corexRemindersEnabled}
+                    onCheckedChange={() => handleToggle('corexRemindersEnabled')}
+                  />
+                </div>
+
+                {/* Tonality Select - Only show if reminders enabled */}
+                {settings.corexRemindersEnabled && (
+                  <div className="space-y-3 pt-3 border-t">
+                    <div className="space-y-2">
+                      <Label htmlFor="tonality" className="text-sm font-medium flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        Tonalitet för påminnelser
+                      </Label>
+                      <Select
+                        value={settings.corexReminderTonality || 'professional'}
+                        onValueChange={(value) =>
+                          handleSettingChange('corexReminderTonality', value)
+                        }
+                      >
+                        <SelectTrigger id="tonality" className="bg-white">
+                          <SelectValue placeholder="Välj tonalitet" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="professional">
+                            Professionell - "God dag! Du är bokad för..."
+                          </SelectItem>
+                          <SelectItem value="friendly">
+                            Vänlig - "Hej! Vi ser fram emot ditt besök..."
+                          </SelectItem>
+                          <SelectItem value="casual">
+                            Avslappnad - "Hej där! Din tid närmar sig..."
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="template" className="text-sm font-medium">
+                        Custom mall (valfritt)
+                      </Label>
+                      <Textarea
+                        id="template"
+                        placeholder="Hej! Corex på {clinic_name} här! Du är bokad {booking_date} kl {booking_time}. Kul, välkommen! Har du frågor så finns jag här. 😊"
+                        value={settings.corexReminderTemplate || ''}
+                        onChange={(e) =>
+                          handleSettingChange('corexReminderTemplate', e.target.value)
+                        }
+                        className="min-h-[100px] bg-white"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Använd variabler: {'{clinic_name}'}, {'{booking_date}'}, {'{booking_time}'}, {'{service_name}'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
 
           {/* Meta Ads */}
           <div className="p-4 border-2 rounded-lg bg-white hover:bg-gray-50 transition-colors">

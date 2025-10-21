@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { OnboardingBanner } from "@/components/dashboard/onboarding-banner"
+import { UserHeader } from "@/components/layout/user-header"
 import { prisma } from "@/lib/db"
 
 export default async function DashboardLayout({
@@ -35,16 +36,27 @@ export default async function DashboardLayout({
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
+      {/* User Header - Always visible at the top */}
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container mx-auto px-4 py-3 flex justify-end">
+          <UserHeader />
+        </div>
+      </div>
+
       {/* Show onboarding banner if step 2 not complete */}
-      {user && (
-        <OnboardingBanner 
-          userId={user.id}
-          onboardingStep={user.onboardingStep}
-          onboardingCompletedAt={user.onboardingCompletedAt}
-        />
-      )}
+      <div className="container mx-auto px-4">
+        {user && (
+          <OnboardingBanner 
+            userId={user.id}
+            onboardingStep={user.onboardingStep}
+            onboardingCompletedAt={user.onboardingCompletedAt}
+          />
+        )}
+      </div>
+
+      {/* Main content */}
       {children}
-    </>
+    </div>
   )
 }

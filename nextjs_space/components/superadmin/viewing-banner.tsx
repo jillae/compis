@@ -46,7 +46,7 @@ export function ViewingBanner() {
         <div className="flex items-center gap-2">
           <Building2 className="h-4 w-4 text-purple-600" />
           <span className="font-semibold text-purple-900">
-            Viewing as: {clinic.name}
+            Visar som: {clinic.name}
           </span>
           <span className="text-xs px-2 py-1 bg-purple-200 text-purple-700 rounded">
             {clinic.tier}
@@ -59,7 +59,7 @@ export function ViewingBanner() {
           className="gap-2 border-purple-300 hover:bg-purple-100"
         >
           <X className="h-3 w-3" />
-          Exit Clinic View
+          Avsluta klinikvy
         </Button>
       </AlertDescription>
     </Alert>

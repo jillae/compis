@@ -3,12 +3,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { TrendingUp, BarChart3, Users, Calendar, CheckCircle, ArrowRight, Sparkles, Target, Zap } from "lucide-react"
+import { TrendingUp, CheckCircle, ArrowRight } from "lucide-react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
 import { PricingCards } from "@/components/pricing/pricing-cards"
+import { FeaturesSection } from "@/components/landing/features-section"
 
 export default async function LandingPage() {
   const session = await getServerSession(authOptions)
@@ -135,87 +136,8 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Allt du behöver för att växa</h2>
-          <p className="text-xl text-gray-600">Proaktiva verktyg som driver affären framåt</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <Card className="border-2 hover:border-blue-300 transition-all hover:shadow-lg">
-            <CardContent className="pt-6 space-y-4">
-              <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Revenue Intelligence</h3>
-              <p className="text-gray-600">
-                Få konkreta intäktsförslag baserat på din bokhistorik. Se exakt vilka åtgärder som ger mest avkastning.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:border-purple-300 transition-all hover:shadow-lg">
-            <CardContent className="pt-6 space-y-4">
-              <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Customer Health Scoring</h3>
-              <p className="text-gray-600">
-                Se vilka kunder som riskerar att försvinna och agera i tid. Få konkreta tips för att öka lojalitet.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:border-indigo-300 transition-all hover:shadow-lg">
-            <CardContent className="pt-6 space-y-4">
-              <div className="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Target className="h-6 w-6 text-indigo-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Dynamic Pricing</h3>
-              <p className="text-gray-600">
-                Optimera dina priser baserat på efterfrågan. "Öka priser 10% på fredagar kl 14-17" = +15k kr/mån.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:border-green-300 transition-all hover:shadow-lg">
-            <CardContent className="pt-6 space-y-4">
-              <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-6 w-6 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Meta Marketing ROI</h3>
-              <p className="text-gray-600">
-                Se exakt vilka annonser som ger bokningar, inte bara klick. Optimera din marknadsföring för maximal avkastning.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:border-orange-300 transition-all hover:shadow-lg">
-            <CardContent className="pt-6 space-y-4">
-              <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-orange-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Risk-varningar för no-shows</h3>
-              <p className="text-gray-600">
-                Identifiera riskbokningar innan de blir no-shows. Få varningar i tid så du kan agera proaktivt och rädda bokningar.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 hover:border-pink-300 transition-all hover:shadow-lg">
-            <CardContent className="pt-6 space-y-4">
-              <div className="bg-pink-100 w-12 h-12 rounded-lg flex items-center justify-center">
-                <Zap className="h-6 w-6 text-pink-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Automatisk integration</h3>
-              <p className="text-gray-600">
-                Anslut ditt bokningssystem och få automatisk realtidssynk av alla bokningar och kunder. Ingen manuell administration.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+      {/* Features Section - Now with clickable cards! */}
+      <FeaturesSection />
 
       {/* Pricing Section */}
       <section id="pricing" className="container mx-auto px-4 py-20">

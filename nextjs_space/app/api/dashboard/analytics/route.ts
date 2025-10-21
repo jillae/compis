@@ -1,12 +1,15 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
+import { getAuthSession, getClinicFilter, unauthorizedResponse, errorResponse } from '@/lib/multi-tenant-security';
 
 export async function GET(request: NextRequest) {
   try {
+    // 🔒 Authentication & Multi-tenant Security
+    const session = await getAuthSession();
+    const clinicFilter = getClinicFilter(session);
+
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get('days') || '30');
     
@@ -17,6 +20,7 @@ export async function GET(request: NextRequest) {
     // Get daily revenue trend
     const bookings = await prisma.booking.findMany({
       where: {
+        ...clinicFilter,
         scheduledTime: { gte: startDate, lte: endDate },
         status: { in: ['completed', 'COMPLETED'] },
       },
@@ -49,6 +53,7 @@ export async function GET(request: NextRequest) {
     // Get hourly booking pattern
     const allBookings = await prisma.booking.findMany({
       where: {
+        ...clinicFilter,
         scheduledTime: { gte: startDate, lte: endDate },
       },
       select: {
@@ -89,6 +94,7 @@ export async function GET(request: NextRequest) {
     // Get service category breakdown
     const serviceBookings = await prisma.booking.findMany({
       where: {
+        ...clinicFilter,
         scheduledTime: { gte: startDate, lte: endDate },
         status: { in: ['completed', 'COMPLETED'] },
         serviceId: { not: null },
@@ -129,10 +135,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Analytics API] Error:', error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    return errorResponse(error, 'Failed to fetch analytics');
   }
 }

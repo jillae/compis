@@ -1,10 +1,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { syncAllData } from '@/lib/bokadirekt/sync';
+import { getAuthSession, unauthorizedResponse, forbiddenResponse, errorResponse } from '@/lib/multi-tenant-security';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('[Manual Sync] Starting manual sync...');
+    // 🔒 Authentication & Authorization - Only SuperAdmin can trigger manual sync
+    const session = await getAuthSession();
+    
+    if (session.user.role !== 'SUPER_ADMIN') {
+      return forbiddenResponse();
+    }
+
+    console.log('[Manual Sync] Starting manual sync by SuperAdmin:', session.user.email);
     
     const result = await syncAllData();
     
@@ -15,15 +23,10 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[Manual Sync] Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    return errorResponse(error, 'Manual sync failed');
   }
 }
 

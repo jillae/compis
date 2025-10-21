@@ -94,6 +94,9 @@ model Clinic {
   bokadirektEnabled         Boolean @default(true) // Toggle for Bokadirekt integration
   metaEnabled               Boolean @default(false) // Toggle for Meta API integration
   corexEnabled              Boolean @default(false) // Toggle for Corex integration (SMS/Communication)
+  corexRemindersEnabled     Boolean @default(false) // Toggle for Corex AI-driven reminders (turn off Bokadirekt reminders if enabled)
+  corexReminderTonality     String? @default("professional") // Tonality for Corex reminders: professional, friendly, casual
+  corexReminderTemplate     String? // Custom template for Corex reminders (optional)
   dynamicPricingEnabled     Boolean @default(false) // Toggle for Dynamic Pricing recommendations
   dynamicPricingLastToggled DateTime? // Last time Dynamic Pricing was toggled
   retentionAutopilotEnabled Boolean @default(false) // Toggle for Retention Autopilot campaigns
@@ -167,6 +170,9 @@ model Clinic {
 
   // Revenue Intelligence (WAVE 5A)
   revenueInsights RevenueInsight[]
+  revenueMetrics  RevenueMetric[]
+  dailyRevenues   DailyRevenue[]
+  customerJourneys CustomerJourney[]
   
   // Email Campaigns (WAVE 5A)
   emailCampaigns EmailCampaign[]
@@ -197,6 +203,10 @@ model Clinic {
   
   // STT (Speech-to-Text) relations
   sttUsageLogs    SttProviderUsageLog[]
+  
+  // Marketing Automation (WAVE 11+)
+  marketingTriggers  MarketingTrigger[]
+  triggerExecutions  TriggerExecution[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -281,6 +291,9 @@ model Customer {
   // Voice & AI Assistant (Wave 6)
   voiceCalls   VoiceCall[]
   voiceTickets VoiceTicket[]
+  
+  // Marketing Automation (WAVE 11+)
+  triggerExecutions TriggerExecution[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -1036,8 +1049,9 @@ model Campaign {
   clinicId String
   clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
-  messages Message[]
-  smsLogs  SMSLog[]
+  messages          Message[]
+  smsLogs           SMSLog[]
+  triggerExecutions TriggerExecution[]
 
   // Timestamps
   sentAt      DateTime?
@@ -1049,6 +1063,96 @@ model Campaign {
   @@index([status])
   @@index([scheduleAt])
   @@index([channel])
+}
+
+// Marketing Trigger - Automatiska marknadsföringskampanjer baserade på kundbeteende
+model MarketingTrigger {
+  id          String  @id @default(cuid())
+  clinicId    String
+  clinic      Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  name        String
+  description String? @db.Text
+
+  // Trigger Type
+  triggerType String // "health_status_change" | "no_visit_days" | "high_value_at_risk" | "low_engagement" | "birthday" | "milestone"
+  
+  // Trigger Conditions (JSON)
+  conditions Json // { healthStatus: "AT_RISK", daysSinceLastVisit: 60, minLifetimeValue: 5000 }
+
+  // Campaign Details
+  channel     String // "sms" | "email"
+  subject     String? // För email
+  messageBody String  @db.Text
+
+  // Personalization
+  usePersonalization Boolean @default(true) // Use customer name, etc.
+  includeOffer       Boolean @default(false)
+  offerDetails       Json? // { type: "discount", value: 20, unit: "percent" }
+
+  // Execution Rules
+  maxExecutionsPerCustomer Int      @default(1) // Max gånger samma kund kan få trigger
+  cooldownDays             Int      @default(30) // Minst X dagar mellan triggers för samma kund
+  maxDailyExecutions       Int      @default(100) // Max antal triggers per dag totalt
+  priority                 Int      @default(5) // 1-10, högre = viktigare
+  isActive                 Boolean  @default(true)
+  lastCheckedAt            DateTime?
+
+  // Stats
+  totalExecutions   Int @default(0)
+  successfulSends   Int @default(0)
+  failedSends       Int @default(0)
+  totalCostSEK      Float @default(0)
+  totalRevenueSEK   Float @default(0)
+  averageROAS       Float?
+
+  // Relations
+  executions TriggerExecution[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([triggerType])
+  @@index([isActive])
+}
+
+// Trigger Execution - Spåra varje gång en trigger körs
+model TriggerExecution {
+  id        String           @id @default(cuid())
+  triggerId String
+  trigger   MarketingTrigger @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  // Execution details
+  status        String  @default("pending") // "pending" | "sent" | "failed" | "skipped"
+  skippedReason String? // "cooldown" | "max_executions" | "opt_out" | "no_contact_info"
+  errorMessage  String? @db.Text
+
+  // Tracking
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  clickedAt   DateTime?
+
+  // Cost & Revenue
+  costSEK    Float?
+  revenueSEK Float? // Revenue attributed to this trigger
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([triggerId])
+  @@index([customerId])
+  @@index([clinicId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // Message - Individuellt meddelande till kund
@@ -2862,6 +2966,148 @@ model RevenueIntelligence {
   @@index([clinicId])
   @@index([periodStart])
   @@index([periodEnd])
+}
+
+// ============================================
+// REVENUE INTELLIGENCE DASHBOARD (WAVE 5A)
+// Business Metrics Dashboard - MRR/ARR Tracking
+// ============================================
+
+// RevenueMetric - Monthly MRR/ARR snapshots with tier breakdown
+model RevenueMetric {
+  id         String   @id @default(cuid())
+  clinicId   String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  // Time period
+  date       DateTime // First day of month
+  year       Int
+  month      Int
+  
+  // Core metrics
+  mrr        Decimal  @db.Decimal(12, 2) // Monthly Recurring Revenue
+  arr        Decimal  @db.Decimal(12, 2) // Annual Recurring Revenue (MRR * 12)
+  
+  // Customer metrics
+  activeCustomers  Int      @default(0)
+  newCustomers     Int      @default(0)
+  churnedCustomers Int      @default(0)
+  churnRate        Decimal  @db.Decimal(5, 4) // 0-1 (e.g., 0.05 = 5%)
+  retentionRate    Decimal  @db.Decimal(5, 4) // 0-1 (e.g., 0.95 = 95%)
+  
+  // Growth metrics
+  mrrGrowth        Decimal  @db.Decimal(10, 2) // Month-over-month MRR change
+  mrrGrowthPercent Decimal? @db.Decimal(5, 4) // MRR growth %
+  netNewMrr        Decimal  @db.Decimal(10, 2) // New - Churned MRR
+  
+  // Tier breakdown (JSON for flexibility)
+  tierBreakdown    Json     // { FREE: {customers: 10, mrr: 0}, BASIC: {customers: 50, mrr: 24950}, ... }
+  
+  // Revenue composition
+  newMrr         Decimal  @db.Decimal(10, 2) // From new customers
+  expansionMrr   Decimal  @db.Decimal(10, 2) // From upgrades
+  contractionMrr Decimal  @db.Decimal(10, 2) // From downgrades
+  churnMrr       Decimal  @db.Decimal(10, 2) // From churned customers
+  
+  // Average metrics
+  avgRevenuePerCustomer Decimal  @db.Decimal(10, 2) // ARPC (MRR / activeCustomers)
+  
+  // Metadata
+  calculatedAt   DateTime @default(now())
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@unique([clinicId, year, month])
+  @@index([clinicId])
+  @@index([date])
+  @@index([year, month])
+}
+
+// DailyRevenue - Daily revenue tracking for granular analysis
+model DailyRevenue {
+  id         String   @id @default(cuid())
+  clinicId   String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  // Time
+  date       DateTime @unique
+  dayOfWeek  Int      // 0-6 (Sunday = 0)
+  weekNumber Int      // ISO week number
+  
+  // Revenue
+  revenue         Decimal @db.Decimal(10, 2)
+  bookings        Int     @default(0)
+  completedBookings Int   @default(0)
+  cancelledBookings Int   @default(0)
+  noShowBookings    Int   @default(0)
+  
+  // Service breakdown (JSON)
+  serviceRevenue  Json?   // { "Laser": 5000, "Ansiktsbehandling": 2000, ... }
+  
+  // Staff breakdown (JSON)
+  staffRevenue    Json?   // { "staff_id_1": 3000, "staff_id_2": 2500, ... }
+  
+  // Comparison metrics
+  revenueTarget   Decimal? @db.Decimal(10, 2)
+  revenueVariance Decimal? @db.Decimal(10, 2) // Actual - Target
+  
+  // Metadata
+  calculatedAt    DateTime @default(now())
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([clinicId])
+  @@index([date])
+  @@index([weekNumber])
+}
+
+// CustomerJourney - Track customer upgrade/downgrade patterns
+model CustomerJourney {
+  id         String   @id @default(cuid())
+  clinicId   String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  customerId String   // Reference to Customer (no FK to avoid complexity)
+  
+  // Journey event
+  eventType  CustomerJourneyEvent
+  eventDate  DateTime
+  
+  // Subscription details
+  fromTier   SubscriptionTier?
+  toTier     SubscriptionTier?
+  
+  // Financial impact
+  mrrChange  Decimal  @db.Decimal(10, 2) // Positive for upgrade, negative for downgrade/churn
+  
+  // Context
+  reason     String?  @db.Text
+  source     String?  // "user_initiated", "payment_failure", "trial_conversion", etc.
+  
+  // Metadata
+  metadata   Json?    // Additional context data
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([clinicId])
+  @@index([customerId])
+  @@index([eventType])
+  @@index([eventDate])
+}
+
+enum CustomerJourneyEvent {
+  SIGNUP              // New customer signup
+  TRIAL_START         // Trial started
+  TRIAL_CONVERSION    // Trial converted to paid
+  TRIAL_EXPIRED       // Trial expired without conversion
+  UPGRADE             // Upgraded to higher tier
+  DOWNGRADE           // Downgraded to lower tier
+  REACTIVATION        // Reactivated after cancellation
+  CHURN               // Customer churned
+  PAYMENT_FAILURE     // Payment failed
+  SUBSCRIPTION_PAUSED // Subscription paused
+  SUBSCRIPTION_RESUMED // Subscription resumed
 }
 
 // STT Provider Configuration

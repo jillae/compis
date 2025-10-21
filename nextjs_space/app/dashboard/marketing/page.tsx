@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { MetaDashboardCard } from '@/components/meta-dashboard-card'
 import { Badge } from '@/components/ui/badge'
-import { Lock, TrendingUp } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Lock, TrendingUp, Zap } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 
 export default function MarketingPage() {
@@ -64,7 +65,7 @@ export default function MarketingPage() {
               Marketing Intelligence
             </h1>
             <p className="text-muted-foreground mt-1">
-              Meta kampanjoptimering och kapacitetsstyrning
+              Automatisk marknadsföring och kampanjoptimering
             </p>
           </div>
         </div>
@@ -74,6 +75,34 @@ export default function MarketingPage() {
           </Badge>
         )}
       </div>
+
+      {/* Marketing Automation Section - Available for all tiers */}
+      <Card className="hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-yellow-500" />
+            Automatiska Marknadsföringstriggrar
+          </CardTitle>
+          <CardDescription>
+            Skicka automatiska SMS/e-postkampanjer baserade på kundbeteende
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            Skapa triggers som automatiskt skickar personaliserade meddelanden när kunder:
+            <ul className="list-disc ml-6 mt-2 space-y-1">
+              <li>Riskerar att churna (inte besökt på länge)</li>
+              <li>Når milstolpar (10:e besök, 10 000 kr spenderat)</li>
+              <li>Har födelsedag</li>
+              <li>Blir klassificerade som högrisk-kunder</li>
+            </ul>
+          </div>
+          <Button onClick={() => router.push('/dashboard/marketing-triggers')}>
+            <Zap className="h-4 w-4 mr-2" />
+            Hantera Triggers
+          </Button>
+        </CardContent>
+      </Card>
 
       {!hasMetaAccess ? (
         <Card>

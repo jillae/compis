@@ -46,7 +46,7 @@ export function ClinicSelector() {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Building2 className="h-4 w-4 animate-pulse" />
-        <span>Loading...</span>
+        <span>Laddar...</span>
       </div>
     );
   }
@@ -59,11 +59,11 @@ export function ClinicSelector() {
         onValueChange={(value) => selectClinic(value === 'none' ? null : value)}
       >
         <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Select clinic..." />
+          <SelectValue placeholder="Välj klinik..." />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">
-            <span className="font-semibold">SuperAdmin View</span>
+            <span className="font-semibold">SuperAdmin-vy</span>
           </SelectItem>
           {clinics.map((clinic) => (
             <SelectItem key={clinic.id} value={clinic.id}>

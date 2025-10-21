@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { subMonths, addMonths, format, startOfMonth, endOfMonth, eachMonthOfInterval } from 'date-fns';
+import { getAuthSession, getClinicFilter, unauthorizedResponse, errorResponse } from '@/lib/multi-tenant-security';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,10 @@ interface SimulatorParams {
 
 export async function POST(req: NextRequest) {
   try {
+    // 🔒 Authentication & Multi-tenant Security
+    const session = await getAuthSession();
+    const clinicFilter = getClinicFilter(session);
+
     const params: SimulatorParams = await req.json();
 
     // Get historical data for baseline (last 6 months)
@@ -28,6 +33,7 @@ export async function POST(req: NextRequest) {
     ] = await Promise.all([
       prisma.booking.findMany({
         where: {
+          ...clinicFilter,
           startTime: {
             gte: sixMonthsAgo,
           },
@@ -41,15 +47,17 @@ export async function POST(req: NextRequest) {
           status: true,
         },
       }),
-      prisma.customer.count(),
+      prisma.customer.count({ where: clinicFilter }),
       prisma.booking.count({
         where: {
+          ...clinicFilter,
           startTime: { gte: sixMonthsAgo },
           status: 'completed',
         },
       }),
       prisma.booking.count({
         where: {
+          ...clinicFilter,
           startTime: { gte: sixMonthsAgo },
           status: 'no_show',
         },
@@ -166,10 +174,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error calculating projections:', error);
-    return NextResponse.json(
-      { error: 'Failed to calculate projections' },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    return errorResponse(error, 'Failed to calculate projections');
   }
 }

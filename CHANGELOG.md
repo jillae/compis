@@ -1,6 +1,60 @@
 
 # Flow Changelog
 
+## 2025-10-20 - Landing Page: Clickable Feature Cards with Modals ✅
+
+### 🎨 UX/UI Förbättringar
+
+#### Interactive Feature Cards
+- **Klickbara feature-kort** på landing page som öppnar detaljerade modals
+- **Simon Sinek's Golden Circle** struktur (Why → How → What) för varje feature:
+  1. **Why:** Varför behöver du detta? (problemet/visionen)
+  2. **How:** Så fungerar det (process/steg)
+  3. **What:** Vad får du? (konkreta benefits)
+
+#### Features med Modals:
+1. **Revenue Intelligence**
+   - Real example: ArchClinic (+23% intäkter på 8 veckor)
+   - 4-step process från analys till implementation
+   
+2. **Customer Health Scoring**
+   - Real example: Glow Beauty (+47% retention rate)
+   - Proaktiva varningar innan kunder churnar
+   
+3. **Dynamic Pricing**
+   - Real example: Radiance Malmö (+15.300 kr/mån)
+   - A/B-testning och demand-based pricing
+   
+4. **Meta Marketing ROI**
+   - Real example: Urban Wellness (140% ROI-ökning)
+   - Exact tracking från ad till bokning
+   
+5. **No-Show Prevention**
+   - Real example: Urban Wellness (-68% no-shows)
+   - AI-driven risk scoring per bokning
+   
+6. **Automatic Integration**
+   - Real example: Glow Beauty (10 tim/vecka sparade)
+   - Plug-and-play med Bokadirekt/andra system
+
+#### Teknisk Implementation:
+- **`components/landing/feature-modal.tsx`** - Reusable modal component
+- **`components/landing/features-section.tsx`** - Client-side feature grid med state
+- **`lib/feature-details.tsx`** - Centralized feature content library
+- **`app/api/user/onboarding-status/route.ts`** - API för user redirect logic
+- **Separerade client/server components** för optimal performance
+- **Hover effects:** Scale transform + shadow på kort
+- **CTA buttons** i varje modal för conversion
+
+#### Benefits:
+- ✅ Visar feature-värde utan att lämna landing page
+- ✅ Bättre SEO (allt innehåll på en sida)
+- ✅ Lägre bounce rate (users utforskar features)
+- ✅ Real examples ökar trovärdighet
+- ✅ Simon Sinek-struktur = emotionell connection
+
+---
+
 ## 2025-10-15 - Wave 2: Capacity Forecasting UI ✅
 
 ### 🚀 Nya Funktioner

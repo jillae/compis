@@ -5,9 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getAuthSession, unauthorizedResponse, errorResponse } from '@/lib/multi-tenant-security';
 
 export async function GET(req: NextRequest) {
   try {
+    // 🔒 Authentication required
+    await getAuthSession();
+
     const providers = await prisma.$queryRaw<any[]>`
       SELECT * FROM stt_provider_config 
       WHERE is_active = true 
@@ -20,10 +24,9 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[STT Providers API] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch providers' },
-      { status: 500 }
-    );
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return unauthorizedResponse();
+    }
+    return errorResponse(error, 'Failed to fetch STT providers');
   }
 }

@@ -30,16 +30,17 @@ interface CreateShiftDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialDate?: Date | null;
 }
 
-export default function CreateShiftDialog({ clinicId, open, onClose, onSuccess }: CreateShiftDialogProps) {
+export default function CreateShiftDialog({ clinicId, open, onClose, onSuccess, initialDate }: CreateShiftDialogProps) {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     staffId: '',
-    shiftDate: '',
+    shiftDate: initialDate ? initialDate.toISOString().split('T')[0] : '',
     startTime: '09:00',
     endTime: '17:00',
     breakMinutes: '30',
@@ -52,6 +53,16 @@ export default function CreateShiftDialog({ clinicId, open, onClose, onSuccess }
       loadStaff();
     }
   }, [open, clinicId]);
+
+  // Update shift date when initialDate changes
+  useEffect(() => {
+    if (initialDate) {
+      setFormData((prev) => ({
+        ...prev,
+        shiftDate: initialDate.toISOString().split('T')[0],
+      }));
+    }
+  }, [initialDate]);
 
   const loadStaff = async () => {
     setLoading(true);
