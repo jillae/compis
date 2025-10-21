@@ -115,6 +115,14 @@ model Clinic {
   metaCapacityMin Int?     @default(75) // Min capacity % before reducing budget
   metaCapacityMax Int?     @default(90) // Max capacity % before increasing budget
 
+  // Fortnox Integration (Phase 2)
+  fortnoxClientId      String?   // Fortnox OAuth Client ID
+  fortnoxClientSecret  String?   // Fortnox OAuth Client Secret (encrypted)
+  fortnoxAccessToken   String?   // Fortnox OAuth Access Token (encrypted)
+  fortnoxRefreshToken  String?   // Fortnox OAuth Refresh Token (encrypted)
+  fortnoxTokenExpiry   DateTime? // When the access token expires
+  fortnoxEnabled       Boolean   @default(false) // Toggle for Fortnox integration
+
   loyaltyPrograms     LoyaltyProgram[]
   customerStatuses    CustomerStatus[]
   campaigns           Campaign[]
