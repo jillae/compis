@@ -1,7 +1,7 @@
 
 'use client'
 
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { UserRole } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,6 +37,7 @@ interface SuperAdminData {
 }
 
 export default function SuperAdminPage() {
+  const router = useRouter()
   const { data: session, status } = useSession() || {}
   const [data, setData] = useState<SuperAdminData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -46,7 +47,7 @@ export default function SuperAdminPage() {
     if (status === 'loading') return
     
     if (!session || session.user.role !== UserRole.SUPER_ADMIN) {
-      redirect('/dashboard')
+      router.replace('/dashboard')
       return
     }
 
