@@ -1,0 +1,8 @@
+tree 1f7b3a273537a8dfb67b17d6729b9273936e4166
+parent 840242a3500aae6343423c9d01aa983c9c8d03c2
+author gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com> 1748130653 +0000
+committer gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com> 1748130653 +0000
+
+Fix JSON parsing for escaped quotes
+
+Improve JSON parsing to handle escaped quotes and provide better error messages.

@@ -12,3 +12,17 @@
 }
 [Tue Oct 21 21:55:09 UTC 2025] Health check complete
 ---
+[Tue Oct 21 22:15:15 UTC 2025] Starting database health check...
+[Tue Oct 21 22:15:15 UTC 2025] ✅ Database HEALTHY
+{
+  "timestamp": "2025-10-21T22:15:15.880Z",
+  "status": "HEALTHY",
+  "counts": {
+    "users": 5,
+    "clinics": 5,
+    "customers": 1137,
+    "bookings": 761
+  }
+}
+[Tue Oct 21 22:15:15 UTC 2025] Health check complete
+---

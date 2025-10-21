@@ -1,0 +1,3 @@
+Fix JSON parsing for escaped quotes
+
+Improve JSON parsing to handle escaped quotes and provide better error messages.
