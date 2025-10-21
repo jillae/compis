@@ -187,6 +187,12 @@ model Clinic {
   ghlLocationId         String?
   ghlLastSync           DateTime?
   
+  // 46elks Subaccounts Integration (WAVE 11)
+  elksSubaccountId      String? @unique // 46elks subaccount ID (usXXXX)
+  elksSubaccountKey     String? // 46elks subaccount API username (encrypted)
+  elksSubaccountSecret  String? // 46elks subaccount API password (encrypted)
+  elksCreatedAt         DateTime? // When subaccount was created
+  
   // Corex AI Context (WAVE 8)
   corexConversations    CorexConversation[]
   

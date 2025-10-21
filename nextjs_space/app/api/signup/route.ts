@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/db"
+import { createSubaccountForClinic } from "@/lib/46elks/subaccount-service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,6 +67,21 @@ export async function POST(request: NextRequest) {
       })
       
       clinicId = clinic.id
+
+      // Auto-create 46elks subaccount for new clinic (async, non-blocking)
+      // Note: This runs in background and won't block user signup
+      createSubaccountForClinic({
+        clinicId: clinic.id,
+        clinicName: clinicName,
+      }).then((result) => {
+        if (result.success) {
+          console.log(`✓ 46elks subaccount created for clinic ${clinic.id}: ${result.subaccountId}`)
+        } else {
+          console.warn(`⚠️ Failed to create 46elks subaccount for clinic ${clinic.id}:`, result.error)
+        }
+      }).catch((error) => {
+        console.error('Error creating 46elks subaccount:', error)
+      })
     }
 
     // Create user and link to the clinic
