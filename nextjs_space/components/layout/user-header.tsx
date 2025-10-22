@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Shield, Users, Crown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DisplayModeSwitcher } from '@/components/display-mode-switcher';
 
 const roleConfig = {
   SUPER_ADMIN: {
@@ -69,24 +70,30 @@ export function UserHeader() {
   };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-muted/50 to-muted/30 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
-      <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-        <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
-        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
-          {getInitials()}
-        </AvatarFallback>
-      </Avatar>
+    <div className="flex items-center gap-3">
+      {/* Display Mode Switcher */}
+      <DisplayModeSwitcher />
       
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground">
-            {user.name || user.email || 'Användare'}
-          </span>
+      {/* User Info Card */}
+      <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-muted/50 to-muted/30 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+        <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+          <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
+          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+            {getInitials()}
+          </AvatarFallback>
+        </Avatar>
+        
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-foreground">
+              {user.name || user.email || 'Användare'}
+            </span>
+          </div>
+          <Badge className={`w-fit text-xs ${config.className}`}>
+            <Icon className="h-3 w-3 mr-1" />
+            {config.label}
+          </Badge>
         </div>
-        <Badge className={`w-fit text-xs ${config.className}`}>
-          <Icon className="h-3 w-3 mr-1" />
-          {config.label}
-        </Badge>
       </div>
     </div>
   );
