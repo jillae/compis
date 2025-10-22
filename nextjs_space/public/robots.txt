@@ -1,0 +1,10 @@
+
+# robots.txt for Klinik Flow Control
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /superadmin/
+Disallow: /auth/
+
+Sitemap: https://goto.klinikflow.app/sitemap.xml
