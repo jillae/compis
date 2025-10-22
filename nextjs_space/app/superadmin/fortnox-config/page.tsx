@@ -39,25 +39,32 @@ export default function FortnoxConfigPage() {
 
   // Check for OAuth callback params
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
     const success = params.get("success");
     const error = params.get("error");
+
+    // Handle malformed URLs like /fortnox-config=error
+    const pathname = url.pathname;
+    const hashError = pathname.includes('=error') || url.hash.includes('error');
 
     if (success === "true") {
       toast({
         title: "✅ Fortnox Connected",
         description: "OAuth authentication successful!",
       });
-      // Clear URL params
       window.history.replaceState({}, "", "/superadmin/fortnox-config");
       loadConfig();
-    } else if (error) {
+    } else if (error || hashError) {
+      const errorMsg = error || 'OAuth callback failed - please check credentials';
       toast({
         title: "❌ OAuth Error",
-        description: `Failed to connect: ${error}`,
+        description: errorMsg,
         variant: "destructive",
       });
-      // Clear URL params
       window.history.replaceState({}, "", "/superadmin/fortnox-config");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
