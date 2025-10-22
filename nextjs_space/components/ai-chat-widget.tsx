@@ -21,7 +21,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hej! Jag är din AI-assistent. Hur kan jag hjälpa dig med ditt lojalitetsprogram idag? 😊',
+      content: 'Hej! Jag är Flow AI Assistant 🤖\n\nJag hjälper dig med:\n• Dataanalys och insights\n• Kapacitetsoptimering\n• Kundretention och churn-prevention\n• Marketing automation\n• Resursplanering\n\nVad kan jag hjälpa dig med idag?',
     },
   ]);
   const [input, setInput] = useState('');
@@ -43,14 +43,13 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/billing/ai/chat', {
+      const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           message: userMessage,
-          customerId,
           conversationHistory: messages.slice(1), // Exclude initial greeting
         }),
       });
@@ -88,7 +87,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
 
     try {
       setIsSpeaking(true);
-      const response = await fetch('/api/billing/ai/tts', {
+      const response = await fetch('/api/ai/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +128,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
         <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col">
           <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">AI Kundtjänst 🤖</CardTitle>
+              <CardTitle className="text-lg">Flow AI Assistant 🤖</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
