@@ -21,7 +21,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hej! Jag är Flow AI Assistant 🤖\n\nJag hjälper dig med:\n• Dataanalys och insights\n• Kapacitetsoptimering\n• Kundretention och churn-prevention\n• Marketing automation\n• Resursplanering\n\nVad kan jag hjälpa dig med idag?',
+      content: 'Hej! Jag är din AI-assistent. Hur kan jag hjälpa dig med ditt lojalitetsprogram idag? 😊',
     },
   ]);
   const [input, setInput] = useState('');
@@ -43,20 +43,21 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/ai/chat', {
+      const response = await fetch('/api/corex/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           message: userMessage,
-          conversationHistory: messages.slice(1), // Exclude initial greeting
+          sessionId: `session_${Date.now()}`,
+          channel: 'web'
         }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (response.ok && data.success) {
         setMessages((prev) => [
           ...prev,
           { role: 'assistant', content: data.response },
@@ -87,7 +88,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
 
     try {
       setIsSpeaking(true);
-      const response = await fetch('/api/ai/tts', {
+      const response = await fetch('/api/billing/ai/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +129,7 @@ export default function AIChatWidget({ customerId }: AIChatWidgetProps) {
         <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col">
           <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Flow AI Assistant 🤖</CardTitle>
+              <CardTitle className="text-lg">AI Kundtjänst 🤖</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"

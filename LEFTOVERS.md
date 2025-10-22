@@ -968,6 +968,37 @@ ENTERPRISE: 2999 kr/mån → 28 790 kr/år (2 399 kr/mån effektivt)
 
 ## 🎉 SENASTE PROGRESS (2025-10-22 Kväll)
 
+### ✅ AI Chat Återställning (1h)
+
+**Problem:** Missförstånd om AI-integration  
+**Status:** ✅ FIXAT - Corex återställd
+
+**Vad som hände:**
+1. Trodde Flow-appen behövde egen AI-agent
+2. Skapade `/api/ai/chat`, `/api/ai/tts`, `/api/ai/stt` med IRAC + anti-hallucination
+3. Uppdaterade `ai-chat-widget.tsx` och `lib/ai-assistant.ts`
+4. Användaren klargjorde: **Flow = Corex** (inte egen agent)
+
+**Återställning:**
+- ✅ `ai-chat-widget.tsx` → `/api/corex/chat` endpoint
+- ✅ `lib/ai-assistant.ts` → original settings
+- ✅ Dead code borttaget (`/api/ai/*` routes raderade)
+- ✅ Build + Deploy successful
+
+**Deployment:**
+- URL: https://goto.klinikflow.app
+- Checkpoint: "Återställt AI-chat till Corex"
+- Build: 189 routes, 0 errors
+
+**Korrekt Implementation:**
+- AI-chatten använder **Corex**
+- Endpoint: `/api/corex/chat`
+- Widget: `components/ai-chat-widget.tsx`
+
+---
+
+
+
 ### ✅ SuperAdmin Pages Critical Fix (2h)
 
 **Problem:** Application errors på SuperAdmin-sidor
@@ -988,16 +1019,16 @@ ENTERPRISE: 2999 kr/mån → 28 790 kr/år (2 399 kr/mån effektivt)
    # Result: 6 nya Fortnox-kolumner tilllagda
    ```
 
-2. **Authorization Issue** ✅ FIXAT
+2. **Authorization - Sanna Återställd till ADMIN** ✅ KORRIGERAT
    ```typescript
-   // Problem: Sanna hade ADMIN istället för SUPER_ADMIN
-   // Fix:
-   UPDATE users SET role = 'SUPER_ADMIN' 
-   WHERE email = 'sanna@archacademy.se'
+   // Problem: Sanna hade ADMIN men behövde inte SUPER_ADMIN
+   // Tillfällig Fix: Uppdaterade till SUPER_ADMIN för testing
+   // Korrekt Fix: Återställd till ADMIN (2025-10-22 kväll)
    
-   // Credentials:
-   // Email: sanna@archacademy.se
+   // För SuperAdmin-testing, använd Gilbert:
+   // Email: gilbert@archacademy.se
    // Password: flow2024
+   // Role: SUPER_ADMIN
    ```
 
 3. **React Hook Bug** ✅ FIXAT
@@ -1019,9 +1050,10 @@ https://goto.klinikflow.app/superadmin
 https://goto.klinikflow.app/superadmin/fortnox-config
 https://goto.klinikflow.app/superadmin/ghl-config
 
-# Login:
-Email: sanna@archacademy.se
+# Login (för SuperAdmin-testing):
+Email: gilbert@archacademy.se
 Password: flow2024
+Role: SUPER_ADMIN
 ```
 
 **Cache Notes:**
