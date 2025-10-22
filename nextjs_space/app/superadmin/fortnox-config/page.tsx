@@ -60,7 +60,8 @@ export default function FortnoxConfigPage() {
       // Clear URL params
       window.history.replaceState({}, "", "/superadmin/fortnox-config");
     }
-  }, [toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Load current configuration
   useEffect(() => {
