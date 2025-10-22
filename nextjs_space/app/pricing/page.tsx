@@ -11,9 +11,19 @@ export default function PricingPage() {
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-4">Enkla och transparenta priser</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            För skönhetskliniker med Bokadirekt. Alla planer inkluderar AI-driven revenue intelligence.
+            För svenska skönhetskliniker. Fungerar med <strong>ALLA bokningssystem</strong> - inkl. Bokadirekt, Timify, Bokamera, Timepal med flera.
           </p>
           <p className="text-sm text-gray-500 mt-2">14 dagars gratis testperiod • Ingen bindningstid • 20% rabatt vid årsfaktura</p>
+          
+          {/* Booking System Logos */}
+          <div className="mt-6 flex items-center justify-center gap-4 flex-wrap text-sm text-gray-500">
+            <span className="font-medium">Integrerar med:</span>
+            <span className="px-3 py-1 bg-white rounded-full border border-gray-200">Bokadirekt</span>
+            <span className="px-3 py-1 bg-white rounded-full border border-gray-200">Timify</span>
+            <span className="px-3 py-1 bg-white rounded-full border border-gray-200">Bokamera</span>
+            <span className="px-3 py-1 bg-white rounded-full border border-gray-200">Timepal</span>
+            <span className="px-3 py-1 bg-white rounded-full border border-gray-200">+ 17 till</span>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">

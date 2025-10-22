@@ -78,7 +78,7 @@ export default async function LandingPage() {
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Flow är din affärsdrivna coach som proaktivt analyserar din bokningsdata och ger dig konkreta åtgärder 
             som ökar intäkter direkt. Inte bara grafer – actionable insikter som driver tillväxt. 
-            Ansluts enkelt till ditt befintliga bokningssystem via API.
+            Fungerar med <strong>ALLA bokningssystem</strong> – Bokadirekt, Timify, Bokamera, Timepal med flera.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4">
@@ -316,7 +316,7 @@ export default async function LandingPage() {
             <Card className="w-full h-full flex items-center justify-center p-6 border-2 border-blue-100">
               <div className="text-center">
                 <CheckCircle className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold">Bokadirekt-partner</p>
+                <p className="text-sm font-semibold">20+ integrationer</p>
               </div>
             </Card>
             <Card className="w-full h-full flex items-center justify-center p-6 border-2 border-purple-100">
