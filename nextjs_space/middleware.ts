@@ -24,6 +24,8 @@ export async function middleware(request: NextRequest) {
     '/legal',
     '/api/auth',
     '/api/signup',
+    '/api/webhooks/meta',  // Meta webhook verification
+    '/api/webhooks/46elks', // 46elks SMS webhooks
   ]
 
   // Check if route is public
