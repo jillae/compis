@@ -56,6 +56,11 @@ export async function POST(request: NextRequest) {
           upserted: result.services.recordsUpserted,
           errors: result.services.errors,
         },
+        sales: {
+          fetched: result.sales.recordsFetched,
+          upserted: result.sales.recordsUpserted,
+          errors: result.sales.errors,
+        },
       },
       errors: result.overall.errors,
     });

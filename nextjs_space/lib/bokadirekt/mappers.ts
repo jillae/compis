@@ -5,7 +5,11 @@ import {
   BokadirektBooking,
   BokadirektCustomer,
   BokadirektResource,
-  BokadirektService
+  BokadirektService,
+  BokadirektSaleResponse,
+  BokadirektSaleHeader,
+  BokadirektSaleRow,
+  BokadirektSalePayment
 } from './types';
 
 export interface PrismaBooking {
@@ -215,4 +219,147 @@ export function mapServicesBatch(services: BokadirektService[]): PrismaService[]
       }
     })
     .filter((service): service is PrismaService => service !== null);
+}
+
+// ===== SALES MAPPERS =====
+// Map Bokadirekt Sales (Financial Transactions) → Prisma
+
+export interface PrismaSale {
+  bokadirektId: string; // receipt number
+  receiptDate: Date;
+  receiptType: number;
+  receiptNumber: string | null;
+  totalAmount: number;
+  totalVat: number;
+  totalDiscount: number;
+  customerId: string | null; // First customer from items, or null
+  clinicId: string | null; // From context
+}
+
+export interface PrismaSaleItem {
+  saleId: string; // Will be set after sale creation
+  itemId: string | null;
+  name: string | null;
+  itemType: number;
+  staffId: string | null;
+  staffName: string | null;
+  bookingId: string | null;
+  customerId: string | null;
+  customerName: string | null;
+  quantity: number;
+  pricePerUnit: number;
+  discount: number;
+  totalPrice: number;
+  vatRate: number;
+}
+
+export interface PrismaSalePayment {
+  saleId: string; // Will be set after sale creation
+  paymentType: number;
+  amount: number;
+}
+
+// Map a single Sale Header to Prisma Sale
+export function mapSaleHeaderToPrisma(
+  header: BokadirektSaleHeader,
+  receiptNumber: string,
+  clinicId?: string
+): PrismaSale {
+  const rows = header.rows || [];
+  const payments = header.payments || [];
+  
+  // Calculate totals
+  const totalAmount = rows.reduce((sum, row) => sum + (row.totalPriceIncVat || 0), 0);
+  const totalDiscount = rows.reduce((sum, row) => sum + (row.discount || 0), 0);
+  
+  // Calculate VAT (totalPriceIncVat includes VAT, so we need to extract it)
+  const totalVat = rows.reduce((sum, row) => {
+    const vatRate = row.vatRate || 0;
+    const priceIncVat = row.totalPriceIncVat || 0;
+    // VAT amount = priceIncVat * (vatRate / (100 + vatRate))
+    const vatAmount = priceIncVat * (vatRate / (100 + vatRate));
+    return sum + vatAmount;
+  }, 0);
+  
+  // Get first customer ID from rows (if any)
+  const firstCustomerId = rows.find(r => r.customerId)?.customerId || null;
+  
+  return {
+    bokadirektId: receiptNumber, // Use receipt number as unique ID
+    receiptDate: new Date(header.receiptDate),
+    receiptType: header.receiptType,
+    receiptNumber: header.receiptNumber,
+    totalAmount: Math.round(totalAmount * 100) / 100, // Round to 2 decimals
+    totalVat: Math.round(totalVat * 100) / 100,
+    totalDiscount: Math.round(totalDiscount * 100) / 100,
+    customerId: firstCustomerId,
+    clinicId: clinicId || null,
+  };
+}
+
+// Map Sale Rows to Prisma Sale Items
+export function mapSaleRowsToPrismaItems(rows: BokadirektSaleRow[]): PrismaSaleItem[] {
+  return rows.map((row) => ({
+    saleId: '', // Will be set after sale creation
+    itemId: row.itemId,
+    name: row.name,
+    itemType: row.type,
+    staffId: row.resourceId,
+    staffName: row.resourceName,
+    bookingId: row.bookingId,
+    customerId: row.customerId,
+    customerName: row.customerName,
+    quantity: row.quantity || 1,
+    pricePerUnit: row.priceIncVat || 0,
+    discount: row.discount || 0,
+    totalPrice: row.totalPriceIncVat || 0,
+    vatRate: row.vatRate || 0,
+  }));
+}
+
+// Map Sale Payments to Prisma Sale Payments
+export function mapSalePaymentsToPrisma(payments: BokadirektSalePayment[]): PrismaSalePayment[] {
+  return payments.map((payment) => ({
+    saleId: '', // Will be set after sale creation
+    paymentType: payment.paymentType,
+    amount: payment.amount,
+  }));
+}
+
+// Batch mapper for full sale response
+export function mapSalesResponseBatch(
+  salesResponses: BokadirektSaleResponse[],
+  clinicId?: string
+): Array<{
+  sale: PrismaSale;
+  items: PrismaSaleItem[];
+  payments: PrismaSalePayment[];
+}> {
+  const results: Array<{
+    sale: PrismaSale;
+    items: PrismaSaleItem[];
+    payments: PrismaSalePayment[];
+  }> = [];
+  
+  for (const response of salesResponses) {
+    const headers = response.headers || [];
+    
+    for (const header of headers) {
+      try {
+        // Use receipt number as unique ID, or generate one from date + type
+        const receiptNumber = header.receiptNumber || 
+          `${header.receiptDate}_${header.receiptType}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        const sale = mapSaleHeaderToPrisma(header, receiptNumber, clinicId);
+        const items = mapSaleRowsToPrismaItems(header.rows || []);
+        const payments = mapSalePaymentsToPrisma(header.payments || []);
+        
+        results.push({ sale, items, payments });
+      } catch (error) {
+        console.error(`[Mapper] Failed to map sale header:`, error, header);
+      }
+    }
+  }
+  
+  return results;
 }

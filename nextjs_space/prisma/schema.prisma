@@ -221,6 +221,9 @@ model Clinic {
   // Marketing Automation (WAVE 11+)
   marketingTriggers  MarketingTrigger[]
   triggerExecutions  TriggerExecution[]
+  
+  // Sales (Financial Transactions) - WAVE 13
+  sales              Sale[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -308,6 +311,10 @@ model Customer {
   
   // Marketing Automation (WAVE 11+)
   triggerExecutions TriggerExecution[]
+  
+  // Sales (Financial Transactions) - WAVE 13
+  sales        Sale[]
+  saleItems    SaleItem[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -350,6 +357,9 @@ model Staff {
   performances StaffPerformance[]
   schedules    StaffSchedule[]
   timeEntries  StaffTimeEntry[]
+  
+  // Sales (Financial Transactions) - WAVE 13
+  saleItems    SaleItem[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -429,6 +439,10 @@ model Booking {
 
   // Voice & AI Assistant (Wave 6)
   voiceCalls VoiceCall[]
+  
+  // Sales (Financial Transactions) - WAVE 13
+  // Link from SaleItem to Booking (optional - null for klippkort purchases)
+  saleItems  SaleItem[]
 
   @@index([bokadirektId])
   @@index([clinicId])
@@ -3183,4 +3197,103 @@ model MetaWebhookLog {
   
   @@index([receivedAt])
   @@map("meta_webhook_logs")
+}
+
+// ===== SALES (FINANCIAL TRANSACTIONS) =====
+// ⚠️ IMPORTANT: Sales are separate from Bookings!
+// - Sales = Financial transactions (revenue, payments, klippkort)
+// - Bookings = Capacity/occupancy tracking (timeslots, staff utilization)
+//
+// WHY? Klippkort creates mismatch:
+// - 1 Sale = Customer buys klippkort (payment happens NOW)
+// - Multiple Bookings = Customer uses klippkort stamps later (no payment)
+//
+// RULE: Use Sales for revenue analysis, Bookings for capacity analysis
+
+// Sale (Receipt/Transaction) - From Bokadirekt /sales endpoint
+model Sale {
+  id               String   @id @default(cuid())
+  bokadirektId     String?  @unique // Bokadirekt receipt number
+  clinicId         String?
+  customerId       String? // Can be null for anonymous sales
+  
+  // Transaction details
+  receiptDate      DateTime // ← WHEN PAYMENT WAS MADE (not when service used!)
+  receiptType      Int      @default(0) // 0=Sale, 1=Refund, etc.
+  receiptNumber    String?
+  
+  // Financial totals
+  totalAmount      Decimal  @db.Decimal(10, 2) // Sum of all items
+  totalVat         Decimal  @db.Decimal(10, 2) // Total VAT
+  totalDiscount    Decimal  @default(0) @db.Decimal(10, 2)
+  
+  // Relations
+  clinic           Clinic?  @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  customer         Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  items            SaleItem[]
+  payments         SalePayment[]
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([clinicId])
+  @@index([customerId])
+  @@index([receiptDate])
+  @@index([receiptType])
+}
+
+// SaleItem - Individual line item in a sale (product/service/klippkort)
+model SaleItem {
+  id               String   @id @default(cuid())
+  saleId           String
+  sale             Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  // Item details
+  itemId           String? // Bokadirekt item ID (product/service)
+  name             String?
+  itemType         Int      @default(0) // 0=Product, 1=Service, 4=Klippkort, etc.
+  
+  // Staff/Resource
+  staffId          String?
+  staffName        String?
+  staff            Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  
+  // Booking link (optional - null for klippkort purchases)
+  bookingId        String?
+  booking          Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  
+  // Customer (can differ from sale customer for multi-person receipts)
+  customerId       String?
+  customerName     String?
+  customer         Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  // Financials
+  quantity         Int      @default(1)
+  pricePerUnit     Decimal  @db.Decimal(10, 2)
+  discount         Decimal  @default(0) @db.Decimal(10, 2)
+  totalPrice       Decimal  @db.Decimal(10, 2) // After discount, incl VAT
+  vatRate          Decimal  @db.Decimal(5, 2) // e.g. 25.00 for 25%
+  
+  createdAt        DateTime @default(now())
+  
+  @@index([saleId])
+  @@index([staffId])
+  @@index([bookingId])
+  @@index([customerId])
+}
+
+// SalePayment - Payment methods used in a transaction
+model SalePayment {
+  id           String   @id @default(cuid())
+  saleId       String
+  sale         Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  paymentType  Int      // 0=Cash, 1=Card, 2=Swish, 3=Invoice, 4=Klippkort, etc.
+  amount       Decimal  @db.Decimal(10, 2)
+  
+  createdAt    DateTime @default(now())
+  
+  @@index([saleId])
+  @@index([paymentType])
 }

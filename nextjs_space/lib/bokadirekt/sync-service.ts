@@ -11,6 +11,7 @@ import {
   mapServicesBatch,
 } from './mappers';
 import { syncStaffAvailabilities } from './availability-sync';
+import { syncSales, recalculateCustomerTotalSpentFromSales } from './sales-sync';
 import type { SyncResult, SyncOptions } from './types';
 
 interface SyncStatus {
@@ -344,53 +345,16 @@ export async function syncServices(): Promise<SyncResult> {
   }
 }
 
-// Recalculate customer totalSpent based on completed bookings
+// ⚠️ DEPRECATED: Use recalculateCustomerTotalSpentFromSales instead!
+// This function incorrectly calculates totalSpent from bookings.
+// Bookings don't represent actual revenue (e.g., klippkort usage has no payment).
 async function recalculateCustomerTotalSpent(): Promise<void> {
-  try {
-    const startTime = Date.now();
-    
-    // Get all customers with their completed bookings
-    const customers = await prisma.customer.findMany({
-      select: {
-        id: true,
-        totalSpent: true,
-        bookings: {
-          where: {
-            status: { in: ['COMPLETED', 'completed'] }
-          },
-          select: {
-            price: true
-          }
-        }
-      }
-    });
-    
-    let updatedCount = 0;
-    
-    // Update each customer's totalSpent
-    for (const customer of customers) {
-      const correctTotalSpent = customer.bookings.reduce((sum, booking) => {
-        return sum + Number(booking.price);
-      }, 0);
-      
-      const oldTotal = Number(customer.totalSpent);
-      
-      // Only update if there's a difference
-      if (correctTotalSpent !== oldTotal) {
-        await prisma.customer.update({
-          where: { id: customer.id },
-          data: { totalSpent: correctTotalSpent }
-        });
-        updatedCount++;
-      }
-    }
-    
-    const duration = Date.now() - startTime;
-    console.log(`[SyncService] Recalculated totalSpent for ${updatedCount} customers in ${duration}ms`);
-  } catch (error) {
-    console.error('[SyncService] Failed to recalculate customer totalSpent:', error);
-    // Don't throw - this is non-critical
-  }
+  console.warn('[SyncService] ⚠️ recalculateCustomerTotalSpent is DEPRECATED!');
+  console.warn('[SyncService] Use recalculateCustomerTotalSpentFromSales instead.');
+  console.warn('[SyncService] This function calculates from bookings, which is INCORRECT for revenue.');
+  
+  // Redirect to the correct function
+  return recalculateCustomerTotalSpentFromSales();
 }
 
 // Full sync (all entities)
@@ -399,6 +363,7 @@ export async function syncAll(): Promise<{
   customers: SyncResult;
   staff: SyncResult;
   services: SyncResult;
+  sales: SyncResult; // ← NEW: Financial transactions
   staffAvailabilities?: SyncResult;
   overall: {
     success: boolean;
@@ -443,9 +408,13 @@ export async function syncAll(): Promise<{
   const servicesResult = await syncServices();
   const bookingsResult = await syncBookings(options);
   
-  // Recalculate customer totalSpent after syncing bookings
-  console.log('[SyncService] Recalculating customer totalSpent...');
-  await recalculateCustomerTotalSpent();
+  // 🆕 Sync SALES (Financial Transactions) - CRITICAL for revenue analysis!
+  console.log('[SyncService] Syncing sales (financial transactions)...');
+  const salesResult = await syncSales(options);
+  
+  // Recalculate customer totalSpent from SALES (not bookings!)
+  console.log('[SyncService] Recalculating customer totalSpent from SALES...');
+  await recalculateCustomerTotalSpentFromSales();
   
   // 🆕 Sync staff availabilities → StaffSchedule → Clockify
   console.log('[SyncService] Syncing staff availabilities...');
@@ -478,6 +447,7 @@ export async function syncAll(): Promise<{
     ...staffResult.errors,
     ...servicesResult.errors,
     ...bookingsResult.errors,
+    ...salesResult.errors, // ← NEW: Sales errors
     ...(staffAvailabilitiesResult?.errors || []),
   ];
   
@@ -486,6 +456,7 @@ export async function syncAll(): Promise<{
     staffResult.success &&
     servicesResult.success &&
     bookingsResult.success &&
+    salesResult.success && // ← NEW: Sales success check
     (staffAvailabilitiesResult?.success !== false);
   
   console.log(`[SyncService] Full sync completed in ${totalDuration}ms`);
@@ -493,6 +464,7 @@ export async function syncAll(): Promise<{
   console.log(`[SyncService] Staff: ${staffResult.recordsUpserted} upserted`);
   console.log(`[SyncService] Services: ${servicesResult.recordsUpserted} upserted`);
   console.log(`[SyncService] Bookings: ${bookingsResult.recordsUpserted} upserted`);
+  console.log(`[SyncService] 💰 Sales: ${salesResult.recordsUpserted} upserted (REVENUE DATA!)`); // ← NEW!
   if (staffAvailabilitiesResult) {
     console.log(`[SyncService] Staff Schedules: ${staffAvailabilitiesResult.recordsUpserted} created`);
   }
@@ -503,6 +475,7 @@ export async function syncAll(): Promise<{
     customers: customersResult,
     staff: staffResult,
     services: servicesResult,
+    sales: salesResult, // ← NEW: Financial transactions
     staffAvailabilities: staffAvailabilitiesResult,
     overall: {
       success: overallSuccess,

@@ -6,6 +6,7 @@ import {
   BokadirektCustomer,
   BokadirektResource,
   BokadirektService,
+  BokadirektSaleResponse,
   SyncOptions
 } from './types';
 
@@ -184,6 +185,26 @@ class BokadirektClient {
   // GET /api/v1/services
   async getServices(): Promise<BokadirektService[]> {
     return this.makeRequest<BokadirektService[]>('/services');
+  }
+  
+  // GET /api/v1/sales
+  // ⚠️ IMPORTANT: Use this for REVENUE/FINANCIAL data, not /bookings
+  // Sales = actual transactions (cash, card, klippkort purchases)
+  // Bookings = capacity/occupancy tracking
+  async getSales(options: SyncOptions = {}): Promise<BokadirektSaleResponse[]> {
+    const { startDate, endDate } = options;
+    
+    const queryParams: Record<string, string> = {};
+    
+    if (startDate) {
+      queryParams.StartDate = startDate.toISOString();
+    }
+    
+    if (endDate) {
+      queryParams.EndDate = endDate.toISOString();
+    }
+    
+    return this.makeRequest<BokadirektSaleResponse[]>('/sales', { queryParams });
   }
 }
 
