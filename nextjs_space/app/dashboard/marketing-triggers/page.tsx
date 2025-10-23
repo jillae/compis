@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BackButton } from '@/components/ui/back-button';
+import { ListPageSkeleton } from '@/components/dashboard/dashboard-skeleton';
+import { EmptyState } from '@/components/dashboard/empty-state';
+import { ErrorState } from '@/components/dashboard/error-state';
 import { 
   Zap, 
   Plus, 
@@ -22,6 +25,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/lib/error-messages';
 
 interface MarketingTrigger {
   id: string;
@@ -52,6 +56,7 @@ export default function MarketingTriggersPage() {
   const { toast } = useToast();
   const [triggers, setTriggers] = useState<MarketingTrigger[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [executing, setExecuting] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,18 +71,20 @@ export default function MarketingTriggersPage() {
 
   const fetchTriggers = async () => {
     try {
+      setError(null);
+      setLoading(true);
       const response = await fetch('/api/marketing-triggers');
-      if (response.ok) {
-        const data = await response.json();
-        setTriggers(data.triggers);
+      
+      if (!response.ok) {
+        throw new Error(getErrorMessage('FETCH_FAILED'));
       }
-    } catch (error) {
-      console.error('Error fetching triggers:', error);
-      toast({
-        title: 'Fel',
-        description: 'Kunde inte hämta marknadsföringstriggrar',
-        variant: 'destructive',
-      });
+      
+      const data = await response.json();
+      setTriggers(data.triggers || []);
+    } catch (err) {
+      const errorMessage = getErrorMessage(err as Error);
+      setError(errorMessage);
+      console.error('Error fetching triggers:', err);
     } finally {
       setLoading(false);
     }
@@ -205,34 +212,51 @@ export default function MarketingTriggersPage() {
     return channel === 'email' ? <Mail className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />;
   };
 
+  // Loading state
   if (loading || status === 'loading') {
+    return <ListPageSkeleton items={6} />;
+  }
+
+  // Error state
+  if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="container mx-auto p-4 md:p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <BackButton href="/dashboard/marketing" />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+              <Zap className="h-6 w-6 md:h-8 md:w-8 text-yellow-500" />
+              Automatiska Marknadsföringstriggrar
+            </h1>
+          </div>
+        </div>
+        <ErrorState message={error} onRetry={fetchTriggers} />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <BackButton href="/dashboard/marketing" />
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <Zap className="h-8 w-8 text-yellow-500" />
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+              <Zap className="h-6 w-6 md:h-8 md:w-8 text-yellow-500" />
               Automatiska Marknadsföringstriggrar
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm md:text-base text-muted-foreground mt-1">
               Skicka automatiska kampanjer baserat på kundbeteende
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={handleExecuteAll}
             disabled={executing !== null || triggers.filter(t => t.isActive).length === 0}
             variant="outline"
+            size="sm"
+            className="md:size-default"
           >
             {executing === 'all' ? (
               <>
@@ -246,7 +270,11 @@ export default function MarketingTriggersPage() {
               </>
             )}
           </Button>
-          <Button onClick={() => router.push('/dashboard/marketing-triggers/create')}>
+          <Button 
+            onClick={() => router.push('/dashboard/marketing-triggers/create')}
+            size="sm"
+            className="md:size-default"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Skapa Trigger
           </Button>
@@ -254,19 +282,13 @@ export default function MarketingTriggersPage() {
       </div>
 
       {triggers.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Zap className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Inga Triggers Ännu</h3>
-            <p className="text-muted-foreground text-center mb-4">
-              Skapa din första automatiska marknadsföringstriggern för att börja engagera kunder automatiskt
-            </p>
-            <Button onClick={() => router.push('/dashboard/marketing-triggers/create')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Skapa Din Första Trigger
-            </Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Zap}
+          title="Inga Triggers Ännu"
+          description="Skapa din första automatiska marknadsföringstriggern för att börja engagera kunder automatiskt"
+          actionLabel="Skapa Din Första Trigger"
+          onAction={() => router.push('/dashboard/marketing-triggers/create')}
+        />
       ) : (
         <div className="grid gap-4">
           {triggers.map((trigger) => {
@@ -340,21 +362,22 @@ export default function MarketingTriggersPage() {
                       </p>
                     )}
 
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex flex-wrap gap-2 pt-2">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleToggleActive(trigger.id, trigger.isActive)}
+                        className="flex-shrink-0"
                       >
                         {trigger.isActive ? (
                           <>
-                            <Pause className="h-4 w-4 mr-2" />
-                            Pausa
+                            <Pause className="h-4 w-4 mr-1 md:mr-2" />
+                            <span className="hidden sm:inline">Pausa</span>
                           </>
                         ) : (
                           <>
-                            <Play className="h-4 w-4 mr-2" />
-                            Aktivera
+                            <Play className="h-4 w-4 mr-1 md:mr-2" />
+                            <span className="hidden sm:inline">Aktivera</span>
                           </>
                         )}
                       </Button>
@@ -363,16 +386,17 @@ export default function MarketingTriggersPage() {
                         variant="outline"
                         onClick={() => handleExecuteTrigger(trigger.id)}
                         disabled={executing !== null}
+                        className="flex-shrink-0"
                       >
                         {executing === trigger.id ? (
                           <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
-                            Kör...
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-1 md:mr-2"></div>
+                            <span className="hidden sm:inline">Kör...</span>
                           </>
                         ) : (
                           <>
-                            <Play className="h-4 w-4 mr-2" />
-                            Kör Nu
+                            <Play className="h-4 w-4 mr-1 md:mr-2" />
+                            <span className="hidden sm:inline">Kör Nu</span>
                           </>
                         )}
                       </Button>
@@ -380,26 +404,28 @@ export default function MarketingTriggersPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => router.push(`/dashboard/marketing-triggers/${trigger.id}/metrics`)}
+                        className="flex-shrink-0"
                       >
-                        <TrendingUp className="h-4 w-4 mr-2" />
-                        Statistik
+                        <TrendingUp className="h-4 w-4 mr-1 md:mr-2" />
+                        <span className="hidden sm:inline">Statistik</span>
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => router.push(`/dashboard/marketing-triggers/${trigger.id}/edit`)}
+                        className="flex-shrink-0"
                       >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Redigera
+                        <Edit className="h-4 w-4 mr-1 md:mr-2" />
+                        <span className="hidden sm:inline">Redigera</span>
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleDelete(trigger.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 flex-shrink-0"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Ta Bort
+                        <Trash2 className="h-4 w-4 mr-1 md:mr-2" />
+                        <span className="hidden sm:inline">Ta Bort</span>
                       </Button>
                     </div>
                   </div>
