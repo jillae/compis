@@ -78,7 +78,7 @@ export default async function LandingPage() {
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Flow är din affärsdrivna coach som proaktivt analyserar din bokningsdata och ger dig konkreta åtgärder 
             som ökar intäkter direkt. Inte bara grafer – actionable insikter som driver tillväxt. 
-            Fungerar med <strong>ALLA bokningssystem</strong> – Bokadirekt, Timify, Bokamera, Timepal med flera.
+            Fungerar med <strong>de flesta bokningssystem</strong> via direktintegration eller enkel filimport.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4">
@@ -112,118 +112,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Supported Booking Systems Section */}
-      <section className="container mx-auto px-4 py-8 bg-white/50">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold mb-2">Fungerar med alla bokningssystem</h3>
-            <p className="text-gray-600">Flow integreras sömlöst med 20+ svenska bokningssystem</p>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 text-center">
-            {/* Systems with API - Marked with ⚡ */}
-            <Card className="p-4 border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="font-semibold text-gray-900">Bokadirekt ⚡</div>
-              <div className="text-xs text-green-600 mt-1">Auto-sync</div>
-            </Card>
-            <Card className="p-4 border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="font-semibold text-gray-900">Timify ⚡</div>
-              <div className="text-xs text-green-600 mt-1">Auto-sync</div>
-            </Card>
-            <Card className="p-4 border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="font-semibold text-gray-900">Bokamera ⚡</div>
-              <div className="text-xs text-green-600 mt-1">Auto-sync</div>
-            </Card>
-            <Card className="p-4 border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="font-semibold text-gray-900">Timepal ⚡</div>
-              <div className="text-xs text-green-600 mt-1">Auto-sync</div>
-            </Card>
-            <Card className="p-4 border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="font-semibold text-gray-900">SuperSalong ⚡</div>
-              <div className="text-xs text-green-600 mt-1">Auto-sync</div>
-            </Card>
-            
-            {/* Systems without API - Manual import */}
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Planity</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Treatwell</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Bookio</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Salongen</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Acuity</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            
-            {/* More systems */}
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Bookly</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Calendly</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">SimplyBook</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Setmore</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Mindbody</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Square</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Vagaro</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Fresha</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Phorest</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            <Card className="p-4 border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="font-semibold text-gray-900">Zenoti</div>
-              <div className="text-xs text-orange-600 mt-1">CSV import</div>
-            </Card>
-            
-            {/* Plus more indicator */}
-            <Card className="p-4 border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-blue-50">
-              <div className="font-semibold text-purple-700">+ många fler</div>
-              <div className="text-xs text-purple-600 mt-1">Kontakta oss</div>
-            </Card>
-          </div>
-          
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-gray-700 text-center">
-              <strong>⚡ Auto-sync:</strong> Automatisk datasynkronisering via API (ingen manual export)  
-              <span className="mx-2">•</span>
-              <strong>CSV import:</strong> Enkel manuell import (5 min per vecka)
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Stats Section */}
       <section className="container mx-auto px-4 py-12">
