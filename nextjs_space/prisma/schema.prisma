@@ -224,6 +224,9 @@ model Clinic {
   
   // Sales (Financial Transactions) - WAVE 13
   sales              Sale[]
+  
+  // Bank Transactions - WAVE 14 (Fortnox Integration)
+  bankTransactions   BankTransaction[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -2903,24 +2906,34 @@ model BankConnection {
 // BankTransaction - Transactions from connected bank accounts
 model BankTransaction {
   id                    String         @id @default(cuid())
-  bankConnectionId      String
-  bankConnection        BankConnection @relation(fields: [bankConnectionId], references: [id], onDelete: Cascade)
+  bankConnectionId      String?        // Optional - only for Plaid
+  bankConnection        BankConnection? @relation(fields: [bankConnectionId], references: [id], onDelete: Cascade)
   clinicId              String
+  clinic                Clinic         @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  // Source identification
+  source                String         @default("plaid") // "plaid" or "fortnox"
+  externalId            String?        // External ID from source system
   
   // Plaid transaction data
-  transactionId         String         @unique // Plaid transaction ID
-  accountId             String         // Which Plaid account this transaction belongs to
+  transactionId         String?        // Plaid transaction ID (not unique anymore since Fortnox also uses this table)
+  accountId             String?        // Which Plaid account this transaction belongs to
   
   // Transaction details
+  transactionDate       DateTime       // Unified date field for all sources
   amount                Decimal        @db.Decimal(12, 2)
   currency              String         @default("SEK")
-  bookingDate           DateTime       // Date transaction was booked
-  valueDate             DateTime       // Date transaction value was applied
+  bookingDate           DateTime?      // Date transaction was booked (Plaid)
+  valueDate             DateTime?      // Date transaction value was applied (Plaid)
   
   // Description & categorization
-  remittanceInformation String?        @db.Text // Payment description
+  description           String?        @db.Text // Unified description field
+  remittanceInformation String?        @db.Text // Payment description (Plaid)
+  reference             String?        // Reference number (Fortnox)
   debtorName            String?        // Who paid (if incoming)
   creditorName          String?        // Who received (if outgoing)
+  accountNumber         String?        // Bank account number (Fortnox)
+  balance               Decimal?       @db.Decimal(12, 2) // Account balance after transaction (Fortnox)
   
   // Transaction type
   transactionType       String?        // "DEBIT" or "CREDIT"
@@ -2931,21 +2944,30 @@ model BankTransaction {
   isReconciled          Boolean        @default(false) // Matched to a booking/expense
   reconciledBookingId   String?        // If matched to a booking
   
+  // Sales matching (for Fortnox bank transactions)
+  matchedToSaleId       String?        // Link to matched Sale
+  matchedSale           Sale?          @relation(fields: [matchedToSaleId], references: [id])
+  matchStatus           String         @default("unmatched") // "matched", "unmatched", "manual"
+  
   // AI analysis
   aiConfidence          Decimal?       @db.Decimal(5, 4) // 0.0 to 1.0
   aiSuggestions         Json?          // AI suggestions for categorization
   
   // Metadata
-  metadata              Json?          // Raw data from Plaid
+  metadata              Json?          // Raw data from source
   
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
   
+  @@unique([source, externalId])
   @@index([bankConnectionId])
   @@index([clinicId])
+  @@index([transactionDate])
   @@index([bookingDate])
   @@index([category])
   @@index([isReconciled])
+  @@index([matchStatus])
+  @@index([matchedToSaleId])
 }
 
 // BankConnectionStatus enum
@@ -3233,6 +3255,7 @@ model Sale {
   
   items            SaleItem[]
   payments         SalePayment[]
+  bankTransactions BankTransaction[] // Matched bank transactions from Fortnox
   
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

@@ -49,13 +49,16 @@ export async function POST(req: NextRequest) {
     const transactionsToCreate = syncResult.added.map((tx) => ({
       bankConnectionId: connection.id,
       clinicId: user.clinic?.id || '',
+      source: 'plaid',
       transactionId: tx.transaction_id,
       accountId: tx.account_id,
+      transactionDate: new Date(tx.date), // Required unified field
       amount: tx.amount,
       currency: tx.iso_currency_code || 'SEK',
       bookingDate: new Date(tx.date),
       valueDate: new Date(tx.date),
       remittanceInformation: tx.name,
+      description: tx.name, // Unified description field
       creditorName: tx.merchant_name || undefined,
       transactionType: tx.amount < 0 ? 'DEBIT' : 'CREDIT',
       metadata: tx as any,
