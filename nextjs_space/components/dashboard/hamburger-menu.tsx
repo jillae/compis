@@ -82,6 +82,12 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
                 Kassaflödesanalys
               </Button>
             </Link>
+            <Link href="/dashboard/liquidity-forecast" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Likviditetsplanering
+              </Button>
+            </Link>
           </div>
 
           {/* Data Management */}
