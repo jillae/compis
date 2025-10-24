@@ -56,11 +56,14 @@ model User {
   accounts              Account[]
   sessions              Session[]
   staffProfile          Staff[] // Link to Staff for scheduling
+  hasCompletedProductTour Boolean @default(false)
+  isBetaUser            Boolean   @default(false)
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
   @@index([clinicId])
   @@index([role])
+  @@index([isBetaUser])
 }
 
 model VerificationToken {
@@ -69,6 +72,33 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Beta Application - for tracking beta program applications
+model BetaApplication {
+  id                String   @id @default(cuid())
+  clinicName        String
+  contactName       String
+  email             String
+  phone             String?
+  currentBookingSystem String?
+  numberOfStaff     Int?
+  motivation        String   @db.Text
+  status            BetaApplicationStatus @default(PENDING)
+  notes             String?  @db.Text
+  approvedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+}
+
+enum BetaApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // Flow Revenue Intelligence Platform Schema

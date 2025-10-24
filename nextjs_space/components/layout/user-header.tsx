@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { User, Shield, Users, Crown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DisplayModeSwitcher } from '@/components/display-mode-switcher';
+import { GuideButton } from '@/components/guide-button';
 
 const roleConfig = {
   SUPER_ADMIN: {
@@ -71,6 +72,9 @@ export function UserHeader() {
 
   return (
     <div className="flex items-center gap-3">
+      {/* Guide Button (only for beta users) */}
+      <GuideButton />
+      
       {/* Display Mode Switcher */}
       <DisplayModeSwitcher />
       
