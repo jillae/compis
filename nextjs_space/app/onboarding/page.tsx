@@ -205,7 +205,7 @@ export default function OnboardingPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Anslut dina system</CardTitle>
           <CardDescription className="text-lg">
-            Steg 2: Välj vilka integrationer du vill aktivera
+            Flow fungerar med de flesta bokningssystem - börja med att ansluta dina integrationer
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -216,16 +216,21 @@ export default function OnboardingPage() {
           </Alert>
 
           {/* Bokadirekt Integration */}
-          <div className="border rounded-lg p-6 space-y-4 bg-white">
+          <div className="border rounded-lg p-6 space-y-4 bg-white border-green-200">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
                 <div className="bg-blue-100 p-3 rounded-lg">
                   <Calendar className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">Bokadirekt Integration</h3>
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    Bokadirekt Integration
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                      AUTO-SYNC
+                    </span>
+                  </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Synka bokningar, kunder och personal från Bokadirekt
+                    Automatisk synkning av bokningar, kunder och personal
                   </p>
                 </div>
               </div>
@@ -349,6 +354,31 @@ export default function OnboardingPage() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Other Booking Systems */}
+          <div className="border rounded-lg p-6 space-y-4 bg-white border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="bg-gray-100 p-3 rounded-lg">
+                <Calendar className="h-6 w-6 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg">Andra bokningssystem</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Använder du Timify, Bokamera, Timepal eller annat system?
+                </p>
+                <div className="mt-3 bg-gray-50 p-3 rounded-lg text-sm space-y-2">
+                  <p className="text-gray-700">
+                    Flow fungerar med de flesta bokningssystem via CSV-import. Du kan exportera din bokningsdata 
+                    och importera den under <strong>Dashboard → Import</strong>.
+                  </p>
+                  <p className="text-gray-600 text-xs">
+                    Vi arbetar kontinuerligt med att lägga till fler direktintegrationer. 
+                    Kontakta oss om du vill att ditt system ska prioriteras!
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Corex AI Reminders */}
