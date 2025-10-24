@@ -205,7 +205,7 @@ export default function OnboardingPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Anslut dina system</CardTitle>
           <CardDescription className="text-lg">
-            Flow fungerar med de flesta bokningssystem - börja med att ansluta dina integrationer
+            Flow integreras med de flesta bokningssystem, antingen via automatisk API-synk eller enkel filimport
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -357,24 +357,32 @@ export default function OnboardingPage() {
           </div>
 
           {/* Other Booking Systems */}
-          <div className="border rounded-lg p-6 space-y-4 bg-white border-gray-200">
+          <div className="border rounded-lg p-6 space-y-4 bg-white border-blue-200">
             <div className="flex items-start gap-4">
-              <div className="bg-gray-100 p-3 rounded-lg">
-                <Calendar className="h-6 w-6 text-gray-600" />
+              <div className="bg-blue-100 p-3 rounded-lg">
+                <Calendar className="h-6 w-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg">Andra bokningssystem</h3>
+                <h3 className="font-semibold text-lg">Använder du annat bokningssystem?</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Använder du Timify, Bokamera, Timepal eller annat system?
+                  Vi hjälper dig komma igång oavsett vilket system du använder
                 </p>
-                <div className="mt-3 bg-gray-50 p-3 rounded-lg text-sm space-y-2">
+                <div className="mt-3 bg-blue-50 p-4 rounded-lg text-sm space-y-3">
                   <p className="text-gray-700">
-                    Flow fungerar med de flesta bokningssystem via CSV-import. Du kan exportera din bokningsdata 
-                    och importera den under <strong>Dashboard → Import</strong>.
+                    <strong>Vi stödjer integration på två sätt:</strong>
                   </p>
-                  <p className="text-gray-600 text-xs">
-                    Vi arbetar kontinuerligt med att lägga till fler direktintegrationer. 
-                    Kontakta oss om du vill att ditt system ska prioriteras!
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span><strong>Direktintegration</strong> via API för realtidssynk (Bokadirekt klar, fler på gång)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span><strong>Filimport</strong> för alla andra system – snabb setup via Dashboard → Import</span>
+                    </li>
+                  </ul>
+                  <p className="text-gray-600 text-xs pt-2 border-t border-blue-200">
+                    💡 Kontakta oss för att diskutera din specifika integration – vi hjälper dig!
                   </p>
                 </div>
               </div>
