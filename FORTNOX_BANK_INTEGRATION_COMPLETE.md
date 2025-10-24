@@ -289,23 +289,31 @@ for (const transaction of unmatchedTransactions) {
 
 ## 🔄 Automatisk Synkronisering
 
-### Cron-jobb (rekommenderat)
+### ✅ Vercel Cron Jobs (IMPLEMENTERAT)
 
-#### Setup Script
+**Fil:** `vercel.json`
 
-**Fil:** `scripts/setup-cron.sh`
-
-```bash
-#!/bin/bash
-
-# BokaDirekt - Varje hel timme
-0 * * * * curl -X POST -H "Authorization: Bearer ${CRON_SECRET}" \
-  ${PROJECT_URL}/api/cron/auto-sync >> /var/log/bokadirekt-sync.log 2>&1
-
-# Fortnox Bank - 15 minuter efter hel timme
-15 * * * * curl -X POST -H "Authorization: Bearer ${CRON_SECRET}" \
-  ${PROJECT_URL}/api/fortnox/bank-sync >> /var/log/fortnox-bank-sync.log 2>&1
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/bokadirekt-sync",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/fortnox-bank-sync",
+      "schedule": "15 * * * *"
+    }
+  ]
+}
 ```
+
+**Endpoints:**
+- ✅ `/api/cron/bokadirekt-sync` - Körs varje timme vid :00
+  - Synkar: Bookings, Customers, Staff, Services, **Sales**
+- ✅ `/api/cron/fortnox-bank-sync` - Körs varje timme vid :15
+  - Synkar: Bank Transactions från Fortnox
+  - Matchar: Automatiskt med Sales (±3 dagar, exakt belopp)
 
 **Frekvens:**
 - BokaDirekt: Varje timme (vid :00)
