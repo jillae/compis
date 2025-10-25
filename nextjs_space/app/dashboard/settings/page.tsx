@@ -9,7 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, Check, Loader2, Settings, Zap, MessageSquare, Info } from 'lucide-react';
+import { AlertCircle, Check, Loader2, Settings, Zap, MessageSquare, Info, Database, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { DynamicPricingToggle } from '@/components/dynamic-pricing/dynamic-pricing-toggle';
@@ -403,6 +404,48 @@ export default function SettingsPage() {
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Knowledge Management Section */}
+      <Card className="border-2">
+        <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50">
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-emerald-600" />
+            Kunskapshantering
+          </CardTitle>
+          <CardDescription>
+            Träna Flow AI med dina egna samtal, dokument och länkar
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <Link href="/dashboard/settings/knowledge-base">
+            <div className="p-6 border-2 rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 transition-all cursor-pointer group">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-lg font-semibold group-hover:text-emerald-700 transition-colors">
+                    Kunskapsbas & AI-träning
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Ladda upp telefonsamtal, dokument och länkar för att göra Flow AI mer personlig och korrekt. 
+                    Ju mer innehåll, desto bättre svar.
+                  </p>
+                  <div className="flex gap-3 pt-2">
+                    <span className="text-xs bg-white px-3 py-1 rounded-full font-medium">
+                      📞 Telefonsamtal
+                    </span>
+                    <span className="text-xs bg-white px-3 py-1 rounded-full font-medium">
+                      📄 Dokument
+                    </span>
+                    <span className="text-xs bg-white px-3 py-1 rounded-full font-medium">
+                      🔗 Länkar
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="h-6 w-6 text-emerald-600 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </Link>
         </CardContent>
       </Card>
 

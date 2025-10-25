@@ -141,30 +141,48 @@ export function createPackageChunk(
   };
 }
 
+export interface TextChunk {
+  text: string;
+  index: number;
+}
+
+export interface ChunkOptions {
+  maxChunkSize?: number;
+  overlap?: number;
+}
+
 /**
- * Chunk text by sentences (max 500 tokens per chunk)
+ * Chunk text by sentences with overlap for better context preservation
  */
-export function chunkText(text: string, maxTokens: number = 500): string[] {
+export function chunkText(text: string, options: ChunkOptions = {}): TextChunk[] {
+  const { maxChunkSize = 800, overlap = 100 } = options;
+  
   const sentences = text.split(/[.!?]\s+/);
-  const chunks: string[] = [];
+  const chunks: TextChunk[] = [];
   let currentChunk = '';
-  let currentTokens = 0;
+  let currentSize = 0;
+  let index = 0;
 
   for (const sentence of sentences) {
-    const sentenceTokens = sentence.split(/\s+/).length;
+    const sentenceSize = sentence.length;
     
-    if (currentTokens + sentenceTokens > maxTokens && currentChunk) {
-      chunks.push(currentChunk.trim());
-      currentChunk = sentence;
-      currentTokens = sentenceTokens;
+    if (currentSize + sentenceSize > maxChunkSize && currentChunk) {
+      chunks.push({ text: currentChunk.trim(), index });
+      index++;
+      
+      // Keep overlap for context
+      const words = currentChunk.split(/\s+/);
+      const overlapWords = words.slice(-Math.floor(overlap / 5)); // Approx characters to words
+      currentChunk = overlapWords.join(' ') + ' ' + sentence;
+      currentSize = currentChunk.length;
     } else {
       currentChunk += (currentChunk ? '. ' : '') + sentence;
-      currentTokens += sentenceTokens;
+      currentSize += sentenceSize;
     }
   }
 
   if (currentChunk) {
-    chunks.push(currentChunk.trim());
+    chunks.push({ text: currentChunk.trim(), index });
   }
 
   return chunks;
