@@ -236,26 +236,35 @@ export async function handleFAQIntent(
   userQuestion: string
 ): Promise<string> {
   try {
-    // Import RAG retrieval (dynamic to avoid circular dependency)
-    const { retrieveContext, buildContextPrompt } = await import('@/lib/rag/retrieval');
-    
-    // Retrieve relevant knowledge chunks
-    const ragResults = await retrieveContext(
-      userQuestion,
-      context.clinicId,
-      5 // Top 5 most relevant chunks
-    );
+    // Try FAQ database first (faster and more accurate for common questions)
+    const { searchFAQs } = await import('@/lib/voice/faq-handler');
+    const faqResults = await searchFAQs(userQuestion, context.clinicId, 3);
 
-    if (ragResults.length === 0) {
-      // Fallback if no relevant knowledge found
-      return `Tack för din fråga. Jag har inte tillräckligt med information för att svara på det just nu. Låt mig skapa en förfrågan så kontaktar kliniken dig snart.`;
+    // If we found a strong FAQ match, use it
+    if (faqResults.length > 0 && faqResults[0].score > 20) {
+      return faqResults[0].answer;
     }
 
-    // Build context prompt from RAG results
-    const contextPrompt = buildContextPrompt(ragResults);
+    // Fallback to RAG retrieval for more complex questions
+    try {
+      const { retrieveContext, buildContextPrompt } = await import('@/lib/rag/retrieval');
+      
+      const ragResults = await retrieveContext(
+        userQuestion,
+        context.clinicId,
+        5 // Top 5 most relevant chunks
+      );
 
-    // Use OpenAI to generate natural response based on RAG context
-    const systemPrompt = `Du är en AI-assistent för kliniken. Använd informationen nedan för att svara på kundens fråga på ett naturligt och hjälpsamt sätt.
+      if (ragResults.length === 0) {
+        // No FAQ or RAG results found
+        return `Tack för din fråga. Jag har inte tillräckligt med information för att svara på det just nu. Låt mig skapa en förfrågan så kontaktar kliniken dig snart.`;
+      }
+
+      // Build context prompt from RAG results
+      const contextPrompt = buildContextPrompt(ragResults);
+
+      // Use OpenAI to generate natural response based on RAG context
+      const systemPrompt = `Du är en AI-assistent för kliniken. Använd informationen nedan för att svara på kundens fråga på ett naturligt och hjälpsamt sätt.
 
 Om informationen inte helt svarar på frågan, säg att du inte är säker och erbjud att någon ska ringa tillbaka.
 
@@ -268,31 +277,41 @@ VIKTIGT:
 
 ${contextPrompt}`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userQuestion },
-        ],
-        temperature: 0.7,
-        max_tokens: 200, // Keep responses concise for voice
-      }),
-    });
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userQuestion },
+          ],
+          temperature: 0.7,
+          max_tokens: 200, // Keep responses concise for voice
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API failed: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`OpenAI API failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const answer = data.choices[0].message.content;
+
+      return answer;
+    } catch (ragError) {
+      console.error('RAG fallback failed:', ragError);
+      
+      // If RAG also failed but we have some FAQ results, use the best one
+      if (faqResults.length > 0) {
+        return faqResults[0].answer;
+      }
+      
+      throw ragError;
     }
-
-    const data = await response.json();
-    const answer = data.choices[0].message.content;
-
-    return answer;
   } catch (error) {
     console.error('FAQ intent handling failed:', error);
     return `Tack för din fråga. Just nu kan jag bäst hjälpa dig med bokningar, ombokningar och avbokningar. För andra frågor kommer någon från kliniken att kontakta dig snart.`;

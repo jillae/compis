@@ -1,0 +1,29 @@
+
+// Add this to schema.prisma before the last closing brace
+
+// FAQ Management System - For Voice AI and customer service
+model FAQ {
+  id          String   @id @default(cuid())
+  clinicId    String
+  clinic      Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  question    String   @db.Text
+  answer      String   @db.Text
+  category    String?  // E.g., "Priser", "Bokningar", "Behandlingar", "Öppettider"
+  keywords    String[] @default([]) // For better search matching
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0) // Higher number = show first in searches
+  
+  // Usage tracking
+  timesUsed   Int      @default(0) // How many times this FAQ was returned
+  lastUsedAt  DateTime?
+  
+  createdBy   String? // User ID who created
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([category])
+  @@index([isActive])
+  @@index([priority])
+}

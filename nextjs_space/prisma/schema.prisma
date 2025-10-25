@@ -127,6 +127,14 @@ model Clinic {
 
   // Integration toggles
   bokadirektEnabled         Boolean @default(true) // Toggle for Bokadirekt integration
+  
+  // Bokadirekt Auto-Booking Configuration
+  bokadirektAutoBookingMode    BokadirektAutoBookingMode @default(OFF)
+  autoBookingPreferredServices String[] @default([]) // Service IDs to auto-book
+  autoBookingPreferredStaff    String[] @default([]) // Staff IDs to prefer
+  autoBookingMaxDaysAhead      Int?     @default(14) // Max days ahead to auto-book
+  autoBookingNotifyEmail       String?  // Email for notifications (NOTIFY mode)
+  
   metaEnabled               Boolean @default(false) // Toggle for Meta API integration
   corexEnabled              Boolean @default(false) // Toggle for Corex integration (SMS/Communication)
   corexRemindersEnabled     Boolean @default(false) // Toggle for Corex AI-driven reminders (turn off Bokadirekt reminders if enabled)
@@ -265,6 +273,9 @@ model Clinic {
   
   // RAG Knowledge Base - AI Assistant Knowledge
   knowledgeChunks    KnowledgeChunk[]
+  
+  // FAQ Management System
+  faqs               FAQ[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -3409,4 +3420,46 @@ model KnowledgeChunk {
   @@index([category])
   @@index([keywords])
   @@map("knowledge_chunks")
+}
+
+// ============================================
+// FAQ MANAGEMENT SYSTEM
+// ============================================
+
+// FAQ Management System - For Voice AI and customer service
+model FAQ {
+  id          String   @id @default(cuid())
+  clinicId    String
+  clinic      Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  question    String   @db.Text
+  answer      String   @db.Text
+  category    String?  // E.g., "Priser", "Bokningar", "Behandlingar", "Öppettider"
+  keywords    String[] @default([]) // For better search matching
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0) // Higher number = show first in searches
+  
+  // Usage tracking
+  timesUsed   Int      @default(0) // How many times this FAQ was returned
+  lastUsedAt  DateTime?
+  
+  createdBy   String? // User ID who created
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clinicId])
+  @@index([category])
+  @@index([isActive])
+  @@index([priority])
+  @@map("faqs")
+}
+
+// ============================================
+// BOKADIREKT AUTO-BOOKING
+// ============================================
+
+enum BokadirektAutoBookingMode {
+  OFF      // No auto-booking
+  NOTIFY   // Send notification when slot available
+  AUTO     // Automatically book slot
 }

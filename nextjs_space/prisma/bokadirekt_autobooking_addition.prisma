@@ -1,0 +1,22 @@
+
+// Add to Clinic model after bokadirektEnabled line:
+
+  // Bokadirekt Auto-Booking Mode
+  // OFF: Manual booking only
+  // NOTIFY: Send notification when booking slot available
+  // AUTO: Automatically book available slots
+  bokadirektAutoBookingMode    BokadirektAutoBookingMode @default(OFF)
+  
+  // Auto-booking preferences
+  autoBookingPreferredServices String[] @default([]) // Service IDs to auto-book
+  autoBookingPreferredStaff    String[] @default([]) // Staff IDs to prefer
+  autoBookingMaxDaysAhead      Int?     @default(14) // Max days ahead to auto-book
+  autoBookingNotifyEmail       String?  // Email for notifications (NOTIFY mode)
+
+// Add this enum at the end of schema.prisma:
+
+enum BokadirektAutoBookingMode {
+  OFF      // No auto-booking
+  NOTIFY   // Send notification when slot available
+  AUTO     // Automatically book slot
+}
