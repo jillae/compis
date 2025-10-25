@@ -235,7 +235,66 @@ export async function handleFAQIntent(
   context: ConversationContext,
   userQuestion: string
 ): Promise<string> {
-  // TODO: Implement FAQ knowledge base
-  // For now, return a generic response
-  return `Tack för din fråga. Just nu kan jag bäst hjälpa dig med bokningar, ombokningar och avbokningar. För andra frågor kommer någon från kliniken att kontakta dig snart.`;
+  try {
+    // Import RAG retrieval (dynamic to avoid circular dependency)
+    const { retrieveContext, buildContextPrompt } = await import('@/lib/rag/retrieval');
+    
+    // Retrieve relevant knowledge chunks
+    const ragResults = await retrieveContext(
+      userQuestion,
+      context.clinicId,
+      5 // Top 5 most relevant chunks
+    );
+
+    if (ragResults.length === 0) {
+      // Fallback if no relevant knowledge found
+      return `Tack för din fråga. Jag har inte tillräckligt med information för att svara på det just nu. Låt mig skapa en förfrågan så kontaktar kliniken dig snart.`;
+    }
+
+    // Build context prompt from RAG results
+    const contextPrompt = buildContextPrompt(ragResults);
+
+    // Use OpenAI to generate natural response based on RAG context
+    const systemPrompt = `Du är en AI-assistent för kliniken. Använd informationen nedan för att svara på kundens fråga på ett naturligt och hjälpsamt sätt.
+
+Om informationen inte helt svarar på frågan, säg att du inte är säker och erbjud att någon ska ringa tillbaka.
+
+VIKTIGT:
+- Om kunden frågar om priser, nämn exakt pris från informationen
+- Om det finns flera behandlingar, nämn de mest relevanta
+- Rekommendera alltid att börja med en konsultation för nya kunder
+- Om kunden frågar om klippkort/paket, nämn rabatterbjudanden
+- Var varm, professionell och hjälpsam
+
+${contextPrompt}`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userQuestion },
+        ],
+        temperature: 0.7,
+        max_tokens: 200, // Keep responses concise for voice
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const answer = data.choices[0].message.content;
+
+    return answer;
+  } catch (error) {
+    console.error('FAQ intent handling failed:', error);
+    return `Tack för din fråga. Just nu kan jag bäst hjälpa dig med bokningar, ombokningar och avbokningar. För andra frågor kommer någon från kliniken att kontakta dig snart.`;
+  }
 }

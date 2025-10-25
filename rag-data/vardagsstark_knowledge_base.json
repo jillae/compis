@@ -1,0 +1,627 @@
+{
+  "clinic_name": "Vardagsstark / Arch Clinic",
+  "services": [
+    {
+      "service_name": "Ryggsmärta behandling",
+      "category": "Smärta & Funktion",
+      "description": "r uppbackad med mängder av kliniska studier & 16 FDA godkännanden. Vad kan behandlas med laser? Exempel på vad vi behandlar: Artros Ländryggs, Bröstryggsmärta & Diskbråck Nacke- & Axlarsmärta Höft & Ljumsksmärta Tennisarmbåge Carpaltunnelsyndrom Hallux Valgus Akillestendinos/Hälseneinflamamtion Plan",
+      "keywords": [
+        "smärta",
+        "rygg",
+        "neurobaserad"
+      ],
+      "source": "https://www.vardagsstark.nu/smärta/behandlingar-36348172"
+    },
+    {
+      "service_name": "Emerald",
+      "category": "Kost, Stress & Övervikt",
+      "description": "VARFÖR Pris/Boka Neurobaserad Träning Boka Tid KOST, STRESS & ÖVERVIKT Kost, Beroende & Stresshantering EMERALD - Celluliter, Övervikt & Metabolt Syndrom Pova på EMERALD - 50% Boka EMERALD Hur & Vad händer Frågor & Svar Kliniska Studier",
+      "keywords": [
+        "emerald",
+        "fettreduktion",
+        "viktminskning",
+        "laser"
+      ],
+      "source": "https://www.vardagsstark.nu/kost,-stress-övervikt-41340293"
+    },
+    {
+      "service_name": "Neurobaserad träning",
+      "category": "Smärta & Funktion",
+      "source": "Bokadirekt",
+      "duration_min": 4545,
+      "price_sek": 950
+    },
+    {
+      "service_name": "Neurobaserad träning",
+      "category": "Smärta & Funktion",
+      "source": "Bokadirekt",
+      "duration_min": 6060,
+      "price_sek": 1080
+    },
+    {
+      "service_name": "Neurobaserad träning",
+      "category": "Smärta & Funktion",
+      "source": "Bokadirekt",
+      "duration_min": 9090,
+      "price_sek": 1390
+    },
+    {
+      "service_name": "Behandling",
+      "category": "Smärta & Funktion",
+      "source": "Bokadirekt",
+      "duration_min": 3030,
+      "price_sek": 750
+    },
+    {
+      "service_name": "Stroke",
+      "category": "Övrigt",
+      "source": "Bokadirekt",
+      "duration_min": 30,
+      "price_sek": 750
+    },
+    {
+      "service_name": "Händerna",
+      "category": "Övrigt",
+      "source": "Bokadirekt",
+      "duration_min": 20,
+      "price_sek": 560
+    },
+    {
+      "service_name": "Emerald-laser för endast",
+      "category": "Fettreduktion",
+      "source": "Bokadirekt",
+      "price_sek": 995
+    },
+    {
+      "service_name": "Konsultation 60 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 60,
+      "description": "Första besök för kartläggning och behandlingsplan enligt Archmethod",
+      "keywords": [
+        "konsultation",
+        "första besök",
+        "kartläggning"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Konsultation 90 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 90,
+      "description": "Utökad konsultation för komplexa fall med djupare kartläggning",
+      "keywords": [
+        "konsultation",
+        "utökad",
+        "komplex"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Behandling 45 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 45,
+      "description": "Neurobaserad behandling enligt Archmethod",
+      "keywords": [
+        "behandling",
+        "neurobaserad",
+        "archmethod"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Behandling 60 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 60,
+      "price_sek": 1125,
+      "description": "Standard neurobaserad behandling enligt Archmethod",
+      "keywords": [
+        "behandling",
+        "neurobaserad",
+        "archmethod"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Behandling 90 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 90,
+      "description": "Utökad neurobaserad behandling för komplexa fall",
+      "keywords": [
+        "behandling",
+        "neurobaserad",
+        "archmethod",
+        "utökad"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Neurobaserad träning 45 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 45,
+      "description": "Träning med fokus på nervsystemets anpassning",
+      "keywords": [
+        "träning",
+        "neurobaserad",
+        "rörelse"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Neurobaserad träning 60 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 60,
+      "description": "Utökad träning med fokus på nervsystemets anpassning",
+      "keywords": [
+        "träning",
+        "neurobaserad",
+        "rörelse"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Emerald Fettreduktion 70 min",
+      "category": "Fettreduktion",
+      "duration_min": 70,
+      "price_sek": 2495,
+      "description": "Laser-baserad fettreduktion med Emerald-teknologi. Icke-invasiv behandling för lokal fettreduktion.",
+      "keywords": [
+        "emerald",
+        "fettreduktion",
+        "laser",
+        "viktminskning"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Ballancer Lymfdränage 40 min",
+      "category": "Lymfdränage & Återhämtning",
+      "duration_min": 40,
+      "description": "Mekanisk lymfdränage för återhämtning och avsvällning",
+      "keywords": [
+        "ballancer",
+        "lymfdränage",
+        "återhämtning"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Ballancer Lymfdränage 75 min",
+      "category": "Lymfdränage & Återhämtning",
+      "duration_min": 75,
+      "description": "Utökad lymfdränage-behandling för djupare effekt",
+      "keywords": [
+        "ballancer",
+        "lymfdränage",
+        "återhämtning"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Personlig träning",
+      "category": "Smärta & Funktion",
+      "description": "Individuell träning anpassad efter dina behov",
+      "keywords": [
+        "träning",
+        "personlig",
+        "individuell"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "MammaMage",
+      "category": "Smärta & Funktion",
+      "description": "Specialiserad behandling för mammor",
+      "keywords": [
+        "mamma",
+        "graviditet",
+        "postpartum"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Axelsmärta 30 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 30,
+      "description": "Specifik neurobaserad behandling för axelsmärta. Fokuserad behandling av smärta i axel.",
+      "keywords": [
+        "smärta",
+        "axel",
+        "neurobaserad",
+        "specifik"
+      ],
+      "suitable_for": [
+        "axelsmärta"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Ländryggsmärta 30 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 30,
+      "description": "Specifik neurobaserad behandling för ländryggsmärta. Fokuserad behandling av smärta i ländrygg.",
+      "keywords": [
+        "smärta",
+        "ländrygg",
+        "neurobaserad",
+        "specifik"
+      ],
+      "suitable_for": [
+        "ländryggsmärta"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Nackesmärta 30 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 30,
+      "description": "Specifik neurobaserad behandling för nackesmärta. Fokuserad behandling av smärta i nacke.",
+      "keywords": [
+        "smärta",
+        "nacke",
+        "neurobaserad",
+        "specifik"
+      ],
+      "suitable_for": [
+        "nackesmärta"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Handsmärta 30 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 30,
+      "description": "Specifik neurobaserad behandling för handsmärta. Fokuserad behandling av smärta i hand.",
+      "keywords": [
+        "smärta",
+        "hand",
+        "neurobaserad",
+        "specifik"
+      ],
+      "suitable_for": [
+        "handsmärta"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Höftsmärta 30 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 30,
+      "description": "Specifik neurobaserad behandling för höftsmärta. Fokuserad behandling av smärta i höft.",
+      "keywords": [
+        "smärta",
+        "höft",
+        "neurobaserad",
+        "specifik"
+      ],
+      "suitable_for": [
+        "höftsmärta"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Knäsmärta 30 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 30,
+      "description": "Specifik neurobaserad behandling för knäsmärta. Fokuserad behandling av smärta i knä.",
+      "keywords": [
+        "smärta",
+        "knä",
+        "neurobaserad",
+        "specifik"
+      ],
+      "suitable_for": [
+        "knäsmärta"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Fotsmärta 30 min",
+      "category": "Smärta & Funktion",
+      "duration_min": 30,
+      "description": "Specifik neurobaserad behandling för fotsmärta. Fokuserad behandling av smärta i fot.",
+      "keywords": [
+        "smärta",
+        "fot",
+        "neurobaserad",
+        "specifik"
+      ],
+      "suitable_for": [
+        "fotsmärta"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Mental ohälsa - Stress",
+      "category": "Mental Hälsa",
+      "description": "Neurobaserad behandling för stressrelaterade besvär",
+      "keywords": [
+        "mental",
+        "stress",
+        "neurobaserad"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Mental ohälsa - Depression",
+      "category": "Mental Hälsa",
+      "description": "Neurobaserad behandling för depression och nedstämdhet",
+      "keywords": [
+        "mental",
+        "depression",
+        "neurobaserad"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Mental ohälsa - ADHD",
+      "category": "Mental Hälsa",
+      "description": "Neurobaserad behandling för ADHD-relaterade utmaningar",
+      "keywords": [
+        "mental",
+        "adhd",
+        "neurobaserad"
+      ],
+      "source": "Known services"
+    },
+    {
+      "service_name": "Mental ohälsa - Autism",
+      "category": "Mental Hälsa",
+      "description": "Neurobaserad behandling för autism och sensoriska utmaningar",
+      "keywords": [
+        "mental",
+        "autism",
+        "neurobaserad"
+      ],
+      "source": "Known services"
+    }
+  ],
+  "packages": [
+    {
+      "name": "Emerald 10 ggr (få 12)",
+      "sessions": 12,
+      "price_sek": 21295,
+      "description": "Köp 10 Emerald-behandlingar, få 12. Spara pengar på paketpris.",
+      "service_type": "Emerald Fettreduktion",
+      "savings": "Få 2 behandlingar gratis",
+      "source": "Known packages"
+    },
+    {
+      "name": "Ballancer 6 ggr",
+      "sessions": 6,
+      "price_sek": 2995,
+      "description": "Paket med 6 Ballancer lymfdränage-behandlingar",
+      "service_type": "Ballancer Lymfdränage",
+      "source": "Known packages"
+    },
+    {
+      "name": "Behandling 60 min 10 ggr",
+      "sessions": 10,
+      "price_sek": 10239,
+      "description": "Paket med 10 behandlingar à 60 minuter",
+      "service_type": "Behandling",
+      "source": "Known packages"
+    },
+    {
+      "name": "Smärta & Mental Trötthet 5-kort",
+      "sessions": 5,
+      "description": "Paket för behandling av smärta och mental trötthet",
+      "service_type": "Behandling",
+      "source": "Known packages"
+    }
+  ],
+  "offers": [
+    {
+      "name": "Emerald prova på",
+      "discount": "60%",
+      "price_sek": 995,
+      "original_price_sek": 2495,
+      "description": "Prova Emerald fettreduktion med 60% rabatt. Perfekt för att testa teknologin.",
+      "service_type": "Emerald Fettreduktion",
+      "source": "Known offers"
+    },
+    {
+      "name": "Ballancer prova på",
+      "discount": "50%",
+      "price_sek": 498,
+      "description": "Prova Ballancer lymfdränage med 50% rabatt",
+      "service_type": "Ballancer Lymfdränage",
+      "source": "Known offers"
+    },
+    {
+      "name": "Duo-behandling",
+      "discount": "2 för 1",
+      "description": "Ta med en vän och få 2 behandlingar för priset av 1",
+      "terms": "Gäller utvalda behandlingar",
+      "source": "Known offers"
+    }
+  ],
+  "practitioners": [
+    {
+      "name": "Sanna Holmgren",
+      "description": "an tolka insignalerna bättre och fatta bättre beslut och på så sätt ge dig ett bättre utförande i kroppen i vad du än vill uppnå – En bättre version av dig själv! Instruktör Sanna Holmgren PassVi har gjort 4 olika typer av pass som kommer att hållas till en början enbart online.Vissa pass kommer att hållas live och vissa kommer sändas som inspelningar av passen.Du kan välja att vara med på alla el",
+      "source": "https://www.vardagsstark.nu/träning/pass-archmethod-32955437"
+    },
+    {
+      "name": "Katarina",
+      "description": "400tim. Och WOW vilken utbildning och vilket innehåll! Jag har nog aldrig känt mig så redo för min nya utmaning!!! Vidareutbildning - Jag vill veta mer!! Jan 2015 Certifierade MammaMagetränare hos Katarina Woxnerud. MammaMage står för att få tillbaka funktionen – inte bara utseendet. Det handlar om hela inre cylindern, alltså magen, bäckenbottenmusklerna liksom ryggen och andningen. Juni 2015 vida",
+      "source": "https://www.vardagsstark.nu/om-oss/instruktörer-10308725"
+    },
+    {
+      "name": "Sarah",
+      "role": "Behandlare",
+      "specializations": [
+        "Behandling",
+        "Träning"
+      ],
+      "description": "Erfaren behandlare på kliniken",
+      "credentials": [
+        "Behandlare"
+      ],
+      "source": "Known practitioners"
+    }
+  ],
+  "philosophy": {
+    "archmethod": {
+      "title": "Archmethod® - Neurocentrerat perspektiv",
+      "description": "Archmethod är en neurobaserad approach till smärta och hälsa. Vi ser smärta som en överlevnadsreflex från nervsystemet, inte som ett strukturellt fel i kroppen. Detta perspektiv möjliggör effektiv behandling genom att arbeta med nervsystemets anpassningsförmåga.",
+      "key_principles": [
+        "Smärta är en överlevnadsreflex från nervsystemet",
+        "Nervsystemet styr smärtupplevelsen",
+        "Individuell anpassning av behandling",
+        "Helhetsperspektiv på hälsa och funktion",
+        "Evidensbaserad och neurocentrerad metodik",
+        "Fokus på långsiktig förändring, inte symptombehandling"
+      ],
+      "scientific_basis": "Baserat på modern smärtforskning och neurovetenskap"
+    },
+    "neurobaserad": "Neurobaserad Träning | Vardagsstark Vardagsstark PÅ GÅNG Paketpriser SMÄRTA Behandlingar Archmethod®",
+    "nervsystem": "kunna hantera dig i din miljö du befinner dig i. Denna träning är i sig ingen direkt behandling men med tanke på att det är din hjärna vi optimerar får vi blixtsnabb respons på övningarna eftersom nervsystemet går med ljusets hastighet. Vad gör vi då? Hjärnan använder sig av 3 \"sateliter\" för att sköta vår kropp: Visuellt: Ögon - hur vi rör och använder våra ögon Vestibular: Hörsel & Balans Proprioception: Allt från känsel till rörelse: Som en karta över din kropp Om någon av dessa sateliter inte fun",
+    "smärta är": "hjärnan skickar för signaler via nervsystemet. Så vi utbildar din hjärna! Vi gör dig uppmärksam på din hållning och hur din kropp placerat sig och vad som kan vara orsaken. Vi ger dig kunskap om vad smärta är och varför hjärnan skickar smärtsignaler. En av dem absolut viktigaste kunskaperna du nånsin kommer att lära dig! Vi lär dig Tensigritet och Proprioception - hur allt hänger ihop både muskulärt men även en av nervsystemets viktigaste uppgifter för basala kroppsfunktioner. Vi återutbildar dig och o",
+    "överlevnadsreflex": "åtgärdssignal. Därför är det viktigt att informationen som hjärnan tar emot är av så hög kvalité som möjligt, så att den kan tolka det rätt och då ge dig ett bättre utförande. Smärta är därför en överlevnadsreflex. Hjärnan varnar om åtgärd krävs och beroende på vad du tidigare gått igenom i ditt liv och hur du då hanterat det, medvetet eller omedvetet, kommer hjärnan att varna olika mycket beroende på om det tidigare varit ett hot eller inte. Vilket ger mer eller mindre smärta - olika för olika individer. V",
+    "treatment_approach": {
+      "title": "Behandlingsmetodik",
+      "description": "Vi använder en kombination av LLLT (Low-Level Laser Therapy), neurobaserad träning, manuell behandling och individuellt anpassade behandlingsplaner för optimal effekt.",
+      "methods": [
+        "LLLT (Low-Level Laser Therapy) - Laser för vävnadsläkning",
+        "Neurobaserad träning - Träning som påverkar nervsystemet",
+        "Manuell behandling - Hands-on behandling",
+        "Rörelsekontroll - Optimering av rörelsemönster",
+        "Stresshantering - Påverkan på nervsystemets stresstolerans",
+        "Individuell anpassning - Varje behandling skräddarsys"
+      ],
+      "process": [
+        "1. Konsultation och kartläggning",
+        "2. Individuell behandlingsplan",
+        "3. Aktiv behandling och träning",
+        "4. Uppföljning och justering",
+        "5. Långsiktig hälsa och prevention"
+      ]
+    },
+    "unique_selling_points": [
+      "Neurocentrerat perspektiv på smärta - Unikt i Sverige",
+      "Individuellt anpassade behandlingsplaner",
+      "Evidensbaserad metodik med vetenskaplig grund",
+      "Helhetssyn på hälsa - Inte bara symptombehandling",
+      "Långsiktig förändring genom nervsystemets anpassning",
+      "Erfarna och certifierade Arch Practitioners",
+      "Modern utrustning (LLLT, Emerald, Ballancer)",
+      "Behandling av både fysisk och mental ohälsa"
+    ],
+    "target_conditions": {
+      "pain": [
+        "Axelsmärta",
+        "Ländryggsmärta",
+        "Nacksmärta",
+        "Handsmärta",
+        "Höftsmärta",
+        "Knäsmärta",
+        "Fotsmärta",
+        "Kronisk smärta"
+      ],
+      "mental_health": [
+        "Stress",
+        "Depression",
+        "ADHD",
+        "Autism",
+        "Mental trötthet"
+      ],
+      "wellness": [
+        "Viktminskning",
+        "Fettreduktion",
+        "Lymfdränage",
+        "Återhämtning"
+      ]
+    }
+  },
+  "booking_info": {
+    "phone": "023-125 25",
+    "opening_hours": "Rapporter Öppet Hus KONTAKT VARDAGSSTARK 0 kr 0 PÅ GÅNG Paketpriser SMÄRTA KOST, STRESS & ÖVERVIKT TRÄNING FÖRELÄSNINGAR BOK",
+    "address": "nedan) - tomt - Adress där eventet äger rum Gatuadress Postnr Stad Ljudanläggning Ta med Er ljud Vi har ljud på plats - tomt - Ditt namn * Din e-postadress * Telefon * Vi återkommer med ett prisförsla",
+    "recommendation": "Vi rekommenderar starkt att börja med en konsultation (60 eller 90 min) för grundlig kartläggning och individuell behandlingsplan",
+    "booking_methods": [
+      "Bokadirekt.se - Enklast och snabbast",
+      "Telefon - Ring för rådgivning",
+      "Email - För frågor och information"
+    ],
+    "payment_methods": [
+      "Kort (Visa, Mastercard)",
+      "Swish",
+      "Faktura (endast företag)"
+    ],
+    "cancellation_policy": "Avbokning måste ske senast 24 timmar innan bokad tid för att undvika avgift",
+    "first_visit": {
+      "recommendation": "Konsultation 60 eller 90 min",
+      "what_to_expect": [
+        "Grundlig kartläggning av dina besvär",
+        "Diskussion om din hälsohistoria",
+        "Undersökning och bedömning",
+        "Individuell behandlingsplan",
+        "Förklaring av Archmethod-perspektivet"
+      ],
+      "preparation": [
+        "Ta med eventuella tidigare utredningar",
+        "Kom i bekväma kläder",
+        "Var beredd att diskutera din hälsa öppet"
+      ]
+    },
+    "location": {
+      "clinic_name": "Vardagsstark / Arch Clinic",
+      "note": "Kontaktuppgifter finns på webbplatsen"
+    }
+  },
+  "reviews": {
+    "overall_rating": "4.8",
+    "total_reviews": "345",
+    "source": "Structured Data"
+  },
+  "metadata": {
+    "scraped_at": "2025-10-25T12:14:37.903762",
+    "sources": [
+      "https://www.vardagsstark.nu",
+      "https://www.vardagsstark.nu/",
+      "https://www.vardagsstark.nu/på-gång-10308279",
+      "https://www.vardagsstark.nu/paketpriser-38115266",
+      "https://www.vardagsstark.nu/smärta-37157264",
+      "https://www.vardagsstark.nu/smärta/behandlingar-36348172",
+      "https://www.vardagsstark.nu/smärta/archmethod®-32946619",
+      "https://www.vardagsstark.nu/smärta/archmethod®/hur-32962615",
+      "https://www.vardagsstark.nu/smärta/archmethod®/varför-32962611",
+      "https://www.vardagsstark.nu/smärta/archmethod®/pris-boka-33996433",
+      "https://www.vardagsstark.nu/smärta/neurobaserad-träning-37157911",
+      "https://www.vardagsstark.nu/boka-37519782",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt-41340293",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/kost,-beroende-stresshantering-41340319",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom-36083572",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom/pova-på-emerald-50-36085454",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom/boka-emerald-36302612",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom/hur-vad-händer-36085455",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom/frågor-svar-36294370",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom/kliniska-studier-36095186",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom/artiklar-36294247",
+      "https://www.vardagsstark.nu/kost,-stress-övervikt/emerald-celluliter,-övervikt-metabolt-syndrom/före-efter-bilder-36294432",
+      "https://www.vardagsstark.nu/träning-22749002",
+      "https://www.vardagsstark.nu/träning/pass-archmethod-32955437",
+      "https://www.vardagsstark.nu/träning/senior-27882310",
+      "https://www.vardagsstark.nu/träning/vardagsstark-mamma-kurs-24700352",
+      "https://www.vardagsstark.nu/träning/hiit-27949972",
+      "https://www.vardagsstark.nu/träning/zumba®-10312511",
+      "https://www.vardagsstark.nu/träning/personlig-träning-pt-24703217",
+      "https://www.vardagsstark.nu/träning/gymmet-37169110",
+      "https://www.vardagsstark.nu/föreläsningar/workshops-30360415",
+      "https://www.vardagsstark.nu/träning/dans-10440665",
+      "https://www.vardagsstark.nu/träning/schema-tider-10352559",
+      "https://www.vardagsstark.nu/träning/butik-28068006",
+      "https://www.vardagsstark.nu/föreläsningar-41276522",
+      "https://www.vardagsstark.nu/boka/boka-oss-fest-företag-10336071",
+      "https://www.vardagsstark.nu/om-oss/om-oss-10308879",
+      "https://www.vardagsstark.nu/om-oss/instruktörer-10308725",
+      "https://www.vardagsstark.nu/om-oss/personalingång/lönerapport-18152911",
+      "https://www.vardagsstark.nu/om-oss/personalingång/rapporter-14805207",
+      "https://www.vardagsstark.nu/om-oss/personalingång/öppet-hus-14741973",
+      "https://www.vardagsstark.nu/om-oss/kontakt-10309207",
+      "https://www.vardagsstark.nu/store/checkout",
+      "https://www.vardagsstark.nu?desktop=1",
+      "https://www.bokadirekt.se/places/vardagsstark-arch-clinic-18977"
+    ]
+  }
+}

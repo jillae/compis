@@ -1,0 +1,56 @@
+
+// Knowledge Base Schema for RAG System
+// Add this to your main schema.prisma file
+
+model KnowledgeChunk {
+  id          String   @id @default(cuid())
+  clinicId    String
+  clinic      Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  // Content
+  content     String   @db.Text
+  contentType String   // "service", "philosophy", "booking_info", "review"
+  
+  // Metadata
+  category    String?  // "Smärta & Funktion", "Mental Hälsa", etc.
+  subcategory String?  // "axelsmärta", "stress", etc.
+  
+  // Service-specific metadata (if contentType = "service")
+  serviceName String?
+  duration    Int?     // minutes
+  price       Float?   // SEK
+  practitioner String? // JSON array of names
+  
+  // Embedding vector (for semantic search)
+  embedding   Float[]  // pgvector type
+  
+  // Source tracking
+  sourceUrl   String?
+  sourceType  String   // "website", "bokadirekt", "manual"
+  
+  // Keywords for keyword-based search
+  keywords    String[] // Array of searchable keywords
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([clinicId])
+  @@index([contentType])
+  @@index([category])
+  @@index([keywords])
+  @@map("knowledge_chunks")
+}
+
+// Enable pgvector extension in Supabase
+// Run this SQL separately:
+// CREATE EXTENSION IF NOT EXISTS vector;
+// 
+// Then update the embedding column:
+// ALTER TABLE knowledge_chunks 
+// ADD COLUMN embedding vector(1536);
+// 
+// Create vector similarity search index:
+// CREATE INDEX ON knowledge_chunks 
+// USING ivfflat (embedding vector_cosine_ops)
+// WITH (lists = 100);

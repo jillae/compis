@@ -125,11 +125,28 @@ async function generateCorexResponse(
     }
   });
 
+  // Import RAG retrieval (dynamic to avoid circular dependency)
+  const { retrieveContext, buildContextPrompt } = await import('@/lib/rag/retrieval');
+  
+  // Retrieve relevant knowledge from RAG system
+  let ragContext = '';
+  try {
+    const ragResults = await retrieveContext(message, clinicId, 5);
+    if (ragResults.length > 0) {
+      ragContext = buildContextPrompt(ragResults);
+    }
+  } catch (error) {
+    console.error('RAG retrieval failed in chat:', error);
+    // Continue without RAG context
+  }
+
   // Bygg context-medveten prompt
   const contextSummary = context.slice(-5).map(m => `${m.role}: ${m.content}`).join('\n');
   
   const systemPrompt = `Du är Corex, den intelligenta assistenten för ${clinic?.name || 'kliniken'}.
 Du hjälper kunder med bokningar, information om behandlingar och svarar på frågor.
+
+${ragContext ? `\n${ragContext}\n` : ''}
 
 Tillgängliga tjänster: ${clinic?.services.map(s => s.name).join(', ') || 'Inga tjänster'}
 Personal: ${clinic?.staff.map(s => s.name).join(', ') || 'Ingen personal'}
@@ -138,6 +155,12 @@ Tidigare konversation:
 ${contextSummary}
 
 Användarens nya fråga: ${message}
+
+VIKTIGT:
+- Om du har information från kunskapsbasen ovan, använd den för att ge exakta priser och detaljer
+- Rekommendera alltid konsultation först för nya kunder
+- Om det finns klippkort/paket, nämn rabatterbjudanden
+- Var varm, professionell och hjälpsam
 
 Ge ett hjälpsamt, vänligt och professionellt svar på svenska.`;
 
