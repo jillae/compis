@@ -70,7 +70,7 @@ export function createServiceChunk(service: RawService): KnowledgeChunk {
   const content = contentParts.join('\n');
 
   // Extract subcategory from keywords or suitable_for
-  const subcategory = service.suitable_for?.[0] || service.keywords[0];
+  const subcategory = service.suitable_for?.[0] || service.keywords?.[0] || 'Allmänt';
 
   return {
     content,
@@ -82,7 +82,7 @@ export function createServiceChunk(service: RawService): KnowledgeChunk {
     price: service.price_sek,
     practitioner: service.practitioner?.join(', '),
     keywords: [
-      ...service.keywords,
+      ...(service.keywords || []),
       service.service_name.toLowerCase(),
       ...(service.suitable_for || []),
     ],

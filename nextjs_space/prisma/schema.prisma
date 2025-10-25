@@ -38,32 +38,37 @@ model Session {
 }
 
 model User {
-  id                    String    @id @default(cuid())
-  name                  String?
-  email                 String?   @unique
-  emailVerified         DateTime?
-  image                 String?
-  password              String?
-  firstName             String?
-  lastName              String?
-  companyName           String?
-  jobTitle              String?
-  role                  UserRole  @default(STAFF)
-  clinicId              String?
-  onboardingStep        Int?      @default(0)
-  onboardingCompletedAt DateTime?
-  clinic                Clinic?   @relation(fields: [clinicId], references: [id], onDelete: SetNull)
-  accounts              Account[]
-  sessions              Session[]
-  staffProfile          Staff[] // Link to Staff for scheduling
-  hasCompletedProductTour Boolean @default(false)
-  isBetaUser            Boolean   @default(false)
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                      String      @id @default(cuid())
+  name                    String?
+  email                   String?     @unique
+  emailVerified           DateTime?
+  image                   String?
+  password                String?
+  firstName               String?
+  lastName                String?
+  companyName             String?
+  jobTitle                String?
+  role                    UserRole    @default(STAFF)
+  clinicId                String?
+  onboardingStep          Int?        @default(0)
+  onboardingCompletedAt   DateTime?
+  clinic                  Clinic?     @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  accounts                Account[]
+  sessions                Session[]
+  staffProfile            Staff[] // Link to Staff for scheduling
+  hasCompletedProductTour Boolean     @default(false)
+  isBetaUser              Boolean     @default(false)
+  betaStatus              BetaStatus  @default(NONE)
+  betaAppliedAt           DateTime?
+  betaApprovedAt          DateTime?
+  hasSeenProductTour      Boolean     @default(false)
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
 
   @@index([clinicId])
   @@index([role])
   @@index([isBetaUser])
+  @@index([betaStatus])
 }
 
 model VerificationToken {
@@ -652,6 +657,13 @@ enum UserRole {
   STAFF // Staff member - limited access
   CLINIC_ADMIN // Legacy - same as ADMIN
   CLINIC_STAFF // Legacy - same as STAFF
+}
+
+enum BetaStatus {
+  NONE      // Not in beta program
+  PENDING   // Applied, awaiting approval
+  APPROVED  // Approved beta tester
+  REJECTED  // Application declined
 }
 
 enum SubscriptionTier {

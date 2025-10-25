@@ -6,12 +6,14 @@
 
 import OpenAI from 'openai';
 
+// Use OpenAI API for embeddings
+// Note: Configure OPENAI_API_KEY in .env to enable RAG embeddings
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
+  apiKey: process.env.OPENAI_API_KEY || 'dummy-key',
 });
 
 /**
- * Generate embedding vector for text using OpenAI
+ * Generate embedding vector for text using OpenAI/Abacus AI
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
