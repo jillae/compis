@@ -14,7 +14,7 @@
     "@next/swc-wasm-nodejs": "13.5.1",
     "@types/facebook-nodejs-business-sdk": "^23",
     "@types/node": "20.6.2",
-    "@types/pg": "^8",
+    "@types/pg": "^8.15.5",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
     "@typescript-eslint/eslint-plugin": "7.0.0",
