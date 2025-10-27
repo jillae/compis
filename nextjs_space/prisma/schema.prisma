@@ -62,6 +62,15 @@ model User {
   betaAppliedAt           DateTime?
   betaApprovedAt          DateTime?
   hasSeenProductTour      Boolean     @default(false)
+  
+  // Referral Program
+  referralCode            String?     @unique // Unique code for this user
+  referredById            String?     // Who referred this user
+  referredBy              User?       @relation("Referrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals               Referral[]  @relation("ReferrerReferrals")
+  referredReferrals       Referral[]  @relation("ReferredReferrals")
+  referredUsers           User[]      @relation("Referrals")
+  
   createdAt               DateTime    @default(now())
   updatedAt               DateTime    @updatedAt
 
@@ -69,6 +78,8 @@ model User {
   @@index([role])
   @@index([isBetaUser])
   @@index([betaStatus])
+  @@index([referralCode])
+  @@index([referredById])
 }
 
 model VerificationToken {
@@ -104,6 +115,38 @@ enum BetaApplicationStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+// Referral Program - Track referrals and rewards
+model Referral {
+  id                String         @id @default(cuid())
+  referrerId        String         // User who refers
+  referredEmail     String         // Email of referred person
+  referredId        String?        // User ID when they sign up
+  status            ReferralStatus @default(PENDING)
+  rewardClaimed     Boolean        @default(false)
+  rewardGrantedAt   DateTime?      // When reward was granted
+  referrerReward    Int            @default(1) // Free months for referrer
+  referredReward    Int            @default(1) // Free months for referred
+  notes             String?        @db.Text
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  referrer          User           @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred          User?          @relation("ReferredReferrals", fields: [referredId], references: [id], onDelete: SetNull)
+
+  @@index([referrerId])
+  @@index([referredEmail])
+  @@index([referredId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ReferralStatus {
+  PENDING    // Invited but not signed up
+  COMPLETED  // Signed up and reward granted
+  EXPIRED    // Invite expired (e.g., after 30 days)
+  CANCELLED  // Manually cancelled
 }
 
 // Flow Revenue Intelligence Platform Schema
@@ -1998,6 +2041,9 @@ model Subscription {
   monthlyPrice    Decimal         @db.Decimal(10, 2)
   billingInterval BillingInterval @default(MONTHLY)
   currency        String          @default("SEK")
+  
+  // Referral Program - Free months from referrals
+  freeMonthsRemaining Int @default(0) // Accumulated free months from referrals
 
   // Relationships
   invoices      Invoice[]

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -183,6 +183,12 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
               <Button variant="ghost" className="w-full justify-start">
                 <CreditCard className="h-4 w-4 mr-2" />
                 Prenumeration & Fakturering
+              </Button>
+            </Link>
+            <Link href="/dashboard/referrals" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <Gift className="h-4 w-4 mr-2" />
+                Hänvisa & Tjäna
               </Button>
             </Link>
             <Link href="/settings/bank" onClick={() => setOpen(false)}>

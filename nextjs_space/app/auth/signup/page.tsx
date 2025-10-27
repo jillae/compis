@@ -1,19 +1,23 @@
 
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertCircle, TrendingUp } from "lucide-react"
+import { AlertCircle, TrendingUp, Gift } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Skeleton } from "@/components/ui/skeleton"
 
-export default function SignupPage() {
+function SignupForm() {
+  const searchParams = useSearchParams()
+  const referralCode = searchParams?.get('ref')
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -21,11 +25,19 @@ export default function SignupPage() {
     lastName: '',
     companyName: '',
     jobTitle: '',
-    acceptTerms: false
+    acceptTerms: false,
+    referralCode: referralCode || ''
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  
+  // Update referral code if URL changes
+  useEffect(() => {
+    if (referralCode) {
+      setFormData(prev => ({ ...prev, referralCode }))
+    }
+  }, [referralCode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,6 +113,15 @@ export default function SignupPage() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {formData.referralCode && (
+                <Alert className="bg-green-50 border-green-200">
+                  <Gift className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    <strong>Grattis!</strong> Du har bjudits in av en kollega. Ni får båda 1 månad gratis när du skapar ditt konto! 🎉
                   </AlertDescription>
                 </Alert>
               )}
@@ -274,5 +295,33 @@ export default function SignupPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+function SignupLoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48 mt-2" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<SignupLoadingFallback />}>
+      <SignupForm />
+    </Suspense>
   )
 }

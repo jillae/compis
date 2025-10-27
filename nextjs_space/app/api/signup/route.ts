@@ -3,11 +3,12 @@ import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/db"
 import { createSubaccountForClinic } from "@/lib/46elks/subaccount-service"
+import { completeReferral, generateReferralCode } from "@/lib/referral-service"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password, firstName, lastName, companyName, jobTitle } = body
+    const { email, password, firstName, lastName, companyName, jobTitle, referralCode } = body
 
     if (!email || !password) {
       return NextResponse.json(
@@ -98,6 +99,25 @@ export async function POST(request: NextRequest) {
         clinicId: clinicId,
       }
     })
+
+    // Handle referral if code was provided
+    if (referralCode) {
+      try {
+        await completeReferral(referralCode, user.id)
+        console.log(`✓ Referral completed for user ${user.id} with code ${referralCode}`)
+      } catch (error) {
+        console.warn(`⚠️ Failed to complete referral for ${referralCode}:`, error)
+        // Don't fail signup if referral completion fails
+      }
+    }
+
+    // Generate referral code for new user
+    try {
+      await generateReferralCode(user.id)
+    } catch (error) {
+      console.warn(`⚠️ Failed to generate referral code for user ${user.id}:`, error)
+      // Don't fail signup if code generation fails
+    }
 
     return NextResponse.json(
       { 
