@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { UserRole } from "@prisma/client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Home, Building2, Users, Settings, BarChart3, MessageSquare, Phone, CreditCard, Mic, Monitor, Webhook, Smartphone, HelpCircle } from "lucide-react"
+import { Home, Building2, Users, Settings, BarChart3, MessageSquare, Phone, CreditCard, Mic, Monitor, Webhook, Smartphone, HelpCircle, Ticket } from "lucide-react"
 import { ClinicSelector } from "@/components/superadmin/clinic-selector"
 import { ViewingBanner } from "@/components/superadmin/viewing-banner"
 
@@ -68,6 +68,12 @@ export default async function SuperAdminLayout({
                 <Button variant="ghost" size="sm" className="px-2 md:px-3">
                   <Mic className="h-4 w-4 md:mr-2" />
                   <span className="hidden lg:inline">STT Providers</span>
+                </Button>
+              </Link>
+              <Link href="/superadmin/voice-tickets">
+                <Button variant="ghost" size="sm" className="px-2 md:px-3">
+                  <Ticket className="h-4 w-4 md:mr-2" />
+                  <span className="hidden lg:inline">Voice Tickets</span>
                 </Button>
               </Link>
               <Link href="/superadmin/faq">
