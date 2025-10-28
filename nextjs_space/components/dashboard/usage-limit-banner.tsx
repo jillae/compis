@@ -1,102 +1,111 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, Zap, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
+import { AlertCircle, TrendingUp, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
 
-interface UsageLimitBannerProps {
-  currentBookings: number;
-  bookingsLimit: number;
+interface UsageData {
   tier: string;
+  bookingsThisMonth: number;
+  bookingsLimit: number | null;
+  remaining: number;
 }
 
-export function UsageLimitBanner({ currentBookings, bookingsLimit, tier }: UsageLimitBannerProps) {
-  const [show, setShow] = useState(false);
-  
-  // Only show for FREE tier with a limit
+export function UsageLimitBanner() {
+  const router = useRouter();
+  const [usage, setUsage] = useState<UsageData | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (tier === 'FREE' && bookingsLimit > 0) {
-      setShow(true);
+    fetchUsage();
+  }, []);
+
+  const fetchUsage = async () => {
+    try {
+      const response = await fetch('/api/billing/subscription');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.subscription) {
+          setUsage({
+            tier: data.subscription.tier,
+            bookingsThisMonth: data.subscription.bookingsThisMonth || 0,
+            bookingsLimit: data.subscription.bookingsLimit,
+            remaining:
+              data.subscription.bookingsLimit !== null
+                ? data.subscription.bookingsLimit - (data.subscription.bookingsThisMonth || 0)
+                : -1,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch usage:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [tier, bookingsLimit]);
+  };
 
-  if (!show || bookingsLimit === 0) return null;
+  if (loading || !usage) return null;
 
-  const usagePercent = (currentBookings / bookingsLimit) * 100;
-  const remaining = Math.max(0, bookingsLimit - currentBookings);
-  const isNearLimit = usagePercent >= 80;
-  const isAtLimit = currentBookings >= bookingsLimit;
+  // Only show for FREE tier
+  if (usage.tier !== 'FREE' || usage.bookingsLimit === null) return null;
+
+  const usagePercent = (usage.bookingsThisMonth / usage.bookingsLimit) * 100;
+  const isNearLimit = usagePercent > 80;
+  const isAtLimit = usage.remaining <= 0;
+
+  if (!isNearLimit && !isAtLimit) return null;
 
   return (
-    <Alert 
-      variant={isAtLimit ? 'destructive' : isNearLimit ? 'default' : 'default'}
-      className={`mb-6 ${isAtLimit ? 'border-red-500 bg-red-50' : isNearLimit ? 'border-orange-500 bg-orange-50' : 'border-blue-500 bg-blue-50'}`}
-    >
-      <div className="flex items-start gap-4">
+    <Alert variant={isAtLimit ? 'destructive' : 'default'} className="mb-6">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle className="flex items-center gap-2">
         {isAtLimit ? (
-          <AlertTriangle className="h-5 w-5 mt-0.5 text-red-600" />
+          <>
+            Bokningsgräns nådd
+            <Badge variant="destructive">50/50 bokningar</Badge>
+          </>
         ) : (
-          <TrendingUp className="h-5 w-5 mt-0.5 text-orange-600" />
+          <>
+            Snart full bokningsgräns
+            <Badge variant="secondary">
+              {usage.bookingsThisMonth}/{usage.bookingsLimit} bokningar
+            </Badge>
+          </>
         )}
-        
-        <div className="flex-1 space-y-3">
-          <div>
-            <AlertTitle className="text-base font-semibold">
-              {isAtLimit 
-                ? '🚨 Bokningsgräns nådd' 
-                : isNearLimit 
-                ? '⚠️ Du närmar dig bokningsgränsen' 
-                : '📊 Bokningsanvändning'}
-            </AlertTitle>
-            <AlertDescription className="mt-2">
-              {isAtLimit ? (
-                <span>
-                  Du har använt <strong>{currentBookings} av {bookingsLimit} bokningar</strong> denna månad. 
-                  Uppgradera nu för att fortsätta ta emot bokningar.
-                </span>
-              ) : (
-                <span>
-                  Du har använt <strong>{currentBookings} av {bookingsLimit} bokningar</strong> denna månad. 
-                  {isNearLimit && ` Du har ${remaining} bokningar kvar.`}
-                </span>
-              )}
-            </AlertDescription>
-          </div>
+      </AlertTitle>
+      <AlertDescription className="mt-2 space-y-3">
+        {isAtLimit ? (
+          <p>
+            Du har använt alla 50 gratisbokningar för denna månad. Uppgradera till <strong>Basic</strong> för obegränsade
+            bokningar!
+          </p>
+        ) : (
+          <>
+            <p>
+              Du har {usage.remaining} bokningar kvar denna månad. Uppgradera för obegränsade bokningar och avancerade
+              funktioner.
+            </p>
+            <Progress value={usagePercent} className="h-2" />
+          </>
+        )}
 
-          {/* Progress Bar */}
-          <div className="space-y-1">
-            <Progress 
-              value={Math.min(usagePercent, 100)} 
-              className={`h-2 ${isAtLimit ? 'bg-red-200' : isNearLimit ? 'bg-orange-200' : 'bg-blue-200'}`}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{currentBookings} bokningar</span>
-              <span>{remaining} kvar av {bookingsLimit}</span>
-            </div>
-          </div>
-
-          {/* Upgrade CTA */}
-          {(isNearLimit || isAtLimit) && (
-            <div className="flex gap-2 pt-2">
-              <Link href="/dashboard/billing/upgrade">
-                <Button size="sm" className="gap-2">
-                  <Zap className="h-4 w-4" />
-                  Uppgradera till Basic
-                </Button>
-              </Link>
-              <Link href="/pricing">
-                <Button size="sm" variant="outline">
-                  Se alla planer
-                </Button>
-              </Link>
-            </div>
+        <div className="flex gap-3 mt-4">
+          <Button onClick={() => router.push('/pricing')} size="sm" className="gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Uppgradera Nu
+          </Button>
+          {!isAtLimit && (
+            <Button onClick={() => router.push('/pricing')} variant="outline" size="sm">
+              Se Priser
+            </Button>
           )}
         </div>
-      </div>
+      </AlertDescription>
     </Alert>
   );
 }

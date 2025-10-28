@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { OnboardingBanner } from "@/components/dashboard/onboarding-banner"
+import { UsageLimitBanner } from "@/components/dashboard/usage-limit-banner"
 import { UserHeader } from "@/components/layout/user-header"
 import { prisma } from "@/lib/db"
 
@@ -53,6 +54,9 @@ export default async function DashboardLayout({
             onboardingCompletedAt={user.onboardingCompletedAt}
           />
         )}
+        
+        {/* Usage limit banner for FREE tier users */}
+        <UsageLimitBanner />
       </div>
 
       {/* Main content */}

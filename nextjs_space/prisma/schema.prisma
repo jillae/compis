@@ -319,6 +319,9 @@ model Clinic {
   
   // FAQ Management System
   faqs               FAQ[]
+  
+  // A/B Testing
+  abTests            ABTest[]
 
   @@index([bokadirektId])
   @@index([name])
@@ -3512,4 +3515,99 @@ enum BokadirektAutoBookingMode {
   OFF      // No auto-booking
   NOTIFY   // Send notification when slot available
   AUTO     // Automatically book slot
+}
+
+// ============================================
+// A/B TESTING FRAMEWORK
+// ============================================
+
+model ABTest {
+  id          String   @id @default(cuid())
+  name        String   // "Pricing Page - 50% Off Banner"
+  description String?
+  status      ABTestStatus @default(DRAFT)
+  
+  // Test configuration
+  variantA    Json     // { name: "Control", config: {...} }
+  variantB    Json     // { name: "Treatment", config: {...} }
+  trafficSplit Int     @default(50) // % of traffic to variant B
+  
+  // Target page/feature
+  targetPage  String   // "/pricing", "/landing", etc.
+  targetElement String? // Specific element ID if applicable
+  
+  // Date range
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  // Results
+  conversionGoal String? // "signup", "upgrade", "booking"
+  
+  // Relations
+  clinicId    String?
+  clinic      Clinic? @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  
+  variants    ABTestVariant[]
+  conversions ABTestConversion[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([clinicId])
+  @@index([status])
+  @@index([targetPage])
+  @@map("ab_tests")
+}
+
+model ABTestVariant {
+  id       String @id @default(cuid())
+  testId   String
+  test     ABTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  variant  String // "A" or "B"
+  
+  // Metrics
+  views       Int @default(0)
+  clicks      Int @default(0)
+  conversions Int @default(0)
+  
+  // Calculated fields (updated via cron)
+  conversionRate Decimal? @db.Decimal(5, 2) // %
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([testId, variant])
+  @@index([testId])
+  @@map("ab_test_variants")
+}
+
+model ABTestConversion {
+  id        String   @id @default(cuid())
+  testId    String
+  test      ABTest   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  variant   String   // "A" or "B"
+  userId    String?  // User who converted (if logged in)
+  sessionId String?  // Anonymous session ID
+  
+  eventType String   // "view", "click", "conversion"
+  eventData Json?    // Additional event data
+  
+  createdAt DateTime @default(now())
+  
+  @@index([testId])
+  @@index([variant])
+  @@index([eventType])
+  @@index([userId])
+  @@index([sessionId])
+  @@map("ab_test_conversions")
+}
+
+enum ABTestStatus {
+  DRAFT      // Not started
+  RUNNING    // Currently active
+  PAUSED     // Temporarily stopped
+  COMPLETED  // Finished
+  ARCHIVED   // Archived for reference
 }
