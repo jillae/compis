@@ -25,16 +25,28 @@ jobs:
             echo "found=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Send to DeepAgent
+      - name: Send to DeepAgent API
         if: steps.check.outputs.found == 'true'
         env:
           DEEPAGENT_API_KEY: ${{ secrets.DEEPAGENT_API_KEY }}
-          DEEPAGENT_CONVERSATION_ID: ${{ secrets.DEEPAGENT_CONVERSATION_ID }}
         run: |
-          echo "🤖 Sending to DA: ${{ steps.check.outputs.msg }}"
-          
-          # Extract instruction from commit message
           INSTRUCTION=$(echo "${{ steps.check.outputs.msg }}" | sed 's/\[ask-da\]//g' | xargs)
           
-          echo "Instruction: $INSTRUCTION"
-          echo "✅ Would send to DA conversation: $DEEPAGENT_CONVERSATION_ID"
+          curl -X POST https://apps.abacus.ai/v1/chatcompletions \
+            -H "Authorization: Bearer $DEEPAGENT_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "model": "gpt-4o",
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "Du är en expert mjukvaruarkitekt som granskar GitHub commits. Ge strukturerad teknisk analys på svenska."
+                },
+                {
+                  "role": "user",
+                  "content": "'"$INSTRUCTION"'"
+                }
+              ],
+              "max_tokens": 1000,
+              "temperature": 0.7
+            }'
