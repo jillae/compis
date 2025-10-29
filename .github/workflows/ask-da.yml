@@ -20,17 +20,21 @@ jobs:
           echo "Message: $COMMIT_MSG"
           if [[ "$COMMIT_MSG" == *"[ask-da]"* ]]; then
             echo "found=true" >> $GITHUB_OUTPUT
+            echo "msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
           else
             echo "found=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Notify about [ask-da]
+      - name: Send to DeepAgent
         if: steps.check.outputs.found == 'true'
+        env:
+          DEEPAGENT_API_KEY: ${{ secrets.DEEPAGENT_API_KEY }}
+          DEEPAGENT_CONVERSATION_ID: ${{ secrets.DEEPAGENT_CONVERSATION_ID }}
         run: |
-          echo "🤖 Found [ask-da] in commit!"
-          echo "Commit: $(git log -1 --pretty=%B)"
+          echo "🤖 Sending to DA: ${{ steps.check.outputs.msg }}"
           
-          # TODO: Send to DA API/webhook här
-          curl -X POST "http://localhost:3000/ask-da" \
-            -H "Content-Type: application/json" \
-            -d "{\"commit\": \"$(git log -1 --pretty=%H)\", \"message\": \"$(git log -1 --pretty=%B)\"}"
+          # Extract instruction from commit message
+          INSTRUCTION=$(echo "${{ steps.check.outputs.msg }}" | sed 's/\[ask-da\]//g' | xargs)
+          
+          echo "Instruction: $INSTRUCTION"
+          echo "✅ Would send to DA conversation: $DEEPAGENT_CONVERSATION_ID"
