@@ -1,0 +1,36 @@
+name: Ask DA
+
+on:
+  push:
+    branches:
+      - flow-da-clean
+
+jobs:
+  check-ask-da:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for [ask-da] in commit message
+        id: check
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Message: $COMMIT_MSG"
+          if [[ "$COMMIT_MSG" == *"[ask-da]"* ]]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify about [ask-da]
+        if: steps.check.outputs.found == 'true'
+        run: |
+          echo "🤖 Found [ask-da] in commit!"
+          echo "Commit: $(git log -1 --pretty=%B)"
+          
+          # TODO: Send to DA API/webhook här
+          curl -X POST "http://localhost:3000/ask-da" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit\": \"$(git log -1 --pretty=%H)\", \"message\": \"$(git log -1 --pretty=%B)\"}"
