@@ -1,1 +1,4 @@
 project_id = "woopkutxpgonqtombuqo"
+
+[functions.da-agent]
+verify_jwt = false

@@ -25,28 +25,32 @@ jobs:
             echo "found=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Send to DeepAgent API
+      - name: Call DA-Agent Edge Function
         if: steps.check.outputs.found == 'true'
         env:
-          DEEPAGENT_API_KEY: ${{ secrets.DEEPAGENT_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           INSTRUCTION=$(echo "${{ steps.check.outputs.msg }}" | sed 's/\[ask-da\]//g' | xargs)
           
-          curl -X POST https://apps.abacus.ai/v1/chatcompletions \
-            -H "Authorization: Bearer $DEEPAGENT_API_KEY" \
+          echo "🤖 Sending to DA-Agent: $INSTRUCTION"
+          
+          RESPONSE=$(curl -s -X POST "$SUPABASE_URL/functions/v1/da-agent" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             -H "Content-Type: application/json" \
-            -d '{
-              "model": "gpt-4o",
-              "messages": [
-                {
-                  "role": "system",
-                  "content": "Du är en expert mjukvaruarkitekt som granskar GitHub commits. Ge strukturerad teknisk analys på svenska."
-                },
-                {
-                  "role": "user",
-                  "content": "'"$INSTRUCTION"'"
-                }
-              ],
-              "max_tokens": 1000,
-              "temperature": 0.7
-            }'
+            -d "{
+              \"instruction\": \"$INSTRUCTION\",
+              \"repoOwner\": \"${{ github.repository_owner }}\",
+              \"repoName\": \"${{ github.event.repository.name }}\",
+              \"branch\": \"flow-da-clean\"
+            }")
+          
+          echo "Response: $RESPONSE"
+          
+          if echo "$RESPONSE" | grep -q "\"success\":true"; then
+            echo "✅ DA-Agent completed successfully"
+          else
+            echo "❌ DA-Agent failed"
+            exit 1
+          fi
