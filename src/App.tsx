@@ -39,3 +39,4 @@ export default App;
 // full-test-v2
 // test-fix
 // test-permissions
+// permissions-test
