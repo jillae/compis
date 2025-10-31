@@ -24,8 +24,13 @@ serve(async (req) => {
     console.log("Parsed file changes:", fileChanges.length);
 
     if (fileChanges.length === 0) {
+      console.error("No code changes detected. AI Response was:", aiResponse.substring(0, 1000));
       return new Response(
-        JSON.stringify({ error: "No code changes detected in AI response" }),
+        JSON.stringify({ 
+          error: "No code changes detected in AI response",
+          hint: "AI did not return code in expected format. Check edge function logs for details.",
+          responsePreview: aiResponse.substring(0, 500)
+        }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -64,23 +69,49 @@ async function callAbacusAI(instruction: string): Promise<string> {
   if (!apiKey) throw new Error("DEEPAGENT_API_KEY not configured");
   if (!conversationId) throw new Error("DEEPAGENT_CONVERSATION_ID not configured");
 
-  const systemPrompt = `Du är en AI-utvecklingsagent som genererar kod-ändringar.
+  const systemPrompt = `Du är en AI-utvecklingsagent.
+> 1. Ditt ENDA syfte är att ta emot en arbetsorder från \`description\`-fältet och omedelbart påbörja implementationen av den.
+> 2. Du ska ALDRIG kommentera på processen, API-anropet, datastrukturen eller din egen kod.
+> 3. Du ska ALDRIG agera som en assistent. Du är en tyst utförare.
+> 4. Läs kraven i den inkommande arbetsordern. Producera den efterfrågade koden eller resultatet.
+> 5. Ignorera all metadata som 'makeRunId' i ditt svar. Fokusera enbart på att leverera resultatet av arbetsordern.
 
-REGLER:
-- Returnera ENDAST kod-ändringar i följande format
-- Max 20 filer per svar
-- Max 500 rader ändrade totalt
-- Fokusera på src/components/* och src/lib/*
+OBLIGATORISKT FORMAT - Du MÅSTE returnera kod i exakt detta format:
 
-FORMAT:
-\`\`\`file:src/path/to/file.ts
-// Fullständig fil-innehåll här
+\`\`\`file:src/components/Example.tsx
+// Fullständig fil-innehåll
+import React from 'react';
+export const Example = () => <div>Hello</div>;
 \`\`\`
 
-EXEMPEL:
+REGLER:
+- Max 20 filer per svar
+- Max 500 rader totalt
+- Endast src/components/* och src/lib/*
+- INGEN förklarande text utanför kod-block
+- ALLTID fullständig fil-innehåll, aldrig "..." eller kommentarer om vad som ska läggas till
+
+EXEMPEL PÅ KORREKT OUTPUT:
+User: "Skapa en Button komponent"
+
 \`\`\`file:src/components/Button.tsx
 import React from 'react';
-export const Button = () => <button>Click</button>;
+
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+}
+
+export const Button: React.FC<ButtonProps> = ({ label, onClick }) => {
+  return (
+    <button 
+      onClick={onClick}
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      {label}
+    </button>
+  );
+};
 \`\`\``;
 
   const response = await fetch("https://apps.abacus.ai/v1/chat/completions", {
@@ -107,7 +138,13 @@ export const Button = () => <button>Click</button>;
   }
 
   const data = await response.json();
-  return data.choices[0]?.message?.content || "";
+  const aiResponse = data.choices[0]?.message?.content || "";
+  
+  // Debug logging
+  console.log("AI Response preview (first 500 chars):", aiResponse.substring(0, 500));
+  console.log("AI Response length:", aiResponse.length);
+  
+  return aiResponse;
 }
 
 interface FileChange {
@@ -117,15 +154,24 @@ interface FileChange {
 
 function parseCodeResponse(response: string): FileChange[] {
   const changes: FileChange[] = [];
+  
+  // Log raw response för debugging
+  console.log("Parsing response, length:", response.length);
+  console.log("Looking for pattern: ```file:path");
+  
   const fileRegex = /```file:([^\n]+)\n([\s\S]*?)```/g;
   
   let match;
   let fileCount = 0;
   let totalLines = 0;
+  let matchesFound = 0;
 
   while ((match = fileRegex.exec(response)) !== null && fileCount < 20) {
+    matchesFound++;
     const path = match[1].trim();
     const content = match[2].trim();
+    
+    console.log(`Match ${matchesFound}: path="${path}", content length=${content.length}`);
     
     // Validate path (only allow src/components/* and src/lib/*)
     if (!path.startsWith("src/components/") && !path.startsWith("src/lib/")) {
@@ -143,6 +189,8 @@ function parseCodeResponse(response: string): FileChange[] {
     fileCount++;
     totalLines += lines;
   }
+  
+  console.log(`Total matches found: ${matchesFound}, valid files: ${fileCount}`);
 
   return changes;
 }

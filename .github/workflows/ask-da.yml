@@ -34,19 +34,23 @@ jobs:
         run: |
           INSTRUCTION=$(echo "${{ steps.check.outputs.msg }}" | sed 's/\[ask-da\]//g' | xargs)
           
-          echo "🤖 Sending to DA-Agent: $INSTRUCTION"
+          echo "🤖 Instruction extracted: '$INSTRUCTION'"
+          
+          # Use jq for safe JSON encoding
+          PAYLOAD=$(jq -n \
+            --arg instruction "$INSTRUCTION" \
+            --arg owner "${{ github.repository_owner }}" \
+            --arg repo "${{ github.event.repository.name }}" \
+            '{instruction: $instruction, repoOwner: $owner, repoName: $repo, branch: "flow-da-clean"}')
+          
+          echo "📦 Payload: $PAYLOAD"
           
           RESPONSE=$(curl -s -X POST "$SUPABASE_URL/functions/v1/da-agent" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"instruction\": \"$INSTRUCTION\",
-              \"repoOwner\": \"${{ github.repository_owner }}\",
-              \"repoName\": \"${{ github.event.repository.name }}\",
-              \"branch\": \"flow-da-clean\"
-            }")
+            -d "$PAYLOAD")
           
-          echo "Response: $RESPONSE"
+          echo "📨 Response: $RESPONSE"
           
           if echo "$RESPONSE" | grep -q "\"success\":true"; then
             echo "✅ DA-Agent completed successfully"
