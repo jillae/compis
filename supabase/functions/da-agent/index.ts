@@ -60,7 +60,9 @@ serve(async (req) => {
 
 async function callAbacusAI(instruction: string): Promise<string> {
   const apiKey = Deno.env.get("DEEPAGENT_API_KEY");
+  const conversationId = Deno.env.get("DEEPAGENT_CONVERSATION_ID");
   if (!apiKey) throw new Error("DEEPAGENT_API_KEY not configured");
+  if (!conversationId) throw new Error("DEEPAGENT_CONVERSATION_ID not configured");
 
   const systemPrompt = `Du är en AI-utvecklingsagent som genererar kod-ändringar.
 
@@ -81,7 +83,7 @@ import React from 'react';
 export const Button = () => <button>Click</button>;
 \`\`\``;
 
-  const response = await fetch("https://apps.abacus.ai/v1/chatcompletions", {
+  const response = await fetch("https://apps.abacus.ai/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -89,6 +91,7 @@ export const Button = () => <button>Click</button>;
     },
     body: JSON.stringify({
       model: "gpt-4o",
+      conversationId: conversationId,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: instruction },
