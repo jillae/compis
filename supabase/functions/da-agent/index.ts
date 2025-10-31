@@ -120,35 +120,51 @@ WRONG EXAMPLES - NEVER DO THIS:
 
 START YOUR RESPONSE NOW WITH \`\`\`file: - NOTHING ELSE.`;
 
+  const requestBody = {
+    model: "gpt-4o",
+    conversationId: conversationId,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: `GENERATE CODE NOW:\n\n${instruction}` },
+    ],
+    max_tokens: 4000,
+    temperature: 0.3,
+  };
+
+  // LOG ENTIRE REQUEST
+  console.log("=== ABACUS API REQUEST ===");
+  console.log("Instruction received:", instruction);
+  console.log("ConversationId:", conversationId?.substring(0, 20) + "...");
+  console.log("Full request body:", JSON.stringify(requestBody, null, 2));
+  console.log("========================");
+
   const response = await fetch("https://apps.abacus.ai/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: "gpt-4o",
-      conversationId: conversationId,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: `GENERATE CODE NOW:\n\n${instruction}` },
-      ],
-      max_tokens: 4000,
-      temperature: 0.3,
-    }),
+    body: JSON.stringify(requestBody),
   });
+
+  // LOG RESPONSE DETAILS
+  console.log("=== ABACUS API RESPONSE ===");
+  console.log("Status:", response.status);
+  console.log("Headers:", JSON.stringify([...response.headers.entries()]));
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("Error response:", errorText);
     throw new Error(`Abacus API error: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
   const aiResponse = data.choices[0]?.message?.content || "";
   
-  // Debug logging
-  console.log("AI Response preview (first 500 chars):", aiResponse.substring(0, 500));
-  console.log("AI Response length:", aiResponse.length);
+  console.log("Response length:", aiResponse.length);
+  console.log("Response preview (first 500 chars):", aiResponse.substring(0, 500));
+  console.log("Response preview (last 200 chars):", aiResponse.substring(Math.max(0, aiResponse.length - 200)));
+  console.log("=========================");
   
   return aiResponse;
 }
@@ -161,44 +177,76 @@ interface FileChange {
 function parseCodeResponse(response: string): FileChange[] {
   const changes: FileChange[] = [];
   
-  // Log raw response för debugging
-  console.log("Parsing response, length:", response.length);
-  console.log("Looking for pattern: ```file:path");
+  console.log("=== PARSING DEBUG START ===");
+  console.log("Raw response length:", response.length);
+  console.log("First 300 chars:", response.substring(0, 300));
+  console.log("Last 300 chars:", response.substring(Math.max(0, response.length - 300)));
   
-  // More lenient regex that handles missing closing backticks
-  const fileRegex = /```file:([^\n]+)\n([\s\S]*?)(?:```|$)/g;
+  // Try multiple regex patterns
+  const patterns = [
+    { name: "Standard", regex: /```file:([^\n]+)\n([\s\S]*?)```/g },
+    { name: "Lenient (no closing)", regex: /```file:([^\n]+)\n([\s\S]*?)(?:```|$)/g },
+    { name: "Whitespace tolerant", regex: /```file:\s*([^\n]+)\s*\n([\s\S]*?)(?:```|$)/g },
+    { name: "Very lenient", regex: /```\s*file:\s*([^\n]+)\s*\n([\s\S]*?)(?:```|$)/g },
+  ];
   
-  let match;
-  let fileCount = 0;
-  let totalLines = 0;
-  let matchesFound = 0;
-
-  while ((match = fileRegex.exec(response)) !== null && fileCount < 20) {
-    matchesFound++;
-    const path = match[1].trim();
-    const content = match[2].trim();
+  for (const pattern of patterns) {
+    console.log(`\n--- Trying pattern: ${pattern.name} ---`);
+    pattern.regex.lastIndex = 0; // Reset regex
     
-    console.log(`Match ${matchesFound}: path="${path}", content length=${content.length}`);
+    let match;
+    let matchCount = 0;
+    const tempChanges: FileChange[] = [];
+    let totalLines = 0;
     
-    // Validate path (only allow src/components/* and src/lib/*)
-    if (!path.startsWith("src/components/") && !path.startsWith("src/lib/")) {
-      console.log(`Skipping file outside allowed paths: ${path}`);
-      continue;
+    while ((match = pattern.regex.exec(response)) !== null && tempChanges.length < 20) {
+      matchCount++;
+      const path = match[1].trim();
+      const content = match[2].trim();
+      
+      console.log(`  Match ${matchCount}:`);
+      console.log(`    Path: "${path}"`);
+      console.log(`    Content length: ${content.length}`);
+      console.log(`    Content preview: ${content.substring(0, 80)}...`);
+      
+      // Validate path - expanded to include nextjs_space
+      const isValidPath = path.startsWith("src/components/") || 
+                          path.startsWith("src/lib/") ||
+                          path.startsWith("nextjs_space/");
+      
+      if (!isValidPath) {
+        console.log(`    ❌ Skipping: Invalid path (must be src/components/, src/lib/, or nextjs_space/)`);
+        continue;
+      }
+      
+      // Check line limit
+      const lines = content.split("\n").length;
+      if (totalLines + lines > 500) {
+        console.log(`    ❌ Stopping: Would exceed 500 line limit (current: ${totalLines}, would add: ${lines})`);
+        break;
+      }
+      
+      console.log(`    ✅ Valid file (${lines} lines)`);
+      tempChanges.push({ path, content });
+      totalLines += lines;
     }
-
-    const lines = content.split("\n").length;
-    if (totalLines + lines > 500) {
-      console.log(`Reached 500 line limit, stopping at ${fileCount} files`);
+    
+    console.log(`  Pattern "${pattern.name}" result: ${tempChanges.length} files, ${matchCount} total matches`);
+    
+    if (tempChanges.length > 0) {
+      console.log(`✅ SUCCESS: Pattern "${pattern.name}" found ${tempChanges.length} valid files`);
+      changes.push(...tempChanges);
       break;
     }
-
-    changes.push({ path, content });
-    fileCount++;
-    totalLines += lines;
   }
   
-  console.log(`Total matches found: ${matchesFound}, valid files: ${fileCount}`);
-
+  console.log("\n=== PARSING DEBUG END ===");
+  console.log(`Final result: ${changes.length} files to commit`);
+  
+  if (changes.length === 0) {
+    console.error("⚠️ NO FILES PARSED - This will trigger an error response");
+  }
+  
   return changes;
 }
 
