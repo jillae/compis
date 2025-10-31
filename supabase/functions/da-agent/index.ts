@@ -159,7 +159,8 @@ function parseCodeResponse(response: string): FileChange[] {
   console.log("Parsing response, length:", response.length);
   console.log("Looking for pattern: ```file:path");
   
-  const fileRegex = /```file:([^\n]+)\n([\s\S]*?)```/g;
+  // More lenient regex that handles missing closing backticks
+  const fileRegex = /```file:([^\n]+)\n([\s\S]*?)(?:```|$)/g;
   
   let match;
   let fileCount = 0;
