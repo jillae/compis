@@ -38,3 +38,4 @@ export default App;
 // trigger-da
 // full-test-v2
 // test-fix
+// test-permissions
