@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { instruction, repoOwner, repoName, branch } = await req.json();
+    const { instruction, repoOwner, repoName, branch, githubToken } = await req.json();
     
     console.log("DA-Agent received instruction:", instruction);
 
@@ -42,6 +42,7 @@ serve(async (req) => {
       branch: branch,
       changes: fileChanges,
       message: `[da-response] ${instruction.substring(0, 50)}`,
+      githubToken: githubToken,
     });
 
     console.log("Commit result:", commitResult);
@@ -256,11 +257,11 @@ async function commitToGitHub(params: {
   branch: string;
   changes: FileChange[];
   message: string;
+  githubToken: string;
 }): Promise<{ sha: string }> {
-  const githubToken = Deno.env.get("GITHUB_TOKEN");
-  if (!githubToken) throw new Error("GITHUB_TOKEN not configured");
+  if (!params.githubToken) throw new Error("GITHUB_TOKEN not provided");
 
-  const { owner, repo, branch, changes, message } = params;
+  const { owner, repo, branch, changes, message, githubToken } = params;
   const baseUrl = `https://api.github.com/repos/${owner}/${repo}`;
 
   // 1. Get current branch reference

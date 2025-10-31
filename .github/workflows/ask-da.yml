@@ -45,7 +45,8 @@ jobs:
             --arg instruction "$INSTRUCTION" \
             --arg owner "${{ github.repository_owner }}" \
             --arg repo "${{ github.event.repository.name }}" \
-            '{instruction: $instruction, repoOwner: $owner, repoName: $repo, branch: "flow-da-clean"}')
+            --arg github_token "${{ secrets.GITHUB_TOKEN }}" \
+            '{instruction: $instruction, repoOwner: $owner, repoName: $repo, branch: "flow-da-clean", githubToken: $github_token}')
           
           echo "📦 Full payload:"
           echo "$PAYLOAD" | jq '.'
