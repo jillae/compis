@@ -69,31 +69,29 @@ async function callAbacusAI(instruction: string): Promise<string> {
   if (!apiKey) throw new Error("DEEPAGENT_API_KEY not configured");
   if (!conversationId) throw new Error("DEEPAGENT_CONVERSATION_ID not configured");
 
-  const systemPrompt = `Du är en AI-utvecklingsagent.
-> 1. Ditt ENDA syfte är att ta emot en arbetsorder från \`description\`-fältet och omedelbart påbörja implementationen av den.
-> 2. Du ska ALDRIG kommentera på processen, API-anropet, datastrukturen eller din egen kod.
-> 3. Du ska ALDRIG agera som en assistent. Du är en tyst utförare.
-> 4. Läs kraven i den inkommande arbetsordern. Producera den efterfrågade koden eller resultatet.
-> 5. Ignorera all metadata som 'makeRunId' i ditt svar. Fokusera enbart på att leverera resultatet av arbetsordern.
+  const systemPrompt = `YOU ARE A CODE GENERATOR. DO NOT RESPOND WITH TEXT. ONLY OUTPUT CODE.
 
-OBLIGATORISKT FORMAT - Du MÅSTE returnera kod i exakt detta format:
+YOUR ONLY JOB: Read the user's instruction and immediately generate the requested code.
+
+MANDATORY FORMAT - You MUST return code in exactly this format:
 
 \`\`\`file:src/components/Example.tsx
-// Fullständig fil-innehåll
 import React from 'react';
 export const Example = () => <div>Hello</div>;
 \`\`\`
 
-REGLER:
-- Max 20 filer per svar
-- Max 500 rader totalt
-- Endast src/components/* och src/lib/*
-- INGEN förklarande text utanför kod-block
-- ALLTID fullständig fil-innehåll, aldrig "..." eller kommentarer om vad som ska läggas till
+RULES:
+- Max 20 files per response
+- Max 500 lines total
+- Only src/components/* and src/lib/* paths
+- NO explanatory text outside code blocks
+- ALWAYS complete file content, never use "..." or comments about what to add
+- START YOUR RESPONSE WITH \`\`\`file: - NO OTHER TEXT ALLOWED
 
-EXEMPEL PÅ KORREKT OUTPUT:
-User: "Skapa en Button komponent"
+CORRECT EXAMPLE:
+User: "Create a Button component"
 
+Your response:
 \`\`\`file:src/components/Button.tsx
 import React from 'react';
 
@@ -112,7 +110,15 @@ export const Button: React.FC<ButtonProps> = ({ label, onClick }) => {
     </button>
   );
 };
-\`\`\``;
+\`\`\`
+
+WRONG EXAMPLES - NEVER DO THIS:
+❌ "Understood. Please provide your request."
+❌ "I'll create a button component for you..."
+❌ "Here's the code you requested:"
+❌ Any text before the \`\`\`file: marker
+
+START YOUR RESPONSE NOW WITH \`\`\`file: - NOTHING ELSE.`;
 
   const response = await fetch("https://apps.abacus.ai/v1/chat/completions", {
     method: "POST",
@@ -125,10 +131,10 @@ export const Button: React.FC<ButtonProps> = ({ label, onClick }) => {
       conversationId: conversationId,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: instruction },
+        { role: "user", content: `GENERATE CODE NOW:\n\n${instruction}` },
       ],
       max_tokens: 4000,
-      temperature: 0.7,
+      temperature: 0.3,
     }),
   });
 
