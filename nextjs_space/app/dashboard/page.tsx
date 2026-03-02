@@ -1,694 +1,1009 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, KeyboardEvent } from 'react';
 import { useSession } from 'next-auth/react';
-import { UserRole } from '@prisma/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Calendar, 
-  DollarSign,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  TrendingUp,
-  ArrowRight,
-  ExternalLink,
-  LogOut,
-  Sparkles,
-  Users,
-} from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RoleToggle } from '@/components/dashboard/role-toggle';
-import { EnhancedRevenueChart } from '@/components/dashboard/enhanced-revenue-chart';
-import { BookingPatternChart } from '@/components/dashboard/booking-pattern-chart';
-import { WeekdayChart } from '@/components/dashboard/weekday-chart';
-import { InsightsSection } from '@/components/dashboard/insights-section';
-import { MetaAlerts } from '@/components/dashboard/meta-alerts';
-import { SyncButton } from '@/components/dashboard/sync-button';
-import { WorkdayToggle } from '@/components/dashboard/workday-toggle';
-import { TimePeriodSelector } from '@/components/time-period-selector';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { HamburgerMenu } from '@/components/dashboard/hamburger-menu';
-import { ExpandableRiskZone } from '@/components/dashboard/expandable-risk-zone';
-import { DisplayModeSwitcher } from '@/components/display-mode-switcher';
-import Link from 'next/link';
-import { signOut } from 'next-auth/react';
+import {
+  Sun,
+  Moon,
+  Calendar,
+  Users,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Zap,
+  BarChart2,
+  Target,
+  Star,
+  Megaphone,
+  Shield,
+  PieChart,
+  UserCheck,
+  ChevronRight,
+  ArrowRight,
+  Activity,
+  Banknote,
+  CalendarDays,
+  Stethoscope,
+  LogIn,
+} from 'lucide-react';
 
-interface DashboardData {
-  overview: {
-    totalBookings: number;
-    completedBookings: number;
-    cancelledBookings: number;
-    noShowBookings: number;
-    totalRevenue: number;
-    onlineBookingPercentage: number;
-    completionRate: number;
-    cancellationRate: number;
-    noShowRate: number;
-  };
-  topServices: Array<{
-    serviceId: string;
-    name: string;
-    category: string;
-    _count: { id: number };
-    _sum: { price: number | null };
-  }>;
-  bookingsTrend: Array<{
-    date: string;
-    count: number;
-  }>;
-  staffPerformance: Array<{
-    staffId: string;
-    name: string;
-    role: string;
-    _count: { id: number };
-    _sum: { price: number | null };
-  }>;
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+type Mode = 'drift' | 'strategi';
+
+interface StaffMember {
+  name: string;
+  role: string;
+  checked_in: boolean;
+  next_booking: string | null;
+  avatar: string;
 }
 
-interface AnalyticsData {
-  revenueTrend: Array<{
-    date: string;
-    revenue: number;
-    bookings: number;
-  }>;
-  bookingPattern: Array<{
-    hour: string;
-    bookings: number;
-  }>;
-  weekdayDistribution: Array<{
-    day: string;
-    bookings: number;
-    revenue: number;
-  }>;
-  categoryBreakdown: Array<{
-    category: string;
-    bookings: number;
-    revenue: number;
-  }>;
+interface WeekDay {
+  label: string;
+  short: string;
+  booked: number;
+  total: number;
+  pct: number;
+  isToday: boolean;
 }
 
-interface AtRiskMetrics {
-  totalBookings: number;
-  highRiskBookings: number;
-  mediumRiskBookings: number;
-  lowRiskBookings: number;
-  potentialLoss: number;
+interface Alert {
+  type: 'warning' | 'error' | 'info';
+  title: string;
+  description: string;
+  icon: React.ReactNode;
 }
+
+interface KpiCard {
+  label: string;
+  value: string;
+  change?: string;
+  positive?: boolean;
+  icon: React.ReactNode;
+}
+
+// ─── Mock data ────────────────────────────────────────────────────────────────
+
+const STAFF: StaffMember[] = [
+  {
+    name: 'Sanna Lindberg',
+    role: 'Hudterapeut',
+    checked_in: true,
+    next_booking: '10:00',
+    avatar: 'SL',
+  },
+  {
+    name: 'Sarah Andersson',
+    role: 'Massageterapeut',
+    checked_in: true,
+    next_booking: '09:30',
+    avatar: 'SA',
+  },
+  {
+    name: 'Emma Johansson',
+    role: 'Hudterapeut',
+    checked_in: false,
+    next_booking: '11:00',
+    avatar: 'EJ',
+  },
+  {
+    name: 'Lisa Bergström',
+    role: 'Nagelvård',
+    checked_in: true,
+    next_booking: '09:45',
+    avatar: 'LB',
+  },
+];
+
+const WEEK_DATA: WeekDay[] = [
+  { label: 'Måndag', short: 'Mån', booked: 20, total: 24, pct: 85, isToday: true },
+  { label: 'Tisdag', short: 'Tis', booked: 17, total: 24, pct: 72, isToday: false },
+  { label: 'Onsdag', short: 'Ons', booked: 22, total: 24, pct: 91, isToday: false },
+  { label: 'Torsdag', short: 'Tor', booked: 15, total: 23, pct: 65, isToday: false },
+  { label: 'Fredag', short: 'Fre', booked: 11, total: 23, pct: 48, isToday: false },
+];
+
+const ALERTS: Alert[] = [
+  {
+    type: 'warning',
+    title: 'Luckor imorgon',
+    description: '4 lediga tider kl. 13–16 (tisdag). Överväg SMS-utskick.',
+    icon: <Clock className="h-5 w-5" />,
+  },
+  {
+    type: 'error',
+    title: 'Sjukfrånvaro',
+    description: 'Emma Johansson har inte stämplat in. Kontakta henne.',
+    icon: <AlertTriangle className="h-5 w-5" />,
+  },
+  {
+    type: 'info',
+    title: 'Fyllnadsgrad fredag',
+    description: 'Fredag är enbart 48% belagd. Kampanj rekommenderas.',
+    icon: <BarChart2 className="h-5 w-5" />,
+  },
+];
+
+const STRATEGY_KPIS: KpiCard[] = [
+  {
+    label: 'Intäkter (mars)',
+    value: '142 300 kr',
+    change: '+12%',
+    positive: true,
+    icon: <Banknote className="h-5 w-5" />,
+  },
+  {
+    label: 'Bokningar',
+    value: '318',
+    change: '+8%',
+    positive: true,
+    icon: <CalendarDays className="h-5 w-5" />,
+  },
+  {
+    label: 'Genomförandgrad',
+    value: '91,4%',
+    change: '+2%',
+    positive: true,
+    icon: <CheckCircle className="h-5 w-5" />,
+  },
+  {
+    label: 'Nya kunder',
+    value: '43',
+    change: '-3',
+    positive: false,
+    icon: <Users className="h-5 w-5" />,
+  },
+  {
+    label: 'Snittintäkt/bokning',
+    value: '447 kr',
+    change: '+4%',
+    positive: true,
+    icon: <TrendingUp className="h-5 w-5" />,
+  },
+];
+
+const AI_RECOMMENDATIONS = [
+  {
+    icon: <Megaphone className="h-5 w-5 text-blue-500" />,
+    title: 'Fyll fredagsluckor',
+    body: 'Fredag har 48% beläggning. Skicka ett SMS-erbjudande till 25 inaktiva kunder om 15% rabatt.',
+    cta: 'Skapa kampanj',
+  },
+  {
+    icon: <Star className="h-5 w-5 text-amber-500" />,
+    title: 'Säsongspush – mars ansiktsbehandling',
+    body: 'Historiskt säljer ansiktsbehandlingar 34% bättre i mars. Lyft i bokningsmotorn nu.',
+    cta: 'Aktivera',
+  },
+  {
+    icon: <Target className="h-5 w-5 text-emerald-500" />,
+    title: 'Återaktivera 12 sovande kunder',
+    body: '12 kunder har inte bokat på 60+ dagar. Automatiserad återaktiveringskampanj rekommenderas.',
+    cta: 'Starta flöde',
+  },
+];
+
+const STAFF_PERFORMANCE = [
+  { name: 'Sanna Lindberg', role: 'Hudterapeut', revenue: '38 400 kr', bookings: 86, completion: 94 },
+  { name: 'Sarah Andersson', role: 'Massageterapeut', revenue: '32 100 kr', bookings: 72, completion: 91 },
+  { name: 'Lisa Bergström', role: 'Nagelvård', revenue: '29 800 kr', bookings: 91, completion: 97 },
+  { name: 'Emma Johansson', role: 'Hudterapeut', revenue: '24 600 kr', bookings: 68, completion: 88 },
+];
+
+const ADVANCED_TOOLS = [
+  { label: 'Simulator', icon: <Activity className="h-5 w-5" />, href: '/dashboard/simulator' },
+  { label: 'Marknadsföring', icon: <Megaphone className="h-5 w-5" />, href: '/dashboard/marketing' },
+  { label: 'Riskvarningar', icon: <Shield className="h-5 w-5" />, href: '/dashboard/risk-alerts' },
+  { label: 'Segment', icon: <PieChart className="h-5 w-5" />, href: '/dashboard/segments' },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function capacityColor(pct: number): string {
+  if (pct >= 80) return 'bg-emerald-500';
+  if (pct >= 50) return 'bg-amber-400';
+  return 'bg-red-500';
+}
+
+function capacityTextColor(pct: number): string {
+  if (pct >= 80) return 'text-emerald-600 dark:text-emerald-400';
+  if (pct >= 50) return 'text-amber-600 dark:text-amber-400';
+  return 'text-red-600 dark:text-red-400';
+}
+
+function alertStyles(type: Alert['type']): string {
+  if (type === 'error') return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/40';
+  if (type === 'warning') return 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40';
+  return 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/40';
+}
+
+function alertIconColor(type: Alert['type']): string {
+  if (type === 'error') return 'text-red-500';
+  if (type === 'warning') return 'text-amber-500';
+  return 'text-blue-500';
+}
+
+// ─── PIN Modal ────────────────────────────────────────────────────────────────
+
+interface PinModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function PinModal({ open, onClose, onSuccess }: PinModalProps) {
+  const [digits, setDigits] = useState(['', '', '', '']);
+  const [shake, setShake] = useState(false);
+  const [error, setError] = useState(false);
+  const refs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
+
+  const CORRECT_PIN = '1234';
+
+  useEffect(() => {
+    if (open) {
+      setDigits(['', '', '', '']);
+      setError(false);
+      setShake(false);
+      setTimeout(() => refs[0].current?.focus(), 100);
+    }
+  }, [open]);
+
+  function handleChange(index: number, val: string) {
+    const char = val.replace(/\D/g, '').slice(-1);
+    const next = [...digits];
+    next[index] = char;
+    setDigits(next);
+    setError(false);
+
+    if (char && index < 3) {
+      refs[index + 1].current?.focus();
+    }
+
+    if (index === 3 && char) {
+      const pin = [...next.slice(0, 3), char].join('');
+      if (pin.length === 4) checkPin(pin);
+    }
+  }
+
+  function checkPin(pin: string) {
+    if (pin === CORRECT_PIN) {
+      sessionStorage.setItem('flow-strategy-unlocked', 'true');
+      onSuccess();
+    } else {
+      setError(true);
+      setShake(true);
+      setTimeout(() => {
+        setShake(false);
+        setDigits(['', '', '', '']);
+        refs[0].current?.focus();
+      }, 600);
+    }
+  }
+
+  function handleKeyDown(index: number, e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Backspace' && !digits[index] && index > 0) {
+      refs[index - 1].current?.focus();
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="sm:max-w-xs text-center bg-white dark:bg-stone-900 rounded-2xl">
+        <DialogHeader>
+          <div className="flex justify-center mb-2">
+            <div className="bg-stone-100 dark:bg-stone-800 rounded-full p-3">
+              <Shield className="h-6 w-6 text-stone-600 dark:text-stone-300" />
+            </div>
+          </div>
+          <DialogTitle className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+            Ange PIN-kod
+          </DialogTitle>
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+            Strategi-läget kräver behörighet.
+          </p>
+        </DialogHeader>
+
+        <div
+          className={`flex gap-3 justify-center mt-4 transition-transform ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}
+          style={shake ? { animation: 'shake 0.5s ease-in-out' } : {}}
+        >
+          {digits.map((d, i) => (
+            <input
+              key={i}
+              ref={refs[i]}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={d}
+              onChange={(e) => handleChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              className={`w-14 h-14 text-center text-2xl font-bold rounded-xl border-2 outline-none transition-all
+                bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100
+                focus:border-stone-900 dark:focus:border-stone-200
+                ${error
+                  ? 'border-red-400 dark:border-red-500'
+                  : d
+                  ? 'border-stone-400 dark:border-stone-500'
+                  : 'border-stone-200 dark:border-stone-600'
+                }`}
+            />
+          ))}
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-500 mt-3 font-medium">
+            Fel PIN-kod. Försök igen.
+          </p>
+        )}
+
+        <Button
+          variant="ghost"
+          className="mt-4 w-full text-stone-500"
+          onClick={onClose}
+        >
+          Avbryt
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Capacity Bar ─────────────────────────────────────────────────────────────
+
+function CapacityBar({ pct }: { pct: number }) {
+  return (
+    <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
+      <div
+        className={`h-full rounded-full transition-all duration-500 ${capacityColor(pct)}`}
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+// ─── Staff Avatar ─────────────────────────────────────────────────────────────
+
+function StaffAvatar({ initials, checkedIn }: { initials: string; checkedIn: boolean }) {
+  return (
+    <div className="relative inline-flex">
+      <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-700 flex items-center justify-center font-semibold text-stone-700 dark:text-stone-200 text-sm">
+        {initials}
+      </div>
+      <span
+        className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-stone-900 ${
+          checkedIn ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'
+        }`}
+      />
+    </div>
+  );
+}
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const { data: session } = useSession() || {};
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [atRiskMetrics, setAtRiskMetrics] = useState<AtRiskMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [timePeriod, setTimePeriod] = useState<string>('30');
-  const [workdays, setWorkdays] = useState<'5' | '7'>('7');
-  const [simulatedRole, setSimulatedRole] = useState<UserRole>(UserRole.ADMIN);
-  const [weekNumber, setWeekNumber] = useState<number>(1);
-  const [isClient, setIsClient] = useState(false);
+  const [mode, setMode] = useState<Mode>('drift');
+  const [showPin, setShowPin] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
-  // Mark when we're on client to avoid hydration mismatches
+  // On mount: check sessionStorage + system dark preference
   useEffect(() => {
-    setIsClient(true);
-    
-    // Calculate week number on client only
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    const diff = now.getTime() - start.getTime();
-    const oneWeek = 1000 * 60 * 60 * 24 * 7;
-    setWeekNumber(Math.ceil(diff / oneWeek));
+    const unlocked = sessionStorage.getItem('flow-strategy-unlocked') === 'true';
+    if (unlocked) setMode('strategi');
 
-    // Initialize from localStorage
-    const saved = localStorage.getItem('simulatedRole');
-    if (saved && Object.values(UserRole).includes(saved as UserRole)) {
-      setSimulatedRole(saved as UserRole);
-    }
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setDarkMode(prefersDark);
   }, []);
 
-  // Helper function to convert timePeriod to days
-  const getDaysFromTimePeriod = (period: string): number => {
-    if (period === 'currentYear') {
-      return Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    } else if (period === 'previousYear') {
-      return 365;
-    } else if (period === 'all') {
-      return 3650; // 10 years as "all"
-    }
-    return parseInt(period) || 30;
-  };
-
-  // Save simulatedRole to localStorage whenever it changes
+  // Apply/remove dark class on <html>
   useEffect(() => {
-    if (simulatedRole && isClient) {
-      localStorage.setItem('simulatedRole', simulatedRole);
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
-  }, [simulatedRole, isClient]);
+  }, [darkMode]);
 
-  useEffect(() => {
-    if (isClient) {
-      fetchDashboardData();
+  function requestStrategi() {
+    const alreadyUnlocked = sessionStorage.getItem('flow-strategy-unlocked') === 'true';
+    if (alreadyUnlocked) {
+      setMode('strategi');
+    } else {
+      setShowPin(true);
     }
-  }, [timePeriod, isClient]);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      
-      // Convert timePeriod to days for API
-      const daysParam = getDaysFromTimePeriod(timePeriod);
-      
-      // Fetch overview data
-      const overviewResponse = await fetch(`/api/dashboard/overview?days=${daysParam}`);
-      const overviewResult = await overviewResponse.json();
-
-      // Fetch analytics data
-      const analyticsResponse = await fetch(`/api/dashboard/analytics?days=${daysParam}`);
-      const analyticsResult = await analyticsResponse.json();
-
-      // Fetch at-risk metrics
-      const atRiskResponse = await fetch(`/api/bookings/predict?action=revenue-at-risk&days=14`);
-      const atRiskResult = await atRiskResponse.json();
-
-      if (overviewResult.success && analyticsResult.success) {
-        setData(overviewResult.data);
-        setAnalytics(analyticsResult.data);
-        setAtRiskMetrics(atRiskResult);
-        setError(null);
-      } else {
-        setError(overviewResult.error || analyticsResult.error);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Laddar dashboard...</p>
-        </div>
-      </div>
-    );
   }
 
-  if (error || !data) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-destructive">Fel</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{error || 'Ingen data tillgänglig'}</p>
-            <button
-              onClick={fetchDashboardData}
-              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Försök igen
-            </button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  function handlePinSuccess() {
+    setShowPin(false);
+    setMode('strategi');
   }
 
-  const { overview, topServices, staffPerformance } = data;
+  function switchToDrift() {
+    setMode('drift');
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto">
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
-          <div className="p-4 md:p-6">
-            <div className="flex items-center justify-between gap-4">
-              {/* Clickable Logo/Title */}
-              <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Flow
-                  </h1>
-                  <p className="text-xs text-muted-foreground hidden sm:block">
-                    Intäktsintelligens för ArchClinic
-                  </p>
-                </div>
-              </Link>
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 transition-colors duration-200">
+      {/* ── HEADER ──────────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-stone-900 dark:bg-stone-100 flex items-center justify-center">
+              <span className="text-white dark:text-stone-900 font-bold text-sm">F</span>
+            </div>
+            <span className="font-bold text-xl tracking-tight">Flow</span>
+          </div>
 
-              {/* Right side controls */}
-              <div className="flex items-center gap-2">
-                <WorkdayToggle value={workdays} onChange={setWorkdays} />
-                <SyncButton />
-                <div data-tour="time-period-selector">
-                  <TimePeriodSelector 
-                    value={timePeriod} 
-                    onChange={setTimePeriod}
-                    className="w-[120px] md:w-[160px]"
-                  />
-                </div>
-                
-                {/* Display Mode Switcher */}
-                <DisplayModeSwitcher />
-                
-                {/* Hamburger Menu */}
-                <div data-tour="hamburger-menu">
-                  <HamburgerMenu 
-                    userRole={session?.user?.role}
-                    simulatedRole={simulatedRole}
-                    onRoleChange={setSimulatedRole}
-                  />
-                </div>
-              </div>
+          {/* Mode toggle — centered */}
+          <div className="flex-1 flex justify-center">
+            <div className="inline-flex rounded-full border border-stone-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 p-1 gap-1">
+              <button
+                onClick={switchToDrift}
+                className={`min-h-[44px] px-5 rounded-full text-sm font-medium transition-all
+                  ${mode === 'drift'
+                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-sm'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                  }`}
+              >
+                Drift
+              </button>
+              <button
+                onClick={requestStrategi}
+                className={`min-h-[44px] px-5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5
+                  ${mode === 'strategi'
+                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-sm'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                  }`}
+              >
+                {mode !== 'strategi' && <Shield className="h-3.5 w-3.5" />}
+                Strategi
+              </button>
             </div>
           </div>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              aria-label="Växla mörkt läge"
+            >
+              {darkMode ? (
+                <Sun className="h-5 w-5 text-stone-500 dark:text-stone-400" />
+              ) : (
+                <Moon className="h-5 w-5 text-stone-500" />
+              )}
+            </button>
+            <HamburgerMenu userRole={session?.user?.role} />
+          </div>
+        </div>
+      </header>
+
+      {/* ── PIN MODAL ──────────────────────────────────────────────────────── */}
+      <PinModal
+        open={showPin}
+        onClose={() => setShowPin(false)}
+        onSuccess={handlePinSuccess}
+      />
+
+      {/* ── CONTENT ────────────────────────────────────────────────────────── */}
+      <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {mode === 'drift' ? <DriftView /> : <StrategiView />}
+      </main>
+
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          15% { transform: translateX(-6px); }
+          30% { transform: translateX(6px); }
+          45% { transform: translateX(-6px); }
+          60% { transform: translateX(6px); }
+          75% { transform: translateX(-4px); }
+          90% { transform: translateX(4px); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── DRIFT VIEW ───────────────────────────────────────────────────────────────
+
+function DriftView() {
+  return (
+    <div className="space-y-6">
+      {/* 1. Dagens sammanfattning */}
+      <section>
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
+            Måndag 2 mars 2026
+          </h1>
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+            Arch Clinic — Drift-läge
+          </p>
         </div>
 
-        {/* Content with padding */}
-        <div className="p-6 space-y-6">
-
-        {/* Horizontal CTA Cards - Main Action Cards (1+1+1) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* 1. Veckans Rekommendationer - PRIMARY */}
-          <Link href="/dashboard/actions" data-tour="actions-card">
-            <Card className="bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 text-white hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 transition-all duration-300 cursor-pointer border-0 shadow-xl hover:shadow-2xl h-full">
-              <CardContent className="p-6">
-                <div className="flex flex-col h-full">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-                        <TrendingUp className="h-6 w-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-xl font-bold">Veckans Rekommendationer</h3>
-                          <span className="text-lg">✨</span>
-                        </div>
-                        <p className="text-xs text-white/70 mt-0.5 tracking-wide">
-                          NYA V{weekNumber}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm leading-relaxed text-white/95">
-                      <strong className="font-semibold">3 konkreta åtgärder</strong> för att öka intäkter. Flow har analyserat din data! 🚀
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mt-3">
-                    <ArrowRight className="h-4 w-4" />
-                    <span className="font-medium">Se rekommendationer</span>
-                  </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            {
+              label: 'Bokningar idag',
+              value: '18 / 24',
+              icon: <CalendarDays className="h-5 w-5 text-blue-500" />,
+              sub: '6 lediga tider',
+            },
+            {
+              label: 'Beläggning',
+              value: '75%',
+              icon: <Activity className="h-5 w-5 text-amber-500" />,
+              sub: 'Mål: 85%',
+            },
+            {
+              label: 'Intäkt idag',
+              value: '14 800 kr',
+              icon: <Banknote className="h-5 w-5 text-emerald-500" />,
+              sub: 'Prognos: 18 200 kr',
+            },
+            {
+              label: 'Personal på plats',
+              value: '3 / 4',
+              icon: <UserCheck className="h-5 w-5 text-violet-500" />,
+              sub: '1 ej incheckad',
+            },
+          ].map((kpi) => (
+            <Card
+              key={kpi.label}
+              className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm"
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">
+                    {kpi.label}
+                  </span>
+                  {kpi.icon}
                 </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* 2. Intäktssimulator - SECONDARY */}
-          <Link href="/dashboard/simulator" data-tour="simulator-card">
-            <Card className="bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
-              <CardContent className="p-6">
-                <div className="flex flex-col h-full">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-                        <TrendingUp className="h-6 w-6" />
-                      </div>
-                      <h3 className="text-xl font-bold flex-1">Intäktssimulator</h3>
-                    </div>
-                    <p className="text-sm text-blue-50/90 leading-relaxed">
-                      Testa "what-if" scenarion och se 12-månaders impact på din verksamhet
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mt-3">
-                    <ArrowRight className="h-4 w-4" />
-                    <span className="font-medium">Öppna simulator</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* 3. Marketing Intelligence - TERTIARY (PRO+) */}
-          <Link href="/dashboard/marketing" data-tour="marketing-card">
-            <Card className="bg-purple-600 text-white hover:bg-purple-700 transition-all duration-300 cursor-pointer border-0 shadow-lg hover:shadow-xl h-full">
-              <CardContent className="p-6">
-                <div className="flex flex-col h-full">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-                        <TrendingUp className="h-6 w-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-xl font-bold">Marketing Intelligence</h3>
-                        </div>
-                        <span className="text-xs bg-white/30 px-2 py-0.5 rounded font-semibold inline-block mt-1">PRO+</span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-purple-50/90 leading-relaxed">
-                      Meta kampanjoptimering & kapacitetsstyrning för maximala intäkter
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mt-3">
-                    <ArrowRight className="h-4 w-4" />
-                    <span className="font-medium">Gå till Marketing</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-
-        {/* Overview Cards - Information Only (Not Clickable) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" data-tour="overview-cards">
-          {/* Total Bookings - Blue - STATIC */}
-          <Card className="bg-white border shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Bokningar</CardTitle>
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Calendar className="h-4 w-4 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{overview.totalBookings}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {overview.onlineBookingPercentage}% online
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Total Revenue - Green - STATIC */}
-          <Card className="bg-white border shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Intäkt (kr)</CardTitle>
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <DollarSign className="h-4 w-4 text-green-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {overview.totalRevenue.toLocaleString('sv-SE')}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Från {overview.completedBookings} klara
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Completion Rate - Emerald - STATIC */}
-          <Card className="bg-white border shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Genomfört</CardTitle>
-              <div className="p-2 bg-emerald-500/10 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{overview.completionRate}%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {overview.completedBookings} / {overview.totalBookings} bokningar
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Cancellation Rate - Orange - STATIC */}
-          <Card className="bg-white border shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Avbokningar</CardTitle>
-              <div className="p-2 bg-orange-500/10 rounded-lg">
-                <XCircle className="h-4 w-4 text-orange-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{overview.cancellationRate}%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {overview.cancelledBookings} avbokade, {overview.noShowBookings} no-show
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* At-Risk Bookings - Red - Expandable - INTERACTIVE */}
-          {atRiskMetrics && (
-            <ExpandableRiskZone 
-              metrics={atRiskMetrics}
-              timeRange={14}
-            />
-          )}
-        </div>
-
-        {/* Quick Action Cards - CLEARLY CLICKABLE */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Capacity Forecast - CLICKABLE */}
-          <Link href="/dashboard/capacity" className="group">
-            <Card className="cursor-pointer border-2 border-purple-200 bg-purple-50 hover:border-purple-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-semibold text-purple-900 flex items-center gap-2">
-                  Kapacitetsprognos
-                  <ArrowRight className="h-4 w-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
-                </CardTitle>
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-md">
-                  <Calendar className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-purple-700">
-                  4 veckor framåt
-                </div>
-                <p className="text-xs text-purple-600 mt-2 font-medium flex items-center gap-1">
-                  Optimera lediga slots
-                  <ExternalLink className="h-3 w-3" />
+                <p className="text-2xl font-bold text-stone-900 dark:text-stone-100">
+                  {kpi.value}
                 </p>
+                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{kpi.sub}</p>
               </CardContent>
             </Card>
-          </Link>
-
-          {/* Retention Autopilot - CLICKABLE */}
-          <Link href="/dashboard/retention" className="group">
-            <Card className="cursor-pointer border-2 border-indigo-200 bg-indigo-50 hover:border-indigo-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-semibold text-indigo-900 flex items-center gap-2">
-                  Retention Autopilot
-                  <ArrowRight className="h-4 w-4 text-indigo-600 group-hover:translate-x-1 transition-transform" />
-                </CardTitle>
-                <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg shadow-md">
-                  <Users className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-indigo-700">
-                  Identifiera at-risk
-                </div>
-                <p className="text-xs text-indigo-600 mt-2 font-medium flex items-center gap-1">
-                  Rädda kunder innan de churnar
-                  <ExternalLink className="h-3 w-3" />
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* Marketing Intelligence - CLICKABLE */}
-          <Link href="/dashboard/marketing" className="group">
-            <Card className="cursor-pointer border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 hover:border-cyan-400 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-semibold text-cyan-900 flex items-center gap-2">
-                  Marketing Intelligence
-                  <ArrowRight className="h-4 w-4 text-cyan-600 group-hover:translate-x-1 transition-transform" />
-                </CardTitle>
-                <div className="p-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg shadow-md">
-                  <TrendingUp className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-cyan-700">
-                  Meta Ads-optimering
-                </div>
-                <p className="text-xs text-cyan-600 mt-2 font-medium flex items-center gap-1">
-                  ROAS, CPL, Budget AI
-                  <ExternalLink className="h-3 w-3" />
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
+          ))}
         </div>
+      </section>
 
-        {/* Two Column Layout - Colorful Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top Services */}
-          <Card className="border-purple-200 bg-gradient-to-br from-purple-50/50 to-white">
-            <CardHeader className="border-b bg-gradient-to-r from-purple-100/50 to-pink-100/50">
-              <CardTitle className="flex items-center gap-2 text-purple-900">
-                <Sparkles className="h-5 w-5 text-purple-600" />
-                Populäraste Tjänster
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-3">
-                {topServices.map((service, index) => {
-                  const colors = [
-                    'from-purple-500 to-pink-500',
-                    'from-blue-500 to-cyan-500',
-                    'from-green-500 to-emerald-500',
-                    'from-orange-500 to-red-500',
-                    'from-indigo-500 to-purple-500'
-                  ];
-                  return (
-                    <div key={service.serviceId} className="flex items-center justify-between p-3 rounded-lg bg-white border border-purple-100 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br ${colors[index % colors.length]} text-white font-bold text-sm shadow-md`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{service.name}</p>
-                          <p className="text-xs text-purple-600 font-medium">{service.category}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-purple-700">{service._count.id} <span className="text-xs font-normal">bok</span></p>
-                        <p className="text-sm font-semibold text-green-600">
-                          {(service._sum.price || 0).toLocaleString('sv-SE')} kr
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-                {topServices.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    Ingen tjänstedata tillgänglig
+      {/* 2. Veckovy */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-stone-500" />
+          Veckovy
+        </h2>
+        <Card className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-5 gap-3">
+              {WEEK_DATA.map((day) => (
+                <div
+                  key={day.short}
+                  className={`rounded-xl p-3 transition-colors ${
+                    day.isToday
+                      ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900'
+                      : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700'
+                  }`}
+                >
+                  <p
+                    className={`text-xs font-medium mb-1 ${
+                      day.isToday
+                        ? 'text-stone-300 dark:text-stone-600'
+                        : 'text-stone-500 dark:text-stone-400'
+                    }`}
+                  >
+                    {day.short}
+                    {day.isToday && (
+                      <span className="ml-1 text-stone-400 dark:text-stone-500 text-[10px]">
+                        ● idag
+                      </span>
+                    )}
                   </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Staff Performance */}
-          <Card className="border-blue-200 bg-gradient-to-br from-blue-50/50 to-white">
-            <CardHeader className="border-b bg-gradient-to-r from-blue-100/50 to-indigo-100/50">
-              <CardTitle className="flex items-center gap-2 text-blue-900">
-                <Users className="h-5 w-5 text-blue-600" />
-                Personalprestanda
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-3">
-                {staffPerformance.map((staff, index) => {
-                  const colors = [
-                    'from-blue-500 to-indigo-500',
-                    'from-cyan-500 to-blue-500',
-                    'from-teal-500 to-cyan-500',
-                    'from-indigo-500 to-blue-500',
-                    'from-sky-500 to-blue-500'
-                  ];
-                  return (
-                    <div key={staff.staffId} className="flex items-center justify-between p-3 rounded-lg bg-white border border-blue-100 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br ${colors[index % colors.length]} text-white font-bold text-sm shadow-md`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{staff.name}</p>
-                          <p className="text-xs text-blue-600 font-medium">{staff.role}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-blue-700">{staff._count.id} <span className="text-xs font-normal">bok</span></p>
-                        <p className="text-sm font-semibold text-green-600">
-                          {(staff._sum.price || 0).toLocaleString('sv-SE')} kr
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-                {staffPerformance.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    Ingen personaldata tillgänglig
+                  <p
+                    className={`text-xl font-bold ${
+                      day.isToday
+                        ? 'text-white dark:text-stone-900'
+                        : capacityTextColor(day.pct)
+                    }`}
+                  >
+                    {day.pct}%
                   </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* META Ads Intelligence - PROACTIVE ALERTS */}
-        <MetaAlerts />
-
-        {/* Enhanced Analytics Charts with Toggle */}
-        {analytics && (
-          <>
-            <EnhancedRevenueChart data={analytics.revenueTrend} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <WeekdayChart data={analytics.weekdayDistribution} />
-              <BookingPatternChart data={analytics.bookingPattern} />
-            </div>
-          </>
-        )}
-
-        {/* Flow Insights Section */}
-        <InsightsSection days={getDaysFromTimePeriod(timePeriod)} />
-
-        {/* Quick Links to Advanced Analytics */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Avancerad Analys & Verktyg</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Datadrivna insikter för att optimera din klinik och öka intäkterna
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link
-                href="/dashboard/risk-alerts"
-                className="p-6 border-2 border-destructive/30 bg-destructive/5 rounded-lg hover:border-destructive hover:bg-destructive/10 transition-all"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                  <h3 className="font-semibold">No-Show Riskanalys</h3>
+                  <p
+                    className={`text-xs mt-0.5 mb-2 ${
+                      day.isToday
+                        ? 'text-stone-300 dark:text-stone-500'
+                        : 'text-stone-400 dark:text-stone-500'
+                    }`}
+                  >
+                    {day.booked}/{day.total} bokade
+                  </p>
+                  {/* Capacity bar */}
+                  <div
+                    className={`w-full h-1.5 rounded-full ${
+                      day.isToday
+                        ? 'bg-stone-700 dark:bg-stone-300'
+                        : 'bg-stone-200 dark:bg-stone-600'
+                    } overflow-hidden`}
+                  >
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        day.isToday
+                          ? 'bg-white dark:bg-stone-900'
+                          : capacityColor(day.pct)
+                      }`}
+                      style={{ width: `${day.pct}%` }}
+                    />
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Förutsägelse av uteblivna besök med åtgärdsrekommendationer för att skydda intäkter
-                </p>
-              </Link>
-
-              <Link
-                href="/analytics/customers"
-                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
-              >
-                <h3 className="font-semibold mb-2">Kundanalys</h3>
-                <p className="text-sm text-muted-foreground">
-                  Livstidsvärde, churn-rate, segmentering och retentionsinsikter
-                </p>
-              </Link>
-              
-              <Link
-                href="/analytics/services"
-                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
-              >
-                <h3 className="font-semibold mb-2">Tjänsteanalys</h3>
-                <p className="text-sm text-muted-foreground">
-                  Prestationsmätningar, kapacitetsutnyttjande och optimeringsrekommendationer
-                </p>
-              </Link>
-              
-              <Link
-                href="/analytics/forecast"
-                className="p-6 border rounded-lg hover:border-primary hover:bg-accent transition-all"
-              >
-                <h3 className="font-semibold mb-2">Intäktsprognos</h3>
-                <p className="text-sm text-muted-foreground">
-                  Datadrivna förutsägelser för framtida intäkter och bokningstrender
-                </p>
-              </Link>
+              ))}
             </div>
           </CardContent>
         </Card>
+      </section>
 
-
+      {/* 3. Personal idag */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <Users className="h-5 w-5 text-stone-500" />
+          Personal idag
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {STAFF.map((s) => (
+            <Card
+              key={s.name}
+              className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm"
+            >
+              <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                <StaffAvatar initials={s.avatar} checkedIn={s.checked_in} />
+                <div>
+                  <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm leading-tight">
+                    {s.name}
+                  </p>
+                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{s.role}</p>
+                </div>
+                <Badge
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    s.checked_in
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                      : 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'
+                  }`}
+                >
+                  {s.checked_in ? 'Incheckad' : 'Ej incheckad'}
+                </Badge>
+                {s.next_booking && (
+                  <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    Nästa: {s.next_booking}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      </section>
+
+      {/* 4. Varningar */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-stone-500" />
+          Varningar
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {ALERTS.map((alert) => (
+            <div
+              key={alert.title}
+              className={`rounded-xl border p-4 flex gap-3 items-start ${alertStyles(alert.type)}`}
+            >
+              <span className={`mt-0.5 flex-shrink-0 ${alertIconColor(alert.type)}`}>
+                {alert.icon}
+              </span>
+              <div>
+                <p className="font-semibold text-sm text-stone-900 dark:text-stone-100">
+                  {alert.title}
+                </p>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-relaxed">
+                  {alert.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. Snabblänkar */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <Zap className="h-5 w-5 text-stone-500" />
+          Snabblänkar
+        </h2>
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            {
+              label: 'Veckoschema',
+              icon: <Calendar className="h-7 w-7" />,
+              href: '/dashboard/staff',
+              color: 'bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-950/60 text-blue-700 dark:text-blue-300',
+            },
+            {
+              label: 'Stämpla in/ut',
+              icon: <LogIn className="h-7 w-7" />,
+              href: '/kiosk',
+              color: 'bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300',
+            },
+            {
+              label: 'Ny bokning',
+              icon: <CalendarDays className="h-7 w-7" />,
+              href: '/dashboard/customers',
+              color: 'bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-950/60 text-violet-700 dark:text-violet-300',
+            },
+          ].map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className={`rounded-xl border border-stone-200 dark:border-stone-800 p-5 flex flex-col items-center justify-center gap-3 min-h-[100px] font-medium transition-colors cursor-pointer ${link.color}`}
+            >
+              {link.icon}
+              <span className="text-sm font-semibold">{link.label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── STRATEGI VIEW ────────────────────────────────────────────────────────────
+
+function StrategiView() {
+  return (
+    <div className="space-y-6">
+      {/* Header band */}
+      <div className="flex items-center gap-3 pb-1">
+        <div className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-lg px-3 py-1 text-xs font-bold tracking-wide">
+          STRATEGI
+        </div>
+        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">
+          Analysdashboard — mars 2026
+        </h1>
       </div>
+
+      {/* 1. KPI-kort */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-stone-500" />
+          KPI-översikt
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          {STRATEGY_KPIS.map((kpi) => (
+            <Card
+              key={kpi.label}
+              className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm"
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide leading-tight">
+                    {kpi.label}
+                  </span>
+                  <span className="text-stone-400 dark:text-stone-500">{kpi.icon}</span>
+                </div>
+                <p className="text-xl font-bold text-stone-900 dark:text-stone-100">
+                  {kpi.value}
+                </p>
+                {kpi.change && (
+                  <p
+                    className={`text-xs mt-0.5 font-medium ${
+                      kpi.positive
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-red-500 dark:text-red-400'
+                    }`}
+                  >
+                    {kpi.positive ? '▲' : '▼'} {kpi.change} vs förra månaden
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* 2. Intäktsöversikt */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <BarChart2 className="h-5 w-5 text-stone-500" />
+          Intäktsöversikt
+        </h2>
+        <Card className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+          <CardContent className="p-6">
+            {/* Chart placeholder */}
+            <div className="h-56 flex flex-col items-center justify-center gap-3 text-stone-400 dark:text-stone-600 border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-xl">
+              <BarChart2 className="h-10 w-10" />
+              <p className="text-sm font-medium">Intäktsdiagram kopplas snart</p>
+              <p className="text-xs text-stone-300 dark:text-stone-600">Historisk data laddas från API</p>
+            </div>
+            {/* Summary row */}
+            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
+              {[
+                { label: 'Denna månad', value: '142 300 kr' },
+                { label: 'Förra månaden', value: '127 100 kr' },
+                { label: 'Årsbudget (kvar)', value: '1 640 000 kr' },
+              ].map((item) => (
+                <div key={item.label} className="text-center">
+                  <p className="text-xs text-stone-400 dark:text-stone-500">{item.label}</p>
+                  <p className="font-bold text-stone-900 dark:text-stone-100 mt-0.5">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* 3. AI Rekommendationer */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <Zap className="h-5 w-5 text-stone-500" />
+          AI-rekommendationer
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {AI_RECOMMENDATIONS.map((rec) => (
+            <Card
+              key={rec.title}
+              className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <CardContent className="p-4 flex flex-col gap-3 h-full">
+                <div className="flex items-center gap-2">
+                  <div className="bg-stone-100 dark:bg-stone-800 rounded-lg p-2">
+                    {rec.icon}
+                  </div>
+                  <p className="font-semibold text-sm text-stone-900 dark:text-stone-100">
+                    {rec.title}
+                  </p>
+                </div>
+                <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed flex-1">
+                  {rec.body}
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full text-xs mt-auto border-stone-200 dark:border-stone-700 min-h-[44px]"
+                >
+                  {rec.cta}
+                  <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. Personalprestation */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <Users className="h-5 w-5 text-stone-500" />
+          Personalprestation
+        </h2>
+        <Card className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-stone-100 dark:border-stone-800">
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                      Personal
+                    </th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                      Roll
+                    </th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                      Intäkt (mars)
+                    </th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                      Bokningar
+                    </th>
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                      Genomförd %
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {STAFF_PERFORMANCE.map((s, i) => (
+                    <tr
+                      key={s.name}
+                      className="border-b border-stone-50 dark:border-stone-800/50 last:border-0 hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors"
+                    >
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-stone-200 dark:bg-stone-700 flex items-center justify-center text-xs font-semibold text-stone-600 dark:text-stone-300">
+                            {i + 1}
+                          </div>
+                          <span className="font-medium text-stone-900 dark:text-stone-100">
+                            {s.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-stone-500 dark:text-stone-400 text-xs">
+                        {s.role}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-semibold text-stone-900 dark:text-stone-100">
+                        {s.revenue}
+                      </td>
+                      <td className="px-4 py-3.5 text-right text-stone-600 dark:text-stone-300">
+                        {s.bookings}
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <span
+                          className={`font-medium ${
+                            s.completion >= 93
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : s.completion >= 88
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : 'text-red-500 dark:text-red-400'
+                          }`}
+                        >
+                          {s.completion}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* 5. Avancerade verktyg */}
+      <section>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+          <Target className="h-5 w-5 text-stone-500" />
+          Avancerade verktyg
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {ADVANCED_TOOLS.map((tool) => (
+            <a
+              key={tool.label}
+              href={tool.href}
+              className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm hover:shadow-md hover:border-stone-300 dark:hover:border-stone-700 transition-all p-5 flex flex-col items-center justify-center gap-3 min-h-[100px] cursor-pointer group"
+            >
+              <span className="text-stone-500 dark:text-stone-400 group-hover:text-stone-800 dark:group-hover:text-stone-200 transition-colors">
+                {tool.icon}
+              </span>
+              <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors">
+                {tool.label}
+              </span>
+              <ChevronRight className="h-4 w-4 text-stone-300 dark:text-stone-600 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

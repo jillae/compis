@@ -133,6 +133,12 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               Personal
             </h3>
+            <Link href="/dashboard/staff" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <Users className="h-4 w-4 mr-2" />
+                Personalöversikt
+              </Button>
+            </Link>
             <Link href="/dashboard/staff/schedule" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full justify-start">
                 <CalendarDays className="h-4 w-4 mr-2" />
