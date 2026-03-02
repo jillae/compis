@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor, Gift, CalendarDays, Clock, CalendarRange } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor, Gift, CalendarDays, Clock, CalendarRange, BarChart3, Target, Zap, Activity, ShieldAlert, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -36,6 +36,21 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
     }
   };
 
+  const NavLink = ({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) => (
+    <Link href={href} onClick={() => setOpen(false)}>
+      <Button variant="ghost" className="w-full justify-start min-h-[44px]">
+        <Icon className="h-4 w-4 mr-2 shrink-0" />
+        {children}
+      </Button>
+    </Link>
+  );
+
+  const SectionHeader = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
+      {children}
+    </h3>
+  );
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -43,7 +58,7 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Meny</SheetTitle>
           <SheetDescription>
@@ -51,187 +66,145 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
           </SheetDescription>
         </SheetHeader>
         
-        <div className="mt-6 space-y-4">
-          {/* AI Actions */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              AI Autopilot
-            </h3>
-            <Link href="/dashboard/actions" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Corex Rekommendationer
-              </Button>
-            </Link>
+        <div className="mt-6 space-y-5">
+
+          {/* ─── Drift (Operations) ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Drift</SectionHeader>
+            <NavLink href="/dashboard/capacity" icon={Gauge}>
+              Kapacitetsprognos
+            </NavLink>
+            <NavLink href="/dashboard/staff" icon={Users}>
+              Personalöversikt
+            </NavLink>
+            <NavLink href="/dashboard/staff/schedule" icon={CalendarDays}>
+              Veckoschema
+            </NavLink>
+            <NavLink href="/dashboard/staff/timesheet" icon={Clock}>
+              Tidrapporter & Stämpling
+            </NavLink>
+            <NavLink href="/dashboard/staff/leave" icon={CalendarRange}>
+              Semester & Frånvaro
+            </NavLink>
           </div>
 
-          {/* Revenue Intelligence */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Revenue Intelligence
-            </h3>
-            <Link href="/dashboard/analytics" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Business Metrics
-              </Button>
-            </Link>
-            <Link href="/dashboard/cash-flow" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <ArrowRightLeft className="h-4 w-4 mr-2" />
-                Kassaflödesanalys
-              </Button>
-            </Link>
-            <Link href="/dashboard/liquidity-forecast" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Likviditetsplanering
-              </Button>
-            </Link>
+          {/* ─── Kunder ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Kunder</SectionHeader>
+            <NavLink href="/dashboard/customers" icon={UsersRound}>
+              Kundöversikt
+            </NavLink>
+            <NavLink href="/dashboard/at-risk" icon={ShieldAlert}>
+              Customer Health
+            </NavLink>
+            <NavLink href="/dashboard/tags" icon={Tag}>
+              Tag Manager
+            </NavLink>
+            <NavLink href="/dashboard/segments" icon={Target}>
+              Kundsegment
+            </NavLink>
           </div>
 
-          {/* Data Management */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Data
-            </h3>
-            <Link href="/dashboard/import" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Upload className="h-4 w-4 mr-2" />
-                Importera CSV
-              </Button>
-            </Link>
+          {/* ─── Marknadsföring ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Marknadsföring</SectionHeader>
+            <NavLink href="/dashboard/marketing-triggers" icon={Zap}>
+              Marketing Triggers
+            </NavLink>
+            <NavLink href="/dashboard/newsletters" icon={MessageSquare}>
+              Nyhetsbrev
+            </NavLink>
+            <NavLink href="/dashboard/competitors" icon={Activity}>
+              Konkurrensanalys
+            </NavLink>
           </div>
 
-          {/* Customer Intelligence */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Kundinsikter
-            </h3>
-            <Link href="/dashboard/tags" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Tag className="h-4 w-4 mr-2" />
-                Tag Manager
-              </Button>
-            </Link>
-            <Link href="/dashboard/segments" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <UsersRound className="h-4 w-4 mr-2" />
-                Kundsegment
-              </Button>
-            </Link>
-            <Link href="/dashboard/newsletters" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Nyhetsbrev
-              </Button>
-            </Link>
+          {/* ─── Ekonomi ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Ekonomi & Analys</SectionHeader>
+            <NavLink href="/dashboard/analytics" icon={BarChart3}>
+              Business Metrics
+            </NavLink>
+            <NavLink href="/dashboard/cash-flow" icon={ArrowRightLeft}>
+              Kassaflödesanalys
+            </NavLink>
+            <NavLink href="/dashboard/liquidity-forecast" icon={TrendingUp}>
+              Likviditetsplanering
+            </NavLink>
           </div>
 
-          {/* Staff Management */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Personal
-            </h3>
-            <Link href="/dashboard/staff" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Users className="h-4 w-4 mr-2" />
-                Personalöversikt
-              </Button>
-            </Link>
-            <Link href="/dashboard/staff/schedule" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Veckoschema
-              </Button>
-            </Link>
-            <Link href="/dashboard/staff/timesheet" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Clock className="h-4 w-4 mr-2" />
-                Tidrapporter & Stämpling
-              </Button>
-            </Link>
-            <Link href="/dashboard/staff/leave" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <CalendarRange className="h-4 w-4 mr-2" />
-                Semester & Frånvaro
-              </Button>
-            </Link>
+          {/* ─── AI ─── */}
+          <div className="space-y-1">
+            <SectionHeader>AI Autopilot</SectionHeader>
+            <NavLink href="/dashboard/actions" icon={Sparkles}>
+              Corex Rekommendationer
+            </NavLink>
+            <NavLink href="/dashboard/insights" icon={TrendingUp}>
+              AI Insikter
+            </NavLink>
           </div>
 
-          {/* Reports */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Rapporter
-            </h3>
+          {/* ─── Data & Import ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Data</SectionHeader>
+            <NavLink href="/dashboard/import" icon={Upload}>
+              Importera CSV
+            </NavLink>
             <Button 
               variant="ghost" 
-              className="w-full justify-start"
+              className="w-full justify-start min-h-[44px]"
               onClick={handleSendWeeklyReport}
             >
-              <Mail className="h-4 w-4 mr-2" />
+              <Mail className="h-4 w-4 mr-2 shrink-0" />
               Skicka veckorapport
             </Button>
           </div>
 
-          {/* Settings */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Inställningar
-            </h3>
-            <Link href="/dashboard/settings" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Settings className="h-4 w-4 mr-2" />
-                Funktioner & Integrationer
-              </Button>
-            </Link>
-            <Link href="/dashboard/settings/display" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Monitor className="h-4 w-4 mr-2" />
-                Visningsinställningar
-              </Button>
-            </Link>
-            <Link href="/dashboard/billing" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Prenumeration & Fakturering
-              </Button>
-            </Link>
-            <Link href="/dashboard/referrals" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Gift className="h-4 w-4 mr-2" />
-                Hänvisa & Tjäna
-              </Button>
-            </Link>
-            <Link href="/settings/bank" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Building className="h-4 w-4 mr-2" />
-                Bank-integration
-              </Button>
-            </Link>
+          {/* ─── Inställningar ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Inställningar</SectionHeader>
+            <NavLink href="/dashboard/settings" icon={Settings}>
+              Funktioner & Integrationer
+            </NavLink>
+            <NavLink href="/dashboard/settings/display" icon={Monitor}>
+              Visningsinställningar
+            </NavLink>
+            <NavLink href="/dashboard/billing" icon={CreditCard}>
+              Prenumeration & Fakturering
+            </NavLink>
+            <NavLink href="/dashboard/referrals" icon={Gift}>
+              Hänvisa & Tjäna
+            </NavLink>
+            <NavLink href="/settings/bank" icon={Building}>
+              Bank-integration
+            </NavLink>
           </div>
 
           {/* LABS Features (only for SUPER_ADMIN) */}
           {userRole === UserRole.SUPER_ADMIN && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-yellow-600 uppercase tracking-wide">
-                🧪 LABS - Arch Clinic
+            <div className="space-y-1">
+              <h3 className="text-xs font-semibold text-yellow-600 uppercase tracking-widest px-1">
+                🧪 LABS
               </h3>
-              <Link href="/revenue-pro" onClick={() => setOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Revenue Intelligence Pro
-                </Button>
-              </Link>
+              <NavLink href="/revenue-pro" icon={DollarSign}>
+                Revenue Intelligence Pro
+              </NavLink>
+              <NavLink href="/dashboard/simulator" icon={Activity}>
+                Revenue Simulator
+              </NavLink>
+              <NavLink href="/dashboard/ab-testing" icon={Target}>
+                A/B Testing
+              </NavLink>
+              <NavLink href="/dashboard/marketplace" icon={ExternalLink}>
+                Marketplace
+              </NavLink>
             </div>
           )}
 
           {/* Role Toggle for Super Admin */}
           {userRole === UserRole.SUPER_ADMIN && simulatedRole && onRoleChange && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Admin
-              </h3>
+            <div className="space-y-1">
+              <SectionHeader>Admin</SectionHeader>
               <div className="px-3">
                 <RoleToggle currentRole={simulatedRole} onRoleChange={onRoleChange} />
               </div>
@@ -242,7 +215,7 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
           <div className="pt-4 border-t">
             <Button 
               variant="destructive" 
-              className="w-full"
+              className="w-full min-h-[44px]"
               onClick={() => signOut({ callbackUrl: '/auth/login' })}
             >
               <LogOut className="h-4 w-4 mr-2" />
