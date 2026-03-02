@@ -754,8 +754,14 @@ function DriftView({ data, onRefresh }: { data: DashboardData; onRefresh: () => 
           <Zap className="h-5 w-5 text-stone-500" />
           Snabblänkar
         </h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
+            {
+              label: 'Dagens Schema',
+              icon: <CalendarDays className="h-7 w-7" />,
+              href: '/dashboard/schedule',
+              color: 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 border-2 border-stone-300 dark:border-stone-600',
+            },
             {
               label: 'Veckoschema',
               icon: <Calendar className="h-7 w-7" />,
