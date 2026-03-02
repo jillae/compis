@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor, Gift } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor, Gift, CalendarDays, Clock, CalendarRange } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -133,16 +133,22 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               Personal
             </h3>
-            <Link href="/staff" onClick={() => setOpen(false)}>
+            <Link href="/dashboard/staff/schedule" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full justify-start">
-                <Users className="h-4 w-4 mr-2" />
-                Personalöversikt
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Veckoschema
               </Button>
             </Link>
-            <Link href="/staff/leave" onClick={() => setOpen(false)}>
+            <Link href="/dashboard/staff/timesheet" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full justify-start">
-                <UserCog className="h-4 w-4 mr-2" />
-                Ledighetshantering
+                <Clock className="h-4 w-4 mr-2" />
+                Tidrapporter & Stämpling
+              </Button>
+            </Link>
+            <Link href="/dashboard/staff/leave" onClick={() => setOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start">
+                <CalendarRange className="h-4 w-4 mr-2" />
+                Semester & Frånvaro
               </Button>
             </Link>
           </div>
