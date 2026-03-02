@@ -323,6 +323,10 @@ model Clinic {
   // A/B Testing
   abTests            ABTest[]
 
+  // Bokadirekt Sync Logging (WAVE 14+)
+  bokadirektWebhookLogs BokadirektWebhookLog[]
+  integrationSyncLogs   IntegrationSyncLog[]
+
   @@index([bokadirektId])
   @@index([name])
   @@index([tier])
@@ -3602,6 +3606,50 @@ model ABTestConversion {
   @@index([userId])
   @@index([sessionId])
   @@map("ab_test_conversions")
+}
+
+// ===== BOKADIREKT WEBHOOK LOG =====
+model BokadirektWebhookLog {
+  id          String   @id @default(cuid())
+  clinicId    String?
+  eventType   String   // 'booking.created', 'booking.updated', etc.
+  payload     Json     // Full webhook payload
+  status      String   @default("received") // received, processed, failed
+  error       String?
+  receivedAt  DateTime @default(now())
+  processedAt DateTime?
+
+  clinic Clinic? @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+
+  @@index([clinicId])
+  @@index([eventType])
+  @@index([receivedAt])
+  @@map("bokadirekt_webhook_logs")
+}
+
+// ===== INTEGRATION SYNC LOG =====
+model IntegrationSyncLog {
+  id          String   @id @default(cuid())
+  clinicId    String?
+  source      String   // 'bokadirekt', 'meta', etc.
+  syncType    String   // 'full', 'incremental', 'initial'
+  entity      String   // 'bookings', 'customers', 'staff', 'services', 'sales'
+  status      String   @default("running") // running, completed, failed
+  recordsFound    Int  @default(0)
+  recordsCreated  Int  @default(0)
+  recordsUpdated  Int  @default(0)
+  recordsSkipped  Int  @default(0)
+  error       String?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  metadata    Json?    // Extra sync metadata
+
+  clinic Clinic? @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+
+  @@index([clinicId])
+  @@index([source])
+  @@index([startedAt])
+  @@map("integration_sync_logs")
 }
 
 enum ABTestStatus {
