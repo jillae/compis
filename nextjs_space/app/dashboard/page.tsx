@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, useCallback, KeyboardEvent } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Card,
@@ -42,6 +42,7 @@ import {
   CalendarDays,
   Stethoscope,
   LogIn,
+  Loader2,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -49,6 +50,7 @@ import {
 type Mode = 'drift' | 'strategi';
 
 interface StaffMember {
+  id: string;
   name: string;
   role: string;
   checked_in: boolean;
@@ -65,153 +67,77 @@ interface WeekDay {
   isToday: boolean;
 }
 
-interface Alert {
+interface DashAlert {
   type: 'warning' | 'error' | 'info';
   title: string;
   description: string;
-  icon: React.ReactNode;
 }
 
 interface KpiCard {
   label: string;
   value: string;
-  change?: string;
+  change?: string | null;
   positive?: boolean;
-  icon: React.ReactNode;
 }
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+interface StaffPerf {
+  name: string;
+  role: string;
+  revenue: string;
+  bookings: number;
+  completion: number;
+}
 
-const STAFF: StaffMember[] = [
-  {
-    name: 'Sanna Lindberg',
-    role: 'Hudterapeut',
-    checked_in: true,
-    next_booking: '10:00',
-    avatar: 'SL',
-  },
-  {
-    name: 'Sarah Andersson',
-    role: 'Massageterapeut',
-    checked_in: true,
-    next_booking: '09:30',
-    avatar: 'SA',
-  },
-  {
-    name: 'Emma Johansson',
-    role: 'Hudterapeut',
-    checked_in: false,
-    next_booking: '11:00',
-    avatar: 'EJ',
-  },
-  {
-    name: 'Lisa Bergström',
-    role: 'Nagelvård',
-    checked_in: true,
-    next_booking: '09:45',
-    avatar: 'LB',
-  },
-];
+interface TodaySnapshot {
+  total: number;
+  completed: number;
+  cancelled: number;
+  noShow: number;
+  remaining: number;
+  staffCheckedIn: number;
+  staffTotal: number;
+}
 
-const WEEK_DATA: WeekDay[] = [
-  { label: 'Måndag', short: 'Mån', booked: 20, total: 24, pct: 85, isToday: true },
-  { label: 'Tisdag', short: 'Tis', booked: 17, total: 24, pct: 72, isToday: false },
-  { label: 'Onsdag', short: 'Ons', booked: 22, total: 24, pct: 91, isToday: false },
-  { label: 'Torsdag', short: 'Tor', booked: 15, total: 23, pct: 65, isToday: false },
-  { label: 'Fredag', short: 'Fre', booked: 11, total: 23, pct: 48, isToday: false },
-];
+interface DashboardData {
+  staff: StaffMember[];
+  weekCapacity: WeekDay[];
+  todaySnapshot: TodaySnapshot;
+  kpis: KpiCard[];
+  staffPerformance: StaffPerf[];
+  alerts: DashAlert[];
+  generatedAt: string;
+}
 
-const ALERTS: Alert[] = [
-  {
-    type: 'warning',
-    title: 'Luckor imorgon',
-    description: '4 lediga tider kl. 13–16 (tisdag). Överväg SMS-utskick.',
-    icon: <Clock className="h-5 w-5" />,
-  },
-  {
-    type: 'error',
-    title: 'Sjukfrånvaro',
-    description: 'Emma Johansson har inte stämplat in. Kontakta henne.',
-    icon: <AlertTriangle className="h-5 w-5" />,
-  },
-  {
-    type: 'info',
-    title: 'Fyllnadsgrad fredag',
-    description: 'Fredag är enbart 48% belagd. Kampanj rekommenderas.',
-    icon: <BarChart2 className="h-5 w-5" />,
-  },
-];
-
-const STRATEGY_KPIS: KpiCard[] = [
-  {
-    label: 'Intäkter (mars)',
-    value: '142 300 kr',
-    change: '+12%',
-    positive: true,
-    icon: <Banknote className="h-5 w-5" />,
-  },
-  {
-    label: 'Bokningar',
-    value: '318',
-    change: '+8%',
-    positive: true,
-    icon: <CalendarDays className="h-5 w-5" />,
-  },
-  {
-    label: 'Genomförandgrad',
-    value: '91,4%',
-    change: '+2%',
-    positive: true,
-    icon: <CheckCircle className="h-5 w-5" />,
-  },
-  {
-    label: 'Nya kunder',
-    value: '43',
-    change: '-3',
-    positive: false,
-    icon: <Users className="h-5 w-5" />,
-  },
-  {
-    label: 'Snittintäkt/bokning',
-    value: '447 kr',
-    change: '+4%',
-    positive: true,
-    icon: <TrendingUp className="h-5 w-5" />,
-  },
-];
+// ─── Static AI recommendations (these stay static — they'll come from Corex later) ─
 
 const AI_RECOMMENDATIONS = [
   {
     icon: <Megaphone className="h-5 w-5 text-blue-500" />,
-    title: 'Fyll fredagsluckor',
-    body: 'Fredag har 48% beläggning. Skicka ett SMS-erbjudande till 25 inaktiva kunder om 15% rabatt.',
+    title: 'Fyll lediga tider',
+    body: 'Det finns dagar med låg beläggning denna vecka. Skicka ett SMS-erbjudande till inaktiva kunder.',
     cta: 'Skapa kampanj',
+    href: '/dashboard/marketing-triggers',
   },
   {
     icon: <Star className="h-5 w-5 text-amber-500" />,
-    title: 'Säsongspush – mars ansiktsbehandling',
-    body: 'Historiskt säljer ansiktsbehandlingar 34% bättre i mars. Lyft i bokningsmotorn nu.',
-    cta: 'Aktivera',
+    title: 'Säsongspush',
+    body: 'Analysera vilka behandlingar som säljer bäst just nu och lyft dem i bokningsmotorn.',
+    cta: 'Visa analys',
+    href: '/dashboard/analytics',
   },
   {
     icon: <Target className="h-5 w-5 text-emerald-500" />,
-    title: 'Återaktivera 12 sovande kunder',
-    body: '12 kunder har inte bokat på 60+ dagar. Automatiserad återaktiveringskampanj rekommenderas.',
+    title: 'Återaktivera sovande kunder',
+    body: 'Kunder som inte bokat på 60+ dagar kan nås med automatiserade återaktiveringskampanjer.',
     cta: 'Starta flöde',
+    href: '/dashboard/marketing-triggers/create',
   },
-];
-
-const STAFF_PERFORMANCE = [
-  { name: 'Sanna Lindberg', role: 'Hudterapeut', revenue: '38 400 kr', bookings: 86, completion: 94 },
-  { name: 'Sarah Andersson', role: 'Massageterapeut', revenue: '32 100 kr', bookings: 72, completion: 91 },
-  { name: 'Lisa Bergström', role: 'Nagelvård', revenue: '29 800 kr', bookings: 91, completion: 97 },
-  { name: 'Emma Johansson', role: 'Hudterapeut', revenue: '24 600 kr', bookings: 68, completion: 88 },
 ];
 
 const ADVANCED_TOOLS = [
   { label: 'Simulator', icon: <Activity className="h-5 w-5" />, href: '/dashboard/simulator' },
-  { label: 'Marknadsföring', icon: <Megaphone className="h-5 w-5" />, href: '/dashboard/marketing' },
-  { label: 'Riskvarningar', icon: <Shield className="h-5 w-5" />, href: '/dashboard/risk-alerts' },
+  { label: 'Marknadsföring', icon: <Megaphone className="h-5 w-5" />, href: '/dashboard/marketing-triggers' },
+  { label: 'Riskvarningar', icon: <Shield className="h-5 w-5" />, href: '/dashboard/at-risk' },
   { label: 'Segment', icon: <PieChart className="h-5 w-5" />, href: '/dashboard/segments' },
 ];
 
@@ -229,16 +155,31 @@ function capacityTextColor(pct: number): string {
   return 'text-red-600 dark:text-red-400';
 }
 
-function alertStyles(type: Alert['type']): string {
+function alertStyles(type: string): string {
   if (type === 'error') return 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/40';
   if (type === 'warning') return 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40';
   return 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/40';
 }
 
-function alertIconColor(type: Alert['type']): string {
+function alertIconColor(type: string): string {
   if (type === 'error') return 'text-red-500';
   if (type === 'warning') return 'text-amber-500';
   return 'text-blue-500';
+}
+
+function alertIcon(type: string) {
+  if (type === 'error') return <AlertTriangle className="h-5 w-5" />;
+  if (type === 'warning') return <Clock className="h-5 w-5" />;
+  return <BarChart2 className="h-5 w-5" />;
+}
+
+function kpiIcon(label: string) {
+  if (label.includes('Intäkt')) return <Banknote className="h-5 w-5 text-emerald-500" />;
+  if (label.includes('Bokn')) return <CalendarDays className="h-5 w-5 text-blue-500" />;
+  if (label.includes('Genomför')) return <CheckCircle className="h-5 w-5 text-emerald-500" />;
+  if (label.includes('Nya')) return <Users className="h-5 w-5 text-violet-500" />;
+  if (label.includes('Snitt')) return <TrendingUp className="h-5 w-5 text-amber-500" />;
+  return <Activity className="h-5 w-5 text-stone-500" />;
 }
 
 // ─── PIN Modal ────────────────────────────────────────────────────────────────
@@ -371,19 +312,6 @@ function PinModal({ open, onClose, onSuccess }: PinModalProps) {
   );
 }
 
-// ─── Capacity Bar ─────────────────────────────────────────────────────────────
-
-function CapacityBar({ pct }: { pct: number }) {
-  return (
-    <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
-      <div
-        className={`h-full rounded-full transition-all duration-500 ${capacityColor(pct)}`}
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-}
-
 // ─── Staff Avatar ─────────────────────────────────────────────────────────────
 
 function StaffAvatar({ initials, checkedIn }: { initials: string; checkedIn: boolean }) {
@@ -401,6 +329,27 @@ function StaffAvatar({ initials, checkedIn }: { initials: string; checkedIn: boo
   );
 }
 
+// ─── Loading Skeleton ─────────────────────────────────────────────────────────
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-8 bg-stone-200 dark:bg-stone-800 rounded w-64" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-24 bg-stone-200 dark:bg-stone-800 rounded-xl" />
+        ))}
+      </div>
+      <div className="h-40 bg-stone-200 dark:bg-stone-800 rounded-xl" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-32 bg-stone-200 dark:bg-stone-800 rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -408,6 +357,33 @@ export default function DashboardPage() {
   const [mode, setMode] = useState<Mode>('drift');
   const [showPin, setShowPin] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [dashData, setDashData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch dashboard data
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch('/api/dashboard/overview');
+      if (!res.ok) throw new Error('Kunde inte ladda dashboard');
+      const json = await res.json();
+      if (json.success) {
+        setDashData(json);
+      } else {
+        throw new Error(json.error || 'API-fel');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // On mount: check sessionStorage + system dark preference
   useEffect(() => {
@@ -512,7 +488,21 @@ export default function DashboardPage() {
 
       {/* ── CONTENT ────────────────────────────────────────────────────────── */}
       <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {mode === 'drift' ? <DriftView /> : <StrategiView />}
+        {loading ? (
+          <DashboardSkeleton />
+        ) : error ? (
+          <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-2xl p-6 text-center">
+            <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+            <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
+            <Button variant="outline" size="sm" className="mt-3" onClick={fetchData}>
+              Försök igen
+            </Button>
+          </div>
+        ) : mode === 'drift' ? (
+          <DriftView data={dashData!} onRefresh={fetchData} />
+        ) : (
+          <StrategiView data={dashData!} />
+        )}
       </main>
 
       <style>{`
@@ -532,17 +522,27 @@ export default function DashboardPage() {
 
 // ─── DRIFT VIEW ───────────────────────────────────────────────────────────────
 
-function DriftView() {
+function DriftView({ data, onRefresh }: { data: DashboardData; onRefresh: () => void }) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('sv-SE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const todayLabel = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+  const snap = data.todaySnapshot;
+  const occupancyPct = snap.total > 0 ? Math.round(((snap.total - snap.cancelled) / Math.max(snap.total, data.weekCapacity.find(d => d.isToday)?.total || snap.total)) * 100) : 0;
+
   return (
     <div className="space-y-6">
       {/* 1. Dagens sammanfattning */}
       <section>
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-            Måndag 2 mars 2026
+            {todayLabel}
           </h1>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-            Arch Clinic — Drift-läge
+            Drift-läge
+            <span className="text-[10px] text-stone-400 dark:text-stone-600 ml-2">
+              Uppdaterad {new Date(data.generatedAt).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}
+            </span>
           </p>
         </div>
 
@@ -550,27 +550,29 @@ function DriftView() {
           {[
             {
               label: 'Bokningar idag',
-              value: '18 / 24',
+              value: `${snap.total - snap.cancelled} / ${data.weekCapacity.find(d => d.isToday)?.total || snap.total}`,
               icon: <CalendarDays className="h-5 w-5 text-blue-500" />,
-              sub: '6 lediga tider',
+              sub: `${snap.remaining} kvar, ${snap.completed} klara`,
             },
             {
               label: 'Beläggning',
-              value: '75%',
+              value: `${data.weekCapacity.find(d => d.isToday)?.pct || occupancyPct}%`,
               icon: <Activity className="h-5 w-5 text-amber-500" />,
               sub: 'Mål: 85%',
             },
             {
-              label: 'Intäkt idag',
-              value: '14 800 kr',
-              icon: <Banknote className="h-5 w-5 text-emerald-500" />,
-              sub: 'Prognos: 18 200 kr',
+              label: 'No-shows idag',
+              value: snap.noShow.toString(),
+              icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
+              sub: snap.noShow === 0 ? 'Inga uteblivna' : `${snap.noShow} missade`,
             },
             {
               label: 'Personal på plats',
-              value: '3 / 4',
+              value: `${snap.staffCheckedIn} / ${snap.staffTotal}`,
               icon: <UserCheck className="h-5 w-5 text-violet-500" />,
-              sub: '1 ej incheckad',
+              sub: snap.staffCheckedIn < snap.staffTotal
+                ? `${snap.staffTotal - snap.staffCheckedIn} ej incheckad`
+                : 'Alla incheckade',
             },
           ].map((kpi) => (
             <Card
@@ -603,7 +605,7 @@ function DriftView() {
         <Card className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
           <CardContent className="p-4">
             <div className="grid grid-cols-5 gap-3">
-              {WEEK_DATA.map((day) => (
+              {data.weekCapacity.map((day) => (
                 <div
                   key={day.short}
                   className={`rounded-xl p-3 transition-colors ${
@@ -644,7 +646,6 @@ function DriftView() {
                   >
                     {day.booked}/{day.total} bokade
                   </p>
-                  {/* Capacity bar */}
                   <div
                     className={`w-full h-1.5 rounded-full ${
                       day.isToday
@@ -674,68 +675,78 @@ function DriftView() {
           <Users className="h-5 w-5 text-stone-500" />
           Personal idag
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {STAFF.map((s) => (
-            <Card
-              key={s.name}
-              className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm"
-            >
-              <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                <StaffAvatar initials={s.avatar} checkedIn={s.checked_in} />
-                <div>
-                  <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm leading-tight">
-                    {s.name}
-                  </p>
-                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{s.role}</p>
-                </div>
-                <Badge
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    s.checked_in
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
-                      : 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'
-                  }`}
-                >
-                  {s.checked_in ? 'Incheckad' : 'Ej incheckad'}
-                </Badge>
-                {s.next_booking && (
-                  <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    Nästa: {s.next_booking}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {data.staff.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {data.staff.map((s) => (
+              <Card
+                key={s.id}
+                className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm"
+              >
+                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                  <StaffAvatar initials={s.avatar} checkedIn={s.checked_in} />
+                  <div>
+                    <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm leading-tight">
+                      {s.name}
+                    </p>
+                    <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{s.role}</p>
+                  </div>
+                  <Badge
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      s.checked_in
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                        : 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'
+                    }`}
+                  >
+                    {s.checked_in ? 'Incheckad' : 'Ej incheckad'}
+                  </Badge>
+                  {s.next_booking && (
+                    <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Nästa: {s.next_booking}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+            <CardContent className="p-6 text-center text-stone-400 dark:text-stone-500 text-sm">
+              Ingen personal registrerad ännu
+            </CardContent>
+          </Card>
+        )}
       </section>
 
       {/* 4. Varningar */}
-      <section>
-        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-stone-500" />
-          Varningar
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {ALERTS.map((alert) => (
-            <div
-              key={alert.title}
-              className={`rounded-xl border p-4 flex gap-3 items-start ${alertStyles(alert.type)}`}
-            >
-              <span className={`mt-0.5 flex-shrink-0 ${alertIconColor(alert.type)}`}>
-                {alert.icon}
-              </span>
-              <div>
-                <p className="font-semibold text-sm text-stone-900 dark:text-stone-100">
-                  {alert.title}
-                </p>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-relaxed">
-                  {alert.description}
-                </p>
+      {data.alerts.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-stone-500" />
+            Varningar
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {data.alerts.map((a, i) => (
+              <div
+                key={i}
+                className={`rounded-xl border p-4 flex gap-3 items-start ${alertStyles(a.type)}`}
+              >
+                <span className={`mt-0.5 flex-shrink-0 ${alertIconColor(a.type)}`}>
+                  {alertIcon(a.type)}
+                </span>
+                <div>
+                  <p className="font-semibold text-sm text-stone-900 dark:text-stone-100">
+                    {a.title}
+                  </p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-relaxed">
+                    {a.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 5. Snabblänkar */}
       <section>
@@ -748,19 +759,19 @@ function DriftView() {
             {
               label: 'Veckoschema',
               icon: <Calendar className="h-7 w-7" />,
-              href: '/dashboard/staff',
+              href: '/dashboard/staff/schedule',
               color: 'bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-950/60 text-blue-700 dark:text-blue-300',
             },
             {
               label: 'Stämpla in/ut',
               icon: <LogIn className="h-7 w-7" />,
-              href: '/kiosk',
+              href: '/dashboard/staff/timesheet',
               color: 'bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300',
             },
             {
-              label: 'Ny bokning',
-              icon: <CalendarDays className="h-7 w-7" />,
-              href: '/dashboard/customers',
+              label: 'Kapacitet',
+              icon: <Activity className="h-7 w-7" />,
+              href: '/dashboard/capacity',
               color: 'bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-950/60 text-violet-700 dark:text-violet-300',
             },
           ].map((link) => (
@@ -781,7 +792,10 @@ function DriftView() {
 
 // ─── STRATEGI VIEW ────────────────────────────────────────────────────────────
 
-function StrategiView() {
+function StrategiView({ data }: { data: DashboardData }) {
+  const now = new Date();
+  const monthLabel = now.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
+
   return (
     <div className="space-y-6">
       {/* Header band */}
@@ -790,7 +804,7 @@ function StrategiView() {
           STRATEGI
         </div>
         <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">
-          Analysdashboard — mars 2026
+          Analysdashboard — {monthLabel}
         </h1>
       </div>
 
@@ -801,7 +815,7 @@ function StrategiView() {
           KPI-översikt
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          {STRATEGY_KPIS.map((kpi) => (
+          {data.kpis.map((kpi) => (
             <Card
               key={kpi.label}
               className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm"
@@ -811,7 +825,7 @@ function StrategiView() {
                   <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide leading-tight">
                     {kpi.label}
                   </span>
-                  <span className="text-stone-400 dark:text-stone-500">{kpi.icon}</span>
+                  <span className="text-stone-400 dark:text-stone-500">{kpiIcon(kpi.label)}</span>
                 </div>
                 <p className="text-xl font-bold text-stone-900 dark:text-stone-100">
                   {kpi.value}
@@ -841,19 +855,15 @@ function StrategiView() {
         </h2>
         <Card className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
           <CardContent className="p-6">
-            {/* Chart placeholder */}
+            {/* Chart placeholder — will be connected to chart library */}
             <div className="h-56 flex flex-col items-center justify-center gap-3 text-stone-400 dark:text-stone-600 border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-xl">
               <BarChart2 className="h-10 w-10" />
               <p className="text-sm font-medium">Intäktsdiagram kopplas snart</p>
-              <p className="text-xs text-stone-300 dark:text-stone-600">Historisk data laddas från API</p>
+              <p className="text-xs text-stone-300 dark:text-stone-600">Realtidsdata laddas från API</p>
             </div>
-            {/* Summary row */}
+            {/* Summary row using real KPI data */}
             <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
-              {[
-                { label: 'Denna månad', value: '142 300 kr' },
-                { label: 'Förra månaden', value: '127 100 kr' },
-                { label: 'Årsbudget (kvar)', value: '1 640 000 kr' },
-              ].map((item) => (
+              {data.kpis.filter(k => k.label.includes('Intäkt') || k.label.includes('Bokn') || k.label.includes('Snitt')).slice(0, 3).map((item) => (
                 <div key={item.label} className="text-center">
                   <p className="text-xs text-stone-400 dark:text-stone-500">{item.label}</p>
                   <p className="font-bold text-stone-900 dark:text-stone-100 mt-0.5">
@@ -890,14 +900,16 @@ function StrategiView() {
                 <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed flex-1">
                   {rec.body}
                 </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full text-xs mt-auto border-stone-200 dark:border-stone-700 min-h-[44px]"
-                >
-                  {rec.cta}
-                  <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                </Button>
+                <a href={rec.href}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full text-xs mt-auto border-stone-200 dark:border-stone-700 min-h-[44px]"
+                  >
+                    {rec.cta}
+                    <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </a>
               </CardContent>
             </Card>
           ))}
@@ -912,70 +924,76 @@ function StrategiView() {
         </h2>
         <Card className="rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-stone-100 dark:border-stone-800">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
-                      Personal
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
-                      Roll
-                    </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
-                      Intäkt (mars)
-                    </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
-                      Bokningar
-                    </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
-                      Genomförd %
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {STAFF_PERFORMANCE.map((s, i) => (
-                    <tr
-                      key={s.name}
-                      className="border-b border-stone-50 dark:border-stone-800/50 last:border-0 hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors"
-                    >
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-stone-200 dark:bg-stone-700 flex items-center justify-center text-xs font-semibold text-stone-600 dark:text-stone-300">
-                            {i + 1}
-                          </div>
-                          <span className="font-medium text-stone-900 dark:text-stone-100">
-                            {s.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-stone-500 dark:text-stone-400 text-xs">
-                        {s.role}
-                      </td>
-                      <td className="px-4 py-3.5 text-right font-semibold text-stone-900 dark:text-stone-100">
-                        {s.revenue}
-                      </td>
-                      <td className="px-4 py-3.5 text-right text-stone-600 dark:text-stone-300">
-                        {s.bookings}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <span
-                          className={`font-medium ${
-                            s.completion >= 93
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : s.completion >= 88
-                              ? 'text-amber-600 dark:text-amber-400'
-                              : 'text-red-500 dark:text-red-400'
-                          }`}
-                        >
-                          {s.completion}%
-                        </span>
-                      </td>
+            {data.staffPerformance.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-stone-100 dark:border-stone-800">
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                        Personal
+                      </th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                        Roll
+                      </th>
+                      <th className="text-right px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                        Intäkt
+                      </th>
+                      <th className="text-right px-4 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                        Bokningar
+                      </th>
+                      <th className="text-right px-5 py-3 text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+                        Genomförd %
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {data.staffPerformance.map((s, i) => (
+                      <tr
+                        key={s.name}
+                        className="border-b border-stone-50 dark:border-stone-800/50 last:border-0 hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors"
+                      >
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-full bg-stone-200 dark:bg-stone-700 flex items-center justify-center text-xs font-semibold text-stone-600 dark:text-stone-300">
+                              {i + 1}
+                            </div>
+                            <span className="font-medium text-stone-900 dark:text-stone-100">
+                              {s.name}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3.5 text-stone-500 dark:text-stone-400 text-xs">
+                          {s.role}
+                        </td>
+                        <td className="px-4 py-3.5 text-right font-semibold text-stone-900 dark:text-stone-100">
+                          {s.revenue}
+                        </td>
+                        <td className="px-4 py-3.5 text-right text-stone-600 dark:text-stone-300">
+                          {s.bookings}
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <span
+                            className={`font-medium ${
+                              s.completion >= 93
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : s.completion >= 88
+                                ? 'text-amber-600 dark:text-amber-400'
+                                : 'text-red-500 dark:text-red-400'
+                            }`}
+                          >
+                            {s.completion}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-6 text-center text-stone-400 dark:text-stone-500 text-sm">
+                Ingen prestationsdata tillgänglig ännu
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
