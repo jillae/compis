@@ -1,6 +1,7 @@
 
 import { prisma } from '@/lib/db';
 import { differenceInDays } from 'date-fns';
+import { smsService, SMSService } from '@/lib/sms/sms-service';
 
 export interface TriggerConditions {
   // Health-based triggers
@@ -389,6 +390,27 @@ export async function executeTrigger(triggerId: string): Promise<{
 
       // Determine channel and recipient
       const channel = trigger.channel;
+
+      // Use channel-specific skip reasons for missing contact info
+      if (channel === 'sms' && !customer.phone) {
+        results.skipped++;
+        await prisma.triggerExecution.create({
+          data: {
+            triggerId,
+            customerId: customer.id,
+            clinicId: trigger.clinicId,
+            status: 'skipped',
+            skippedReason: 'no_phone_number',
+          },
+        });
+        results.details.push({
+          customerId: customer.id,
+          status: 'skipped',
+          reason: 'no_phone_number',
+        });
+        continue;
+      }
+
       const recipient = channel === 'email' ? customer.email : customer.phone;
 
       if (!recipient) {
@@ -423,6 +445,78 @@ export async function executeTrigger(triggerId: string): Promise<{
         },
       });
 
+      // --- Channel dispatch ---
+      let smsCostSEK: number | undefined;
+
+      if (channel === 'sms') {
+        // Normalise phone to E.164 (Swedish default country code 46)
+        const formattedPhone = SMSService.formatPhoneNumber(customer.phone!, '46');
+
+        // Derive a sender ID: use clinic name truncated to 11 chars (GSM alphanumeric limit)
+        // Falls back to "KlinikFlow" which is already the provider default
+        const senderName = trigger.clinic.name
+          ? trigger.clinic.name.replace(/[^a-zA-Z0-9 ]/g, '').trim().substring(0, 11) || 'KlinikFlow'
+          : 'KlinikFlow';
+
+        const smsResult = await smsService.sendEnhanced({
+          to: formattedPhone,
+          message: personalizedMessage,
+          from: senderName,
+          clinicId: trigger.clinicId,
+          customerId: customer.id,
+          category: 'marketing',
+          // Consent was already verified above via canExecuteTrigger
+          skipConsentCheck: true,
+        });
+
+        if (!smsResult.success) {
+          // SMS delivery failed — record failure and move on to next customer
+          results.failed++;
+
+          await prisma.message.update({
+            where: { id: message.id },
+            data: { status: 'failed' },
+          });
+
+          await prisma.triggerExecution.create({
+            data: {
+              triggerId,
+              customerId: customer.id,
+              clinicId: trigger.clinicId,
+              status: 'failed',
+              skippedReason: 'sms_delivery_failed',
+              errorMessage: smsResult.error || 'SMS delivery failed',
+            },
+          });
+
+          await prisma.marketingTrigger.update({
+            where: { id: triggerId },
+            data: {
+              totalExecutions: { increment: 1 },
+              failedSends: { increment: 1 },
+            },
+          });
+
+          results.details.push({
+            customerId: customer.id,
+            status: 'failed',
+            reason: smsResult.error || 'sms_delivery_failed',
+          });
+          continue;
+        }
+
+        // SMS sent successfully — track cost
+        // 46elks returns cost in USD cents; convert to approximate SEK (1 USD ≈ 10.5 SEK)
+        // The cost field on SMSResult is already a decimal number from the provider
+        smsCostSEK = smsResult.cost !== undefined ? smsResult.cost * 10.5 : undefined;
+
+        // Mark message as sent
+        await prisma.message.update({
+          where: { id: message.id },
+          data: { status: 'sent' },
+        });
+      }
+
       // Create trigger execution record
       const execution = await prisma.triggerExecution.create({
         data: {
@@ -431,15 +525,17 @@ export async function executeTrigger(triggerId: string): Promise<{
           clinicId: trigger.clinicId,
           status: 'sent',
           sentAt: new Date(),
+          ...(smsCostSEK !== undefined && { costSEK: smsCostSEK }),
         },
       });
 
-      // Update trigger stats
+      // Update trigger stats (including cumulative cost if available)
       await prisma.marketingTrigger.update({
         where: { id: triggerId },
         data: {
           totalExecutions: { increment: 1 },
           successfulSends: { increment: 1 },
+          ...(smsCostSEK !== undefined && { totalCostSEK: { increment: smsCostSEK } }),
         },
       });
 
