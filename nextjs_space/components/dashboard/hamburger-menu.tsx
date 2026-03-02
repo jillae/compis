@@ -71,6 +71,9 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
           {/* ─── Drift (Operations) ─── */}
           <div className="space-y-1">
             <SectionHeader>Drift</SectionHeader>
+            <NavLink href="/dashboard/schedule" icon={CalendarDays}>
+              Dagens Schema
+            </NavLink>
             <NavLink href="/dashboard/capacity" icon={Gauge}>
               Kapacitetsprognos
             </NavLink>
@@ -165,6 +168,9 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             <SectionHeader>Inställningar</SectionHeader>
             <NavLink href="/dashboard/settings" icon={Settings}>
               Funktioner & Integrationer
+            </NavLink>
+            <NavLink href="/dashboard/settings/bokadirekt" icon={ExternalLink}>
+              Bokadirekt-synk
             </NavLink>
             <NavLink href="/dashboard/settings/display" icon={Monitor}>
               Visningsinställningar
