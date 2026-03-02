@@ -12,22 +12,27 @@ import { PricingCards } from "@/components/pricing/pricing-cards"
 import { FeaturesSection } from "@/components/landing/features-section"
 
 export default async function LandingPage() {
-  const session = await getServerSession(authOptions)
-  
-  // If logged in, check onboarding status and redirect appropriately
-  if (session?.user?.id) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { clinicId: true }
-    })
+  try {
+    const session = await getServerSession(authOptions)
     
-    if (user?.clinicId) {
-      // Has clinic -> onboarding complete -> go to dashboard
-      redirect('/dashboard')
-    } else {
-      // No clinic -> needs onboarding
-      redirect('/onboarding')
+    // If logged in, check onboarding status and redirect appropriately
+    if (session?.user?.id) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { clinicId: true }
+      })
+      
+      if (user?.clinicId) {
+        redirect('/dashboard')
+      } else {
+        redirect('/onboarding')
+      }
     }
+  } catch (e: any) {
+    // If redirect was thrown, re-throw it (Next.js uses throw for redirects)
+    if (e?.digest?.includes('NEXT_REDIRECT')) throw e;
+    // Otherwise log and continue to landing page
+    console.error('[Landing] Auth/DB check failed:', e?.message);
   }
 
   return (
