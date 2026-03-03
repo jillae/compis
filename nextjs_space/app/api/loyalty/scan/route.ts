@@ -17,6 +17,8 @@ import {
   unauthorizedResponse,
   errorResponse,
 } from '@/lib/multi-tenant-security';
+import { loyaltySMSAutomation } from '@/lib/loyalty/sms-automation';
+import { notifyLoyaltyMilestone } from '@/lib/notifications/campaign-reminders';
 
 function computeTier(stamps: number, points: number, tierRules: unknown): string {
   if (!tierRules || typeof tierRules !== 'object') return 'bronze';
@@ -168,6 +170,46 @@ export async function POST(request: NextRequest) {
       },
       orderBy: { requiredStamps: 'asc' },
     });
+
+    // 7. Skicka SMS-notiser asynkront (fire-and-forget, blockerar ej svaret)
+    void (async () => {
+      try {
+        // Stämpelbekräftelse
+        await loyaltySMSAutomation.sendStampConfirmation(
+          card.id,
+          stampsToAdd,
+          newStamps
+        );
+
+        // Nivå-uppgradering
+        if (tierUpgraded) {
+          await loyaltySMSAutomation.sendLevelUp(card.id, card.level, newLevel);
+
+          // Notis till personal om milstolpen
+          const customerName =
+            card.customer?.firstName ??
+            card.customer?.name ??
+            'Kund';
+          await notifyLoyaltyMilestone(
+            program.clinicId,
+            customerName,
+            newLevel,
+            card.id
+          );
+        }
+
+        // Belöning tillgänglig
+        if (availableRewards.length > 0) {
+          await loyaltySMSAutomation.sendRewardAvailable(
+            card.id,
+            availableRewards[0].name
+          );
+        }
+      } catch (smsErr) {
+        // Logga men bryt inte flödet – SMS är icke-kritiskt
+        console.error('[LoyaltySMS] Kunde inte skicka SMS efter skanning:', smsErr);
+      }
+    })();
 
     return NextResponse.json({
       success: true,

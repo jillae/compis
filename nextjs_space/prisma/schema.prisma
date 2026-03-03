@@ -327,6 +327,9 @@ model Clinic {
   bokadirektWebhookLogs BokadirektWebhookLog[]
   integrationSyncLogs   IntegrationSyncLog[]
 
+  // Staff Notifications (SMS Loyalty Module)
+  staffNotifications    StaffNotification[]
+
   @@index([bokadirektId])
   @@index([name])
   @@index([tier])
@@ -3676,6 +3679,33 @@ model WalletPass {
   @@index([serialNumber])
   @@index([qrCode])
   @@map("wallet_passes")
+}
+
+// StaffNotification - In-dashboard push notifications for clinic staff
+model StaffNotification {
+  id        String   @id @default(cuid())
+  clinicId  String
+  staffId   String?  // null = all staff in clinic
+
+  type      String   // campaign_reminder | loyalty_milestone | customer_alert | schedule_reminder
+  title     String
+  message   String   @db.Text
+  actionUrl String?  // Link to relevant page
+  priority  String   @default("medium") // low | medium | high
+
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime? // Auto-dismiss after this time
+
+  clinic    Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId])
+  @@index([staffId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("staff_notifications")
 }
 
 enum ABTestStatus {
