@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { DisplayMode } from '@prisma/client'
+import { DisplayMode } from '@/lib/client-types'
 import {
   DropdownMenu,
   DropdownMenuContent,

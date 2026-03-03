@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { MODULE_REGISTRY, type ModuleDefinition } from '@/lib/modules/module-registry';
-import { DisplayMode } from '@prisma/client';
+import { DisplayMode } from '@/lib/client-types';
 
 interface DisplayModeConfig {
   id: string;

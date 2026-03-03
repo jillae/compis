@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Key, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@/lib/client-types';
 
 interface License {
   id: string;

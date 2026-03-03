@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ArrowLeft, UserPlus, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@/lib/client-types'
 
 interface User {
   id: string

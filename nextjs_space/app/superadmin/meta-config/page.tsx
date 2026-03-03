@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, XCircle, ExternalLink, Building2, Save } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@/lib/client-types';
 
 interface Clinic {
   id: string;

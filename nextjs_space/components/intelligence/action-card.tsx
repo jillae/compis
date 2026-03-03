@@ -15,7 +15,7 @@ import {
   ChevronUp,
   Zap,
 } from 'lucide-react';
-import { ActionCategory, ActionStatus } from '@prisma/client';
+import { ActionCategory, ActionStatus } from '@/lib/client-types';
 
 interface ActionStep {
   description: string;

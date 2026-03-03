@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@/lib/client-types';
 import { RoleToggle } from './role-toggle';
 
 interface HamburgerMenuProps {

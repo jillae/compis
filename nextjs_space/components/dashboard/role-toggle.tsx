@@ -3,7 +3,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@/lib/client-types'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

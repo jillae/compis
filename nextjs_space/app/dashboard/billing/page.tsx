@@ -21,7 +21,7 @@ import {
 import { formatPrice, getSubscriptionStatusBadge, PRICING_TIERS, isTrialExpiringSoon } from '@/lib/billing';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { SubscriptionTier } from '@prisma/client';
+import { SubscriptionTier } from '@/lib/client-types';
 
 interface SubscriptionData {
   subscription: any;

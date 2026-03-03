@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { UserRole } from "@prisma/client"
+import { UserRole } from '@/lib/client-types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2, Users, DollarSign, Calendar } from "lucide-react"
 import Link from "next/link"
@@ -41,12 +41,12 @@ export default function SuperAdminPage() {
   const { data: session, status } = useSession() || {}
   const [data, setData] = useState<SuperAdminData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [simulatedRole, setSimulatedRole] = useState<UserRole>(UserRole.SUPER_ADMIN)
+  const [simulatedRole, setSimulatedRole] = useState<UserRole>('SUPER_ADMIN')
   
   useEffect(() => {
     if (status === 'loading') return
     
-    if (!session || session.user.role !== UserRole.SUPER_ADMIN) {
+    if (!session || session.user.role !== 'SUPER_ADMIN') {
       router.replace('/dashboard')
       return
     }
@@ -70,9 +70,9 @@ export default function SuperAdminPage() {
   const handleRoleChange = (role: UserRole) => {
     setSimulatedRole(role)
     // Redirect based on role
-    if (role === UserRole.ADMIN) {
+    if (role === 'ADMIN') {
       window.location.href = '/dashboard'
-    } else if (role === UserRole.STAFF) {
+    } else if (role === 'STAFF') {
       window.location.href = '/dashboard'
     }
   }

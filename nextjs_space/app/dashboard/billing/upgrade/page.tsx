@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, ArrowLeft, Zap } from 'lucide-react';
 import { PRICING_TIERS, formatPrice } from '@/lib/billing';
-import { SubscriptionTier } from '@prisma/client';
+import { SubscriptionTier } from '@/lib/client-types';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { PricingToggle, PriceDisplay } from '@/components/pricing/pricing-toggle';
