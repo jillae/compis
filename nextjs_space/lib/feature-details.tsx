@@ -1,5 +1,4 @@
-
-import { TrendingUp, Users, Target, BarChart3, Sparkles, Zap, CheckCircle, TrendingDown, Clock, DollarSign, AlertTriangle, Shield } from "lucide-react"
+import { TrendingUp, Users, Target, BarChart3, Sparkles, Zap, CheckCircle, DollarSign, Clock, Shield, Bell, LineChart } from "lucide-react"
 import { FeatureDetail } from "@/components/landing/feature-modal"
 
 export const featureDetails: FeatureDetail[] = [
@@ -7,208 +6,192 @@ export const featureDetails: FeatureDetail[] = [
     id: "revenue-intelligence",
     title: "Revenue Intelligence",
     icon: <TrendingUp className="h-8 w-8 text-blue-600" />,
-    shortDescription: "Få konkreta intäktsförslag baserat på din bokhistorik. Se exakt vilka åtgärder som ger mest avkastning.",
+    shortDescription: "AI-driven intäktsanalys som ger dig konkreta åtgärder",
     why: {
-      title: "Varför behöver du detta?",
-      content: "De flesta kliniker går miste om 15-30% av sina potentiella intäkter bara för att de inte ser möjligheterna i sin egen data. Du har guld i din bokningshistorik - men utan rätt verktyg ser du bara grafer, inte pengar."
+      title: "Varför Revenue Intelligence?",
+      content: "De flesta kliniker har tillgång till bokningsdata men saknar verktyg för att omvandla den till konkreta affärsbeslut. Revenue Intelligence analyserar dina bokningar, identifierar mönster och ger dig specifika åtgärder som ökar intäkterna — inte bara grafer och siffror."
     },
     how: {
       title: "Så fungerar det",
       steps: [
-        "Flow analyserar din bokningshistorik, behandlingstyper, priser och kundflöden automatiskt varje natt",
-        "AI:n identifierar mönster som du missar - tomma tider, underprissatta behandlingar, missade upsell-möjligheter",
-        "Du får konkreta åtgärdsförslag varje morgon: 'Öka pris på laser fredagar kl 14-17 med 15% = +12.500 kr/mån'",
-        "Implementera förslagen med ett klick - eller ignorera de du inte känner för"
+        "Flow samlar in och analyserar din bokningshistorik automatiskt",
+        "AI identifierar mönster: populära tider, outnyttjad kapacitet, säsongssvängningar",
+        "Du får konkreta förslag: 'Lägg till en extra behandlare på torsdagar kl 14-18 — potential: +12k kr/mån'",
+        "Följ upp effekten i realtid och justera löpande"
       ]
     },
     what: {
-      title: "Vad får du?",
+      title: "Vad du får",
       benefits: [
-        { icon: <DollarSign className="h-6 w-6" />, text: "Genomsnittlig intäktsökning på 18-25% inom 3 månader" },
-        { icon: <Clock className="h-6 w-6" />, text: "Dagliga actionable insights - inte bara data" },
-        { icon: <TrendingUp className="h-6 w-6" />, text: "Optimering baserad på verklig efterfrågan, inte gissningar" },
-        { icon: <CheckCircle className="h-6 w-6" />, text: "Automatisk bevakning av tillväxtmöjligheter 24/7" }
+        { icon: <DollarSign className="h-5 w-5" />, text: "Konkreta intäktsförslag med beräknad potential i kronor" },
+        { icon: <Clock className="h-5 w-5" />, text: "Identifiering av outnyttjad kapacitet — timmar som kan fyllas" },
+        { icon: <LineChart className="h-5 w-5" />, text: "Trendanalys som visar vart din klinik är på väg" },
+        { icon: <CheckCircle className="h-5 w-5" />, text: "Veckorapporter med prioriterade åtgärder" }
       ]
     },
     realExample: {
-      clinic: "ArchClinic",
-      challenge: "Hade 68% beläggningsgrad men såg inte var pengarna läckte",
-      result: "Flow identifierade 12 timmars outnyttjad högefterfrågan-tid per vecka + 3 underprissatta behandlingar",
-      metric: "+23% intäkter på 8 veckor"
+      clinic: "Glow Beauty Stockholm",
+      challenge: "12 timmar outnyttjad kapacitet per vecka utan att veta vilka tider som var mest lönsamma att fylla",
+      result: "Flow identifierade att tisdag-onsdag eftermiddagar hade högst konvertering från erbjudanden. Riktade kampanjer fyllde 9 av 12 timmar.",
+      metric: "+18% intäkter"
     }
   },
   {
     id: "customer-health-scoring",
     title: "Customer Health Scoring",
     icon: <Users className="h-8 w-8 text-purple-600" />,
-    shortDescription: "Se vilka kunder som riskerar att försvinna och agera i tid. Få konkreta tips för att öka lojalitet.",
+    shortDescription: "Se vilka kunder som riskerar att försvinna — och agera i tid",
     why: {
-      title: "Varför är detta kritiskt?",
-      content: "Det kostar 5x mer att skaffa en ny kund än att behålla en befintlig. Men hur vet du vilka kunder som är på väg att försvinna innan det är för sent? De flesta kliniker ser problemet först när kunden redan är borta."
+      title: "Varför Customer Health Scoring?",
+      content: "Att förlora en befintlig kund kostar 5-7x mer än att behålla den. De flesta kliniker märker inte att kunder slutar komma förrän det är för sent. Customer Health Scoring identifierar riskbeteenden tidigt så du kan agera proaktivt."
     },
     how: {
-      title: "Så räddas dina kunder",
+      title: "Så fungerar det",
       steps: [
-        "Flow analyserar kundernas bokningsfrekvens, behandlingstyper, feedback och engagemang",
-        "Varje kund får en health score (0-100) som uppdateras dagligen baserat på beteendemönster",
-        "När en kund riskerar att churn får du en varning: 'Emma besökte dig 1 gång/månad i 8 månader - nu har hon missat 2 månader'",
-        "Flow föreslår konkret action: 'Skicka 20% rabatt-SMS till Emma på hennes favoritbehandling inom 48 timmar'"
+        "Varje kund får ett hälsopoäng (0-100) baserat på besöksfrekvens, avbokningar och engagement",
+        "AI jämför kundens beteende med historiska mönster för att förutsäga risk",
+        "Du får varningar när kunder börjar visa tecken på att de tänker sluta",
+        "Konkreta åtgärdsförslag: personligt SMS, rabatterbjudande eller uppföljningssamtal"
       ]
     },
     what: {
-      title: "Resultatet",
+      title: "Vad du får",
       benefits: [
-        { icon: <Shield className="h-6 w-6" />, text: "Minska customer churn med 40-60%" },
-        { icon: <AlertTriangle className="h-6 w-6" />, text: "Proaktiva varningar innan kunden försvinner" },
-        { icon: <CheckCircle className="h-6 w-6" />, text: "Automatiska win-back kampanjer" },
-        { icon: <TrendingUp className="h-6 w-6" />, text: "Högre customer lifetime value (LTV)" }
+        { icon: <Shield className="h-5 w-5" />, text: "Tidig varning när kunder riskerar att försvinna" },
+        { icon: <Bell className="h-5 w-5" />, text: "Automatiska påminnelser till personal att följa upp" },
+        { icon: <Users className="h-5 w-5" />, text: "Segmentering: VIP, lojala, at-risk, förlorade" },
+        { icon: <CheckCircle className="h-5 w-5" />, text: "Beräknat kundlivstidsvärde (CLV) per segment" }
       ]
     },
     realExample: {
-      clinic: "Glow Beauty Stockholm",
-      challenge: "Tappade 30% av kunderna efter första besöket utan att märka det",
-      result: "Health scoring identifierade at-risk kunder tidigt och automatiska SMS-påminnelser räddade 65% av dem",
-      metric: "+47% retention rate"
+      clinic: "Urban Wellness Göteborg",
+      challenge: "Tappade 15% av sina mest lönsamma kunder utan att märka det i tid",
+      result: "Med hälsopoäng identifierades 23 at-risk VIP-kunder. Personlig uppföljning räddade 19 av dem.",
+      metric: "-67% kundtapp"
     }
   },
   {
     id: "dynamic-pricing",
     title: "Dynamic Pricing",
     icon: <Target className="h-8 w-8 text-indigo-600" />,
-    shortDescription: "Optimera dina priser baserat på efterfrågan. \"Öka priser 10% på fredagar kl 14-17\" = +15k kr/mån.",
+    shortDescription: "Optimera priser baserat på efterfrågan — automatiskt",
     why: {
-      title: "Varför fast pris kostar dig pengar",
-      content: "Flygbolag, hotell och Uber har förstått det länge: efterfrågan varierar, så borde priserna göra det. Din klinik är stressad på fredagar kl 15-18 men tom på måndagar kl 10-13. Varför samma pris? Du lämnar pengar på bordet."
+      title: "Varför Dynamic Pricing?",
+      content: "De flesta kliniker har samma pris oavsett dag och tid. Men efterfrågan varierar enormt — fredagar kl 14-17 kan vara 3x mer eftertraktade än tisdagar kl 09. Dynamic Pricing hjälper dig ta rätt pris vid rätt tid, precis som flygbolag och hotell gör."
     },
     how: {
-      title: "Så optimeras dina priser",
+      title: "Så fungerar det",
       steps: [
-        "Flow analyserar din efterfrågan per timme, dag och vecka för varje behandlingstyp",
-        "AI:n jämför med marknadspriser, dina kostnader och customer willingness to pay",
-        "Du får konkreta prisförslag: 'Öka laser-behandling fredagar kl 14-17 från 1.200 kr till 1.350 kr'",
-        "Testa förslagen live - Flow mäter impact och justerar automatiskt eller låter dig bestämma"
+        "Flow analyserar din bokningshistorik och identifierar hög- och lågbelastningstider",
+        "Du sätter regler: 'Max +15% på peak-tider, max -10% på lågtrafik'",
+        "Prisförslag genereras automatiskt per tjänst, dag och tid",
+        "Du godkänner eller justerar — full kontroll hela tiden"
       ]
     },
     what: {
-      title: "Vad händer",
+      title: "Vad du får",
       benefits: [
-        { icon: <DollarSign className="h-6 w-6" />, text: "Genomsnittlig intäktsökning 12-18% utan fler kunder" },
-        { icon: <Target className="h-6 w-6" />, text: "Jämna ut efterfrågan - fyll tomma tider med lägre priser" },
-        { icon: <TrendingUp className="h-6 w-6" />, text: "Maximera intäkter under peak hours" },
-        { icon: <CheckCircle className="h-6 w-6" />, text: "A/B-testning av priser för att hitta sweet spot" }
+        { icon: <DollarSign className="h-5 w-5" />, text: "Högre intäkter på populära tider utan att förlora kunder" },
+        { icon: <Clock className="h-5 w-5" />, text: "Jämnare beläggning genom att locka kunder till lugna tider" },
+        { icon: <Target className="h-5 w-5" />, text: "Simuleringsverktyg: se effekten innan du aktiverar" },
+        { icon: <CheckCircle className="h-5 w-5" />, text: "Full kontroll — du bestämmer min/max-gränser" }
       ]
     },
     realExample: {
       clinic: "Radiance Malmö",
-      challenge: "Fullbokade fredagar men tom måndagar - tappade potential på båda hållen",
-      result: "Dynamic pricing ökade fredagspriser 15% (kunderna köpte ändå) + sänkte måndagspriser 10% (fyllde kalendern)",
-      metric: "+15.300 kr/mån"
+      challenge: "Fredagar kl 14-17 var alltid fullbokade medan onsdag förmiddagar stod tomma",
+      result: "Höjde fredagspriser 15% och erbjöd 10% rabatt på onsdagar. Onsdagsbeläggningen ökade 40%.",
+      metric: "+23k kr/mån"
     }
   },
   {
     id: "meta-marketing-roi",
     title: "Meta Marketing ROI",
     icon: <BarChart3 className="h-8 w-8 text-green-600" />,
-    shortDescription: "Se exakt vilka annonser som ger bokningar, inte bara klick. Optimera din marknadsföring för maximal avkastning.",
+    shortDescription: "Se vilka annonser som ger bokningar — inte bara klick",
     why: {
-      title: "Varför slösar du pengar på ads?",
-      content: "Du betalar 5.000 kr/månad för Facebook-annonser. Du ser klick, likes och kommentarer. Men hur många faktiska bokningar gav det? Vilken annons drog in mest pengar? Du vet inte - så du fortsätter betala för ads som inte funkar."
+      title: "Varför Marketing ROI?",
+      content: "De flesta kliniker spenderar tusentals kronor på Meta-annonser utan att veta vilka som faktiskt leder till bokningar. Du ser klick och räckvidd, men inte om de blev betalande kunder. Marketing ROI kopplar ihop annonsdata med faktiska bokningar."
     },
     how: {
-      title: "Så får du riktig ROI",
+      title: "Så fungerar det",
       steps: [
-        "Anslut ditt Meta Ads-konto till Flow med ett klick (OAuth, tar 30 sekunder)",
-        "Flow synkar automatiskt alla dina kampanjer, ad sets och enskilda annonser",
-        "Varje bokning trackas tillbaka till exakt vilken annons som drev kunden till dig",
-        "Du ser live: 'Ad A kostade 1.200 kr och gav 8 bokningar = 15.600 kr intäkt. Ad B kostade 800 kr och gav 2 bokningar = 2.400 kr intäkt. Pausa Ad B.'"
+        "Koppla ditt Meta Ads-konto till Flow (tar 2 minuter)",
+        "Flow spårar hela kundresan: annons → klick → bokning → intäkt",
+        "Se exakt vilka kampanjer, annonsgrupper och annonser som ger ROI",
+        "Få automatiska förslag på budgetoptimering"
       ]
     },
     what: {
-      title: "Vad får du?",
+      title: "Vad du får",
       benefits: [
-        { icon: <BarChart3 className="h-6 w-6" />, text: "Exakt ROI per kampanj, ad set och annons" },
-        { icon: <TrendingDown className="h-6 w-6" />, text: "Sluta slösa pengar på annonser som inte konverterar" },
-        { icon: <DollarSign className="h-6 w-6" />, text: "Dubbla ROI på samma budget genom att optimera" },
-        { icon: <Target className="h-6 w-6" />, text: "Se vilka målgrupper som faktiskt bokar" }
+        { icon: <DollarSign className="h-5 w-5" />, text: "Faktisk ROI per kampanj — inte bara CTR och CPC" },
+        { icon: <LineChart className="h-5 w-5" />, text: "Trendrapporter: vilka kampanjer förbättras/försämras" },
+        { icon: <Target className="h-5 w-5" />, text: "Automatisk budgetrekommendation baserat på ROI" },
+        { icon: <CheckCircle className="h-5 w-5" />, text: "Spårning av kundens livstidsvärde per kampanj" }
       ]
-    },
-    realExample: {
-      clinic: "Urban Wellness Göteborg",
-      challenge: "Spenderade 8.000 kr/mån på Meta Ads men såg bara klick, inte bokningar",
-      result: "Flow visade att 3 av 7 kampanjer drog 90% av bokningarna. Omprioriterade budget till vinnarna.",
-      metric: "140% ROI-ökning"
     }
   },
   {
     id: "no-show-prevention",
     title: "Risk-varningar för no-shows",
     icon: <Sparkles className="h-8 w-8 text-orange-600" />,
-    shortDescription: "Identifiera riskbokningar innan de blir no-shows. Få varningar i tid så du kan agera proaktivt och rädda bokningar.",
+    shortDescription: "Identifiera riskbokningar innan de blir no-shows",
     why: {
-      title: "Varför no-shows dödar din business",
-      content: "En no-show kostar dig inte bara den utebliva intäkten - det är också en tom stol som någon annan kunde betalat för. Vid 20% no-show-rate på en klinik med 500 bokningar/månad å 800 kr = 80.000 kr i röken per månad."
+      title: "Varför No-Show Prevention?",
+      content: "No-shows kostar den genomsnittliga kliniken 50-100k kr per år i förlorade intäkter. Många bokningar som blir no-shows visar tidiga varningssignaler: sent bokade, tidigare avbokningar, lång tid sedan senaste besök. Flow identifierar dessa mönster."
     },
     how: {
-      title: "Så förutsäger och förhindrar Flow no-shows",
+      title: "Så fungerar det",
       steps: [
-        "AI-modellen tränas på historiska no-shows och hittar patterns: nya kunder, sena bokningar, fredagar, regniga dagar, etc.",
-        "Varje bokning får en risk-score 0-100% baserat på 20+ faktorer",
-        "När en bokning har >60% no-show-risk får du en alert: 'Ahmed bokade sent för fredag kl 17 - ny kund - 73% risk'",
-        "Flow skickar automatisk SMS-påminnelse till högriskkunder 24h innan + follow-up 2h innan"
+        "Varje bokning får ett riskpoäng baserat på kundens historik och bokningsbeteende",
+        "Högrisk-bokningar flaggas automatiskt i din dashboard",
+        "Du får förslag på åtgärder: bekräftelse-SMS, dubbelbokning, väntelista-backup",
+        "Systemet lär sig av utfall och blir bättre över tid"
       ]
     },
     what: {
-      title: "Resultatet",
+      title: "Vad du får",
       benefits: [
-        { icon: <AlertTriangle className="h-6 w-6" />, text: "Minska no-shows med 50-70%" },
-        { icon: <DollarSign className="h-6 w-6" />, text: "Rädda 30.000-80.000 kr/månad i förlorade intäkter" },
-        { icon: <CheckCircle className="h-6 w-6" />, text: "Automatiska påminnelser till högrisk-bokningar" },
-        { icon: <Clock className="h-6 w-6" />, text: "Få tid att boka om stolen om kunden ändå inte kommer" }
+        { icon: <Bell className="h-5 w-5" />, text: "Automatiska varningar för högrisk-bokningar" },
+        { icon: <Shield className="h-5 w-5" />, text: "Vänteliste-hantering som fyller luckor automatiskt" },
+        { icon: <DollarSign className="h-5 w-5" />, text: "Beräknad kostnad per no-show för att motivera åtgärder" },
+        { icon: <CheckCircle className="h-5 w-5" />, text: "Rapporter som visar förbättring över tid" }
       ]
     },
     realExample: {
-      clinic: "Urban Wellness Göteborg",
-      challenge: "30-40% no-shows på fredagar - tappade 50.000 kr/månad",
-      result: "AI-modellen identifierade högrisk-bokningar och automatiska SMS + telefonuppföljningar räddade 75% av dem",
-      metric: "-68% no-shows"
+      clinic: "ArchClinic",
+      challenge: "22% no-show-rate på fredagar, utan verktyg för att identifiera vilka bokningar som var riskfyllda",
+      result: "Flow flaggade 85% av blivande no-shows korrekt. Bekräftelse-SMS minskade no-shows till 7%.",
+      metric: "-67% no-shows"
     }
   },
   {
     id: "automatic-integration",
     title: "Automatisk integration",
     icon: <Zap className="h-8 w-8 text-pink-600" />,
-    shortDescription: "Anslut ditt bokningssystem och få automatisk realtidssynk av alla bokningar och kunder. Ingen manuell administration.",
+    shortDescription: "Koppla ditt bokningssystem — ingen manuell administration",
     why: {
-      title: "Varför manuellt arbete är slöseri",
-      content: "Du betalar redan för Bokadirekt/annan bokningssystem. Varför ska du OCKSÅ manuellt föra över data till Excel, manuellt räkna metrics, manuellt skicka påminnelser? Du är klinikägare, inte dataentré-person."
+      title: "Varför automatisk integration?",
+      content: "Manuell datainmatning tar tid, skapar fel och gör att du alltid ligger efter. Med automatisk integration synkas dina bokningar, kunder och tjänster i realtid. Du behöver aldrig logga in någon annanstans — allt finns i Flow."
     },
     how: {
-      title: "Så enkelt är det",
+      title: "Så fungerar det",
       steps: [
-        "Anslut ditt bokningssystem (Bokadirekt, Timely, etc.) med API-nyckel - tar 2 minuter",
-        "Flow synkar automatiskt alla bokningar, kunder, behandlingar, priser och staff varje timme (eller realtid)",
-        "All data flödar automatiskt in i Flow's AI-motor utan att du behöver göra något",
-        "Du fokuserar på klinikens kärna medan Flow håller koll på business intelligence"
+        "Välj ditt bokningssystem (Bokadirekt, Timma, etc.) och logga in",
+        "Flow synkar automatiskt alla befintliga bokningar och kunder",
+        "Nya bokningar och ändringar synkas i realtid via webhooks",
+        "All data stannar krypterad och GDPR-säkrad på svenska servrar"
       ]
     },
     what: {
-      title: "Vad slipper du?",
+      title: "Vad du får",
       benefits: [
-        { icon: <Clock className="h-6 w-6" />, text: "Spara 8-12 timmar/vecka på manuell administration" },
-        { icon: <Zap className="h-6 w-6" />, text: "Realtidsdata istället för föråldrade Excel-filer" },
-        { icon: <CheckCircle className="h-6 w-6" />, text: "Inga manuella fel eller missade uppdateringar" },
-        { icon: <Shield className="h-6 w-6" />, text: "GDPR-compliant och säker datahantering" }
+        { icon: <Zap className="h-5 w-5" />, text: "Realtidssynk — nya bokningar visas direkt i Flow" },
+        { icon: <Clock className="h-5 w-5" />, text: "Noll manuellt arbete — allt sker automatiskt" },
+        { icon: <Shield className="h-5 w-5" />, text: "GDPR-compliant med krypterad dataöverföring" },
+        { icon: <CheckCircle className="h-5 w-5" />, text: "Stöd för flera bokningssystem samtidigt" }
       ]
-    },
-    realExample: {
-      clinic: "Glow Beauty Stockholm",
-      challenge: "Spenderade 10 timmar/vecka på att exportera data från Bokadirekt och räkna metrics i Excel",
-      result: "Flow anslöt till Bokadirekt API och automatiserade allt - all data synkas varje timme automatiskt",
-      metric: "10 tim/vecka sparade"
     }
   }
 ]
-
-export function getFeatureById(id: string): FeatureDetail | undefined {
-  return featureDetails.find(f => f.id === id)
-}
