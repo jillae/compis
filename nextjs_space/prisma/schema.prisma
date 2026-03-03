@@ -1128,6 +1128,8 @@ model LoyaltyCard {
   activatedAt   DateTime  @default(now())
   deactivatedAt DateTime?
 
+  walletPasses  WalletPass[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -3650,6 +3652,30 @@ model IntegrationSyncLog {
   @@index([source])
   @@index([startedAt])
   @@map("integration_sync_logs")
+}
+
+// ===== WALLET PASSES (LOYALTY) =====
+model WalletPass {
+  id          String   @id @default(cuid())
+  cardId      String   // Relates to LoyaltyCard
+  card        LoyaltyCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  passType    String   // "apple" | "google"
+  serialNumber String  @unique
+  qrCode      String   @unique // Unique QR code for scanning
+  passUrl     String?  // URL to download .pkpass / Google Wallet link
+
+  // Push notification token
+  pushToken   String?
+
+  isActive    Boolean  @default(true)
+  lastUpdatedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([cardId])
+  @@index([serialNumber])
+  @@index([qrCode])
+  @@map("wallet_passes")
 }
 
 enum ABTestStatus {

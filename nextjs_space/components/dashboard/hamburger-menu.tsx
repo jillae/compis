@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor, Gift, CalendarDays, Clock, CalendarRange, BarChart3, Target, Zap, Activity, ShieldAlert, Gauge } from 'lucide-react';
+import { Menu, X, Users, LogOut, Mail, UserCog, ExternalLink, Sparkles, Settings, CreditCard, Tag, UsersRound, MessageSquare, DollarSign, Building, TrendingUp, Upload, ArrowRightLeft, Monitor, Gift, CalendarDays, Clock, CalendarRange, BarChart3, Target, Zap, Activity, ShieldAlert, Gauge, Star, QrCode, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -105,6 +105,23 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             </NavLink>
             <NavLink href="/dashboard/segments" icon={Target}>
               Kundsegment
+            </NavLink>
+          </div>
+
+          {/* ─── Lojalitet ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Lojalitet</SectionHeader>
+            <NavLink href="/dashboard/loyalty" icon={LayoutDashboard}>
+              Översikt
+            </NavLink>
+            <NavLink href="/dashboard/loyalty/scan" icon={QrCode}>
+              Skanna QR
+            </NavLink>
+            <NavLink href="/dashboard/loyalty/members" icon={UsersRound}>
+              Medlemmar
+            </NavLink>
+            <NavLink href="/dashboard/loyalty/programs/new" icon={Star}>
+              Program
             </NavLink>
           </div>
 
