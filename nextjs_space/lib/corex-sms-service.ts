@@ -18,31 +18,21 @@ interface ElksApiConfig {
 }
 
 /**
- * Get 46elks credentials from auth secrets
+ * Get 46elks credentials from environment variables
  */
 async function getElksConfig(): Promise<ElksApiConfig> {
-  const fs = require('fs');
-  const path = require('path');
+  const username = process.env.FORTYSEVEN_ELKS_API_USERNAME || '';
+  const password = process.env.FORTYSEVEN_ELKS_API_PASSWORD || '';
   
-  try {
-    const secretsPath = path.join('/home/ubuntu/.config/abacusai_auth_secrets.json');
-    const secrets = JSON.parse(fs.readFileSync(secretsPath, 'utf8'));
-    
-    const elksSecrets = secrets['46elks']?.secrets;
-    
-    if (!elksSecrets?.api_username?.value || !elksSecrets?.api_password?.value) {
-      throw new Error('46elks credentials not configured');
-    }
-    
-    return {
-      username: elksSecrets.api_username.value,
-      password: elksSecrets.api_password.value,
-      from: '+46766866273' // Your 46elks number
-    };
-  } catch (error) {
-    console.error('Failed to load 46elks config:', error);
-    throw new Error('46elks not configured');
+  if (!username || !password) {
+    throw new Error('46elks credentials not configured - set FORTYSEVEN_ELKS_API_USERNAME and FORTYSEVEN_ELKS_API_PASSWORD');
   }
+  
+  return {
+    username,
+    password,
+    from: '+46766866273'
+  };
 }
 
 /**

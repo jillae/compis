@@ -73,25 +73,13 @@ async function getMetaPixelId(clinicId: string): Promise<string | null> {
  * Get Meta Access Token
  */
 async function getMetaAccessToken(): Promise<string> {
-  const fs = require('fs');
-  const path = require('path');
+  const token = process.env.META_ACCESS_TOKEN || '';
   
-  try {
-    const secretsPath = path.join('/home/ubuntu/.config/abacusai_auth_secrets.json');
-    const secrets = JSON.parse(fs.readFileSync(secretsPath, 'utf8'));
-    
-    const metaSecrets = secrets['meta marketing api']?.secrets;
-    const token = metaSecrets?.access_token?.value;
-    
-    if (!token) {
-      throw new Error('Meta access token not found');
-    }
-    
-    return token;
-  } catch (error) {
-    console.error('Failed to load Meta token:', error);
-    throw new Error('Meta not configured');
+  if (!token || token === 'NEEDS_ROTATION_BY_USER') {
+    throw new Error('Meta access token not configured - set META_ACCESS_TOKEN env var');
   }
+  
+  return token;
 }
 
 /**
