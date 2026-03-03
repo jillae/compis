@@ -63,12 +63,12 @@ export async function GET(request: NextRequest) {
     const todayTimeEntries = await prisma.staffTimeEntry.findMany({
       where: {
         staffId: { in: staffMembers.map(s => s.id) },
-        date: { gte: todayStart, lte: todayEnd },
+        clockInAt: { gte: todayStart, lte: todayEnd },
       },
-      select: { staffId: true, clockIn: true, clockOut: true },
+      select: { staffId: true, clockInAt: true, clockOutAt: true },
     });
     const checkedInSet = new Set(
-      todayTimeEntries.filter(e => e.clockIn && !e.clockOut).map(e => e.staffId)
+      todayTimeEntries.filter(e => e.clockInAt && !e.clockOutAt).map(e => e.staffId)
     );
 
     // Next booking per staff (today, after now)

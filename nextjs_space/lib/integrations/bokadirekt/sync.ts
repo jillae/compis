@@ -150,7 +150,6 @@ export async function syncServices(clinicId: string): Promise<SyncCounts> {
               clinicId,
               name: svc.serviceName ?? 'Unnamed Service',
               isActive: true,
-              source: 'bokadirekt',
             },
           });
           counts.recordsCreated++;
@@ -323,7 +322,6 @@ export async function syncCustomers(clinicId: string): Promise<SyncCounts> {
               city: c.city,
               postalCode: c.postalCode,
               dateOfBirth,
-              source: 'bokadirekt',
             },
           });
           counts.recordsCreated++;
