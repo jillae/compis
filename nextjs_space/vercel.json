@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/bokadirekt-sync",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
