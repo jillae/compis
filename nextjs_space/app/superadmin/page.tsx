@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
-import { Building2, Users, Activity, Plus, Download, ScrollText, ExternalLink, Settings } from "lucide-react"
+import { Building2, Users, Activity, Plus, Download, ScrollText, ExternalLink, Settings, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -118,6 +118,8 @@ export default function SuperAdminPage() {
   const [data, setData] = useState<SuperAdminData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -268,6 +270,42 @@ export default function SuperAdminPage() {
             Lägg till klinik
           </Button>
         </Link>
+        <Button
+          variant="outline"
+          size="sm"
+          className="min-h-[44px] gap-2"
+          disabled={syncing}
+          onClick={async () => {
+            setSyncing(true)
+            setSyncResult(null)
+            try {
+              const res = await fetch('/api/integrations/bokadirekt/sync', { method: 'POST' })
+              const json = await res.json()
+              if (json.success || res.status === 207) {
+                const e = json.entities ?? {}
+                const total = (e.services?.created ?? 0) + (e.staff?.created ?? 0) +
+                  (e.customers?.created ?? 0) + (e.bookings?.created ?? 0) + (e.sales?.created ?? 0)
+                const updated = (e.services?.updated ?? 0) + (e.staff?.updated ?? 0) +
+                  (e.customers?.updated ?? 0) + (e.bookings?.updated ?? 0) + (e.sales?.updated ?? 0)
+                setSyncResult(`Synk klar: ${total} nya, ${updated} uppdaterade (${json.durationMs}ms)`)
+                // Refresh page data
+                window.location.reload()
+              } else {
+                setSyncResult(`Fel: ${json.error ?? 'Okänt fel'}`)
+              }
+            } catch {
+              setSyncResult('Nätverksfel vid synk')
+            } finally {
+              setSyncing(false)
+            }
+          }}
+        >
+          <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />
+          {syncing ? 'Synkar...' : 'Synka Bokadirekt'}
+        </Button>
+        {syncResult && (
+          <span className="self-center text-xs text-muted-foreground px-2">{syncResult}</span>
+        )}
         <Button variant="outline" size="sm" className="min-h-[44px] gap-2">
           <Download className="h-4 w-4" />
           Exportera data

@@ -1,2 +1,8 @@
-
-{}
+{
+  "crons": [
+    {
+      "path": "/api/cron/bokadirekt-sync",
+      "schedule": "0 */4 * * *"
+    }
+  ]
+}
