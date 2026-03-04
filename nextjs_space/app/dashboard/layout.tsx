@@ -50,20 +50,18 @@ export default async function DashboardLayout({
       {/* ── Top header — hidden in KIOSK mode ── */}
       {!isKiosk && (
         <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="container mx-auto px-4 py-3 flex items-center gap-3">
-            {/* User info & display mode switcher — left side */}
-            <div className="flex-1 min-w-0">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-3">
+            {/* User info — left side */}
+            <div className="flex items-center gap-3 min-w-0">
               <UserHeader />
             </div>
 
-            {/* Dynamic navigation hamburger trigger — forced right side */}
-            <div className="flex-shrink-0 ml-auto">
-              <DynamicNav
-                initialMode={activeDisplayMode}
-                clinicTier={clinicTier}
-                userRole={userRole}
-              />
-            </div>
+            {/* Navigation hamburger — RIGHT side (aldrig vänster!) */}
+            <DynamicNav
+              initialMode={activeDisplayMode}
+              clinicTier={clinicTier}
+              userRole={userRole}
+            />
           </div>
         </div>
       )}
