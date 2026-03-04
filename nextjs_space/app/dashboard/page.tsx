@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback, KeyboardEvent } from 'react';
-import { useSession } from 'next-auth/react';
+
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { HamburgerMenu } from '@/components/dashboard/hamburger-menu';
+// HamburgerMenu removed — DynamicNav in layout.tsx handles navigation
 import {
-  Sun,
-  Moon,
   Calendar,
   Users,
   TrendingUp,
@@ -40,9 +36,7 @@ import {
   Activity,
   Banknote,
   CalendarDays,
-  Stethoscope,
   LogIn,
-  Loader2,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -353,10 +347,9 @@ function DashboardSkeleton() {
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const { data: session } = useSession() || {};
   const [mode, setMode] = useState<Mode>('drift');
   const [showPin, setShowPin] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+
   const [dashData, setDashData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -385,23 +378,11 @@ export default function DashboardPage() {
     fetchData();
   }, [fetchData]);
 
-  // On mount: check sessionStorage + system dark preference
+  // On mount: check sessionStorage for strategi unlock
   useEffect(() => {
     const unlocked = sessionStorage.getItem('flow-strategy-unlocked') === 'true';
     if (unlocked) setMode('strategi');
-
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setDarkMode(prefersDark);
   }, []);
-
-  // Apply/remove dark class on <html>
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
 
   function requestStrategi() {
     const alreadyUnlocked = sessionStorage.getItem('flow-strategy-unlocked') === 'true';
@@ -422,62 +403,33 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 transition-colors duration-200">
-      {/* ── HEADER ──────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-stone-900 dark:bg-stone-100 flex items-center justify-center">
-              <span className="text-white dark:text-stone-900 font-bold text-sm">F</span>
-            </div>
-            <span className="font-bold text-xl tracking-tight">Flow</span>
-          </div>
-
-          {/* Mode toggle — centered */}
-          <div className="flex-1 flex justify-center">
-            <div className="inline-flex rounded-full border border-stone-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 p-1 gap-1">
-              <button
-                onClick={switchToDrift}
-                className={`min-h-[44px] px-5 rounded-full text-sm font-medium transition-all
-                  ${mode === 'drift'
-                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-sm'
-                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
-                  }`}
-              >
-                Drift
-              </button>
-              <button
-                onClick={requestStrategi}
-                className={`min-h-[44px] px-5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5
-                  ${mode === 'strategi'
-                    ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-sm'
-                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
-                  }`}
-              >
-                {mode !== 'strategi' && <Shield className="h-3.5 w-3.5" />}
-                Strategi
-              </button>
-            </div>
-          </div>
-
-          {/* Right actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              aria-label="Växla mörkt läge"
-            >
-              {darkMode ? (
-                <Sun className="h-5 w-5 text-stone-500 dark:text-stone-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-stone-500" />
-              )}
-            </button>
-            <HamburgerMenu userRole={session?.user?.role} />
-          </div>
+    <div className="text-stone-900 dark:text-stone-100">
+      {/* ── MODE TOGGLE (Drift / Strategi) ─────────────────────────────────── */}
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 pt-4 pb-2 flex justify-center">
+        <div className="inline-flex rounded-full border border-stone-200 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 p-1 gap-1">
+          <button
+            onClick={switchToDrift}
+            className={`min-h-[44px] px-5 rounded-full text-sm font-medium transition-all
+              ${mode === 'drift'
+                ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-sm'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+              }`}
+          >
+            Drift
+          </button>
+          <button
+            onClick={requestStrategi}
+            className={`min-h-[44px] px-5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5
+              ${mode === 'strategi'
+                ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-sm'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+              }`}
+          >
+            {mode !== 'strategi' && <Shield className="h-3.5 w-3.5" />}
+            Strategi
+          </button>
         </div>
-      </header>
+      </div>
 
       {/* ── PIN MODAL ──────────────────────────────────────────────────────── */}
       <PinModal
