@@ -50,14 +50,14 @@ export default async function DashboardLayout({
       {/* ── Top header — hidden in KIOSK mode ── */}
       {!isKiosk && (
         <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-3" data-build="v4f23">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-3">
             {/* User info — left side */}
-            <div className="flex items-center gap-3 min-w-0" data-slot="user-header">
+            <div className="flex items-center gap-3 min-w-0">
               <UserHeader />
             </div>
 
-            {/* Navigation hamburger — RIGHT side (aldrig vänster!) */}
-            <div className="flex-shrink-0" data-slot="nav-trigger">
+            {/* Navigation hamburger — RIGHT side */}
+            <div className="flex-shrink-0">
               <DynamicNav
                 initialMode={activeDisplayMode}
                 clinicTier={clinicTier}
@@ -96,4 +96,3 @@ export default async function DashboardLayout({
     </div>
   )
 }
-// Force rebuild Wed Mar  4 04:46:18 UTC 2026
