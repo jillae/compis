@@ -33,7 +33,7 @@ export function ClinicSelector() {
       const response = await fetch('/api/superadmin/clinics');
       if (response.ok) {
         const data = await response.json();
-        setClinics(data);
+        setClinics(Array.isArray(data) ? data : data.clinics ?? []);
       }
     } catch (error) {
       console.error('Failed to fetch clinics:', error);
