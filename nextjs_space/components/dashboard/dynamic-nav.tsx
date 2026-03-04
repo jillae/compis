@@ -605,9 +605,9 @@ export function DynamicNav({
           body: JSON.stringify({ mode: newMode }),
         })
         if (res.ok) {
-          setActiveMode(newMode)
-          // Close sheet if switching away from current mode
-          setSheetOpen(false)
+          // Full reload so both server layout and client page pick up the new mode
+          window.location.reload()
+          return
         } else {
           const data = await res.json().catch(() => ({}))
           alert(data?.error ?? 'Kunde inte byta läge.')

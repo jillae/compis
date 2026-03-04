@@ -594,7 +594,9 @@ export function KioskDashboard() {
             background: 'transparent',
             cursor: 'pointer',
             outline: 'none',
-          }}
+            // @ts-ignore -- CSS custom property for track fill
+            '--pct': `${(extraBookings / 20) * 100}%`,
+          } as React.CSSProperties}
           aria-label="Extra bokningar per vecka"
         />
         <p
