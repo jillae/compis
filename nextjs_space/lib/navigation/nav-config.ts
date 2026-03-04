@@ -38,27 +38,22 @@ export const kioskNavConfig: NavConfig = {
         {
           href: '/dashboard/schedule',
           icon: 'CalendarDays',
-          label: 'Dagens Schema',
+          label: 'Schema',
         },
         {
-          href: '/dashboard/loyalty/scan',
-          icon: 'QrCode',
-          label: 'Skanna Lojalitetskort',
-        },
-        {
-          href: '/dashboard/risk-alerts',
-          icon: 'ShieldAlert',
-          label: 'No-Show Varningar',
+          href: '/dashboard',
+          icon: 'LayoutDashboard',
+          label: 'Översikt',
         },
         {
           href: '/dashboard/staff',
           icon: 'Users',
-          label: 'Personal Idag',
+          label: 'Personal',
         },
         {
           href: '/dashboard/staff/timesheet',
           icon: 'Clock',
-          label: 'Stämpla In/Ut',
+          label: 'Stämpla',
         },
       ],
     },

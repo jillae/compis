@@ -412,7 +412,7 @@ function ModeSwitcherPill({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// KIOSK bottom bar (no Sheet)
+// KIOSK bottom bar — 4 primary items + right-aligned Meny sheet
 // ─────────────────────────────────────────────────────────────────────────────
 
 function KioskBottomBar({
@@ -426,57 +426,20 @@ function KioskBottomBar({
   currentMode: DisplayMode
   onModeSwitch: (mode: DisplayMode) => void
 }) {
-  const [showModePicker, setShowModePicker] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  // Take the first 4 items for the bottom bar; rest go into the sheet
+  const primaryItems = items.slice(0, 4)
 
   return (
     <>
-      {/* Mode picker overlay for admins */}
-      {canSwitchModes && showModePicker && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 flex items-end"
-          onClick={() => setShowModePicker(false)}
-        >
-          <div
-            className="w-full bg-zinc-950 border-t border-zinc-800 p-4 pb-safe"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3 text-center">
-              Byt visningsläge
-            </p>
-            <div className="flex gap-3">
-              {([DisplayMode.KIOSK, DisplayMode.OPERATIONS, DisplayMode.FULL] as DisplayMode[]).map(
-                (mode) => {
-                  const cfg = modeConfig[mode]
-                  const Icon = cfg.icon
-                  const isActive = currentMode === mode
-                  return (
-                    <button
-                      key={mode}
-                      onClick={() => {
-                        onModeSwitch(mode)
-                        setShowModePicker(false)
-                      }}
-                      className={cn(
-                        'flex-1 flex flex-col items-center gap-2 py-3 rounded-xl border transition-all min-h-[44px]',
-                        isActive
-                          ? 'border-white/30 bg-white/10 text-white'
-                          : 'border-zinc-700 text-zinc-400 hover:border-zinc-500'
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-xs font-medium">{cfg.label}</span>
-                    </button>
-                  )
-                }
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Bottom bar */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 bg-zinc-950 border-t border-zinc-800 flex items-stretch">
-        {items.map((item) => {
+      <nav
+        className="fixed bottom-0 inset-x-0 z-40 bg-zinc-950 border-t border-zinc-800 flex items-stretch"
+        style={{ minHeight: 56 }}
+      >
+        {/* Primary nav items (left-to-right) */}
+        {primaryItems.map((item) => {
           const Icon = getIcon(item.icon)
           return (
             <Link
@@ -492,24 +455,90 @@ function KioskBottomBar({
           )
         })}
 
-        {/* Mode switcher dot for admins */}
-        {canSwitchModes && (
-          <button
-            onClick={() => setShowModePicker(true)}
-            className="flex flex-col items-center justify-center gap-1.5 py-3 px-2 min-h-[56px] text-zinc-600 hover:text-zinc-400 transition-colors"
-            title="Byt läge"
-            aria-label="Byt visningsläge"
-          >
-            <div className="h-6 w-6 flex items-center justify-center">
-              <div className="h-2 w-2 rounded-full bg-current" />
-            </div>
-            <span className="text-[10px] font-medium">Läge</span>
-          </button>
-        )}
+        {/* Right-aligned Meny button — visually separated with border-left */}
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="flex flex-col items-center justify-center gap-1.5 py-3 px-4 min-h-[56px] min-w-[64px] text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors active:bg-zinc-800 border-l border-zinc-800"
+          aria-label="Öppna meny"
+        >
+          <Menu className="h-6 w-6 shrink-0" />
+          <span className="text-[10px] font-medium leading-tight">Meny</span>
+        </button>
       </nav>
 
-      {/* Spacer so page content doesn't hide behind fixed bottom bar */}
+      {/* Spacer so content doesn't hide behind fixed bar */}
       <div className="h-16 pb-safe" aria-hidden />
+
+      {/* Slide-up Meny sheet */}
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent
+          side="bottom"
+          className="bg-zinc-950 border-t border-zinc-800 rounded-t-2xl text-white px-5 pb-8"
+        >
+          <SheetHeader className="mb-4">
+            <SheetTitle className="text-white text-lg">Meny</SheetTitle>
+            <SheetDescription className="text-zinc-500 text-sm">
+              Alla alternativ och inställningar
+            </SheetDescription>
+          </SheetHeader>
+
+          {/* All nav items in a grid */}
+          <div className="grid grid-cols-3 gap-3 mb-5">
+            {items.map((item) => {
+              const Icon = getIcon(item.icon)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex flex-col items-center gap-2 py-3 px-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700 transition-colors min-h-[72px] justify-center text-zinc-300 hover:text-white active:scale-95"
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-xs font-medium text-center leading-tight">
+                    {item.label}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Mode switcher for admins */}
+          {canSwitchModes && (
+            <div className="pt-4 border-t border-zinc-800">
+              <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-3">
+                Byt visningsläge
+              </p>
+              <div className="flex gap-3">
+                {([DisplayMode.KIOSK, DisplayMode.OPERATIONS, DisplayMode.FULL] as DisplayMode[]).map(
+                  (mode) => {
+                    const cfg = modeConfig[mode]
+                    const Icon = cfg.icon
+                    const isActive = currentMode === mode
+                    return (
+                      <button
+                        key={mode}
+                        onClick={() => {
+                          onModeSwitch(mode)
+                          setMenuOpen(false)
+                        }}
+                        className={cn(
+                          'flex-1 flex flex-col items-center gap-2 py-3 rounded-xl border transition-all min-h-[44px]',
+                          isActive
+                            ? 'border-white/30 bg-white/10 text-white'
+                            : 'border-zinc-700 text-zinc-400 hover:border-zinc-500'
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span className="text-xs font-medium">{cfg.label}</span>
+                      </button>
+                    )
+                  }
+                )}
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

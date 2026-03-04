@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback, KeyboardEvent } from 'react';
+import { KioskDashboard } from '@/components/dashboard/kiosk-dashboard';
+import { DisplayMode } from '@/lib/client-types';
 
 import {
   Card,
@@ -349,10 +351,23 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const [mode, setMode] = useState<Mode>('drift');
   const [showPin, setShowPin] = useState(false);
+  const [displayMode, setDisplayMode] = useState<string | null>(null);
+  const [modeLoading, setModeLoading] = useState(true);
 
   const [dashData, setDashData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Detect KIOSK mode on mount
+  useEffect(() => {
+    fetch('/api/clinic/display-mode')
+      .then((r) => r.ok ? r.json() : null)
+      .then((json) => {
+        if (json?.activeDisplayMode) setDisplayMode(json.activeDisplayMode);
+      })
+      .catch(() => {})
+      .finally(() => setModeLoading(false));
+  }, []);
 
   // Fetch dashboard data
   const fetchData = useCallback(async () => {
@@ -383,6 +398,11 @@ export default function DashboardPage() {
     const unlocked = sessionStorage.getItem('flow-strategy-unlocked') === 'true';
     if (unlocked) setMode('strategi');
   }, []);
+
+  // If KIOSK mode, render the full-screen kiosk dashboard instead
+  if (!modeLoading && displayMode === DisplayMode.KIOSK) {
+    return <KioskDashboard />;
+  }
 
   function requestStrategi() {
     const alreadyUnlocked = sessionStorage.getItem('flow-strategy-unlocked') === 'true';

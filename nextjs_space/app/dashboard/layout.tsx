@@ -46,7 +46,7 @@ export default async function DashboardLayout({
   const isKiosk = activeDisplayMode === 'KIOSK'
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={isKiosk ? 'bg-zinc-950 min-h-screen overflow-hidden' : 'min-h-screen bg-background'}>
       {/* ── Top header — hidden in KIOSK mode ── */}
       {!isKiosk && (
         <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -81,12 +81,12 @@ export default async function DashboardLayout({
       {/* ── Main content ── */}
       {children}
 
-      {/* ── KIOSK: bottom bar navigation (no Sheet, renders fixed bar) ── */}
+      {/* ── KIOSK: bottom bar navigation (fixed, no Sheet trigger) ── */}
       {isKiosk && (
         <DynamicNav
-          initialMode={activeDisplayMode as any}
-          clinicTier={clinicTier as any}
-          userRole={userRole as any}
+          initialMode={activeDisplayMode}
+          clinicTier={clinicTier}
+          userRole={userRole}
         />
       )}
     </div>
