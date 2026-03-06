@@ -4,18 +4,18 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { TrendingUp, CheckCircle, ArrowRight } from "lucide-react"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/db"
 import { PricingCards } from "@/components/pricing/pricing-cards"
 import { FeaturesSection } from "@/components/landing/features-section"
 
-export default async function LandingPage() {
+async function checkAuthAndRedirect() {
   try {
+    const { getServerSession } = await import("next-auth")
+    const { authOptions } = await import("@/lib/auth")
+    const { redirect } = await import("next/navigation")
+    const { prisma } = await import("@/lib/db")
+    
     const session = await getServerSession(authOptions)
     
-    // If logged in, check onboarding status and redirect appropriately
     if (session?.user?.id) {
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },
@@ -29,11 +29,15 @@ export default async function LandingPage() {
       }
     }
   } catch (e: any) {
-    // If redirect was thrown, re-throw it (Next.js uses throw for redirects)
-    if (e?.digest?.includes('NEXT_REDIRECT')) throw e;
-    // Otherwise log and continue to landing page
+    // Re-throw Next.js redirects (they use throw internally)
+    if (e?.digest && String(e.digest).includes('NEXT_REDIRECT')) throw e;
+    // Any other error: log and continue to landing page
     console.error('[Landing] Auth/DB check failed:', e?.message);
   }
+}
+
+export default async function LandingPage() {
+  await checkAuthAndRedirect()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
