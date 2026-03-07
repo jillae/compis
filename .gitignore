@@ -18,5 +18,3 @@ out
 .deploy
 .logs
 *.tsbuildinfo
-nextjs_space/core
-docs/chat-history/
