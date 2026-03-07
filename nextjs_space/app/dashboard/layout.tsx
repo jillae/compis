@@ -68,10 +68,10 @@ export default async function DashboardLayout({
         </div>
       )}
 
-      {/* ── Onboarding & usage banners (not shown in KIOSK) ── */}
+      {/* ── Onboarding & usage banners (not shown in KIOSK or for SUPER_ADMIN) ── */}
       {!isKiosk && (
         <div className="container mx-auto px-4">
-          {user && (
+          {user && userRole !== 'SUPER_ADMIN' && (
             <OnboardingBanner
               userId={user.id}
               onboardingStep={user.onboardingStep}
