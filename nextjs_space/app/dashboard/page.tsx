@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, KeyboardEvent } from 'react';
 import { KioskDashboard } from '@/components/dashboard/kiosk-dashboard';
+import { QuickStart } from '@/components/dashboard/quick-start';
 import { DisplayMode } from '@/lib/client-types';
 
 import {
@@ -457,6 +458,11 @@ export default function DashboardPage() {
         onClose={() => setShowPin(false)}
         onSuccess={handlePinSuccess}
       />
+
+      {/* ── QUICK START ──────────────────────────────────────────────────────── */}
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 pt-4">
+        <QuickStart />
+      </div>
 
       {/* ── CONTENT ────────────────────────────────────────────────────────── */}
       <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
