@@ -33,6 +33,14 @@ Primärt mål: lansera för Arch Clinic och samla riktig feedback.
 - 🔄 Tier + seats licensing-modell (alla Marknadscentral-features konsoliderade i Flow)
 - 🔄 Hålla credits-burn lågt
 
+## Wave 5 — Nya Moduler (2026-03-07)
+
+- ✅ **Marknadscentral** — Extern integration med API:er för status, kapacitet, insikter, kunder
+- ✅ **UGC (User Generated Content)** — Kundrecensioner, testimonials, media-hantering
+- ✅ **Digital Signage** — Väntrumsssärmar, info-tavlor, display-hantering
+
+Alla tre moduler är licensbaserade (premium tier) och tillgängliga för INTERNAL, PROFESSIONAL, ENTERPRISE.
+
 ## Kända problem / tech debt
 
 - `.env` finns i repo (bör flyttas till enbart Vercel env vars + .gitignore)
@@ -46,3 +54,11 @@ Primärt mål: lansera för Arch Clinic och samla riktig feedback.
 |---|---|---|
 | ADA (Abacus Deep Agent) | Vardagsdrift, UI, buggar, deploy | AKTIV — äger `main` |
 | CA (Perplexity Computer) | Tunga lyft, refactoring, nya integrationer | PÅ BEGÄRAN — jobbar i `ca/` branch |
+
+## Leftovers / Backlog
+
+- 🔜 Google Analytics (pilot-tracking för Arch Clinic)
+
+## Leftovers / Backlog
+
+- 🔜 Google Analytics (pilot-tracking för Arch Clinic)

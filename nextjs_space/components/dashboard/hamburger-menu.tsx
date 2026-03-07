@@ -139,6 +139,20 @@ export function HamburgerMenu({ userRole, simulatedRole, onRoleChange }: Hamburg
             </NavLink>
           </div>
 
+          {/* ─── Nya Moduler (V5) ─── */}
+          <div className="space-y-1">
+            <SectionHeader>Nya Moduler</SectionHeader>
+            <NavLink href="/dashboard/marknadscentral" icon={ExternalLink}>
+              Marknadscentral
+            </NavLink>
+            <NavLink href="/dashboard/ugc" icon={Star}>
+              UGC
+            </NavLink>
+            <NavLink href="/dashboard/signage" icon={Monitor}>
+              Digital Signage
+            </NavLink>
+          </div>
+
           {/* ─── Ekonomi ─── */}
           <div className="space-y-1">
             <SectionHeader>Ekonomi & Analys</SectionHeader>

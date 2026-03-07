@@ -156,6 +156,41 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
     availableForTiers: ['INTERNAL'],
     route: '/settings/bank',
   },
+
+  // NEW MODULES - V5
+  {
+    key: 'marknadscentral',
+    name: 'Marknadscentral',
+    description: 'Extern marknadsföringsplattform med realtidsdata från Flow',
+    icon: 'Radio',
+    category: 'premium',
+    status: 'BETA',
+    order: 20,
+    availableForTiers: ['INTERNAL', 'PROFESSIONAL', 'ENTERPRISE'],
+    route: '/dashboard/marknadscentral',
+  },
+  {
+    key: 'ugc',
+    name: 'UGC (User Generated Content)',
+    description: 'Samla in och hantera kundrecensioner, testimonials och media',
+    icon: 'Camera',
+    category: 'premium',
+    status: 'BETA',
+    order: 21,
+    availableForTiers: ['INTERNAL', 'PROFESSIONAL', 'ENTERPRISE'],
+    route: '/dashboard/ugc',
+  },
+  {
+    key: 'digital_signage',
+    name: 'Digital Signage',
+    description: 'Väntrumsskärmar, info-tavlor och digital display',
+    icon: 'Monitor',
+    category: 'premium',
+    status: 'BETA',
+    order: 22,
+    availableForTiers: ['INTERNAL', 'PROFESSIONAL', 'ENTERPRISE'],
+    route: '/dashboard/signage',
+  },
 ]
 
 // Helper functions
