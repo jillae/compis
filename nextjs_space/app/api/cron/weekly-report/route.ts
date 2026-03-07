@@ -1,12 +1,11 @@
 
 
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { getResendClient } from '@/lib/email';
 import { prisma } from '@/lib/db';
 import { startOfWeek, endOfWeek, subWeeks, format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // This endpoint should be called by a cron job (e.g., Vercel Cron or external service)
 // Schedule: Every Monday at 8 AM
@@ -132,7 +131,7 @@ export async function POST(request: Request) {
         });
 
         try {
-          await resend.emails.send({
+          await getResendClient().emails.send({
             from: 'Flow <noreply@flow.se>',
             to: admin.email,
             subject: `📊 Veckorapport för ${clinic.name} - ${format(weekStart, 'dd MMM', { locale: sv })}`,

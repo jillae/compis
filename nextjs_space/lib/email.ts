@@ -1,7 +1,21 @@
 
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-load Resend client to prevent build-time initialization errors
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
+
+// Export for use in other files
+export { getResendClient };
 
 /**
  * Generic email sending function
@@ -18,7 +32,7 @@ export async function sendEmail({
   from?: string;
 }) {
   try {
-    const result = await resend.emails.send({
+    const result = await getResendClient().emails.send({
       from,
       to,
       subject,
@@ -61,7 +75,7 @@ export async function sendWeeklyReport(
   try {
     const emailHtml = generateWeeklyReportHTML(data);
     
-    const result = await resend.emails.send({
+    const result = await getResendClient().emails.send({
       from: 'Flow <noreply@flowrevenue.se>',
       to,
       subject: `📊 Veckorapport för ${data.clinicName} - ${data.weekRange}`,

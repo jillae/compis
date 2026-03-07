@@ -3,9 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { getResendClient } from '@/lib/email'
 
 export async function PATCH(
   req: Request,
@@ -42,7 +40,7 @@ export async function PATCH(
     // Send email to applicant
     if (process.env.RESEND_API_KEY) {
       if (status === 'APPROVED') {
-        await resend.emails.send({
+        await getResendClient().emails.send({
           from: 'Flow <hello@goto.klinikflow.app>',
           to: application.email,
           subject: 'Välkommen till Flow Beta! 🎉',
@@ -79,7 +77,7 @@ export async function PATCH(
           `
         })
       } else if (status === 'REJECTED') {
-        await resend.emails.send({
+        await getResendClient().emails.send({
           from: 'Flow <hello@goto.klinikflow.app>',
           to: application.email,
           subject: 'Angående din beta-ansökan till Flow',

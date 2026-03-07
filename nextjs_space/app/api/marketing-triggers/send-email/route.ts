@@ -3,11 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { Resend } from 'resend';
+import { getResendClient } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -69,7 +68,7 @@ export async function POST(req: Request) {
     const fromName = clinic?.name || 'Klinik Flow';
 
     // Send email via Resend
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: `${fromName} <${fromEmail}>`,
       to: [customer.email],
       subject,

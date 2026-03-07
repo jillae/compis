@@ -1,9 +1,8 @@
 
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { Resend } from 'resend'
+import { getResendClient } from '@/lib/email'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(req: Request) {
   try {
@@ -46,7 +45,7 @@ export async function POST(req: Request) {
     // Send confirmation email to applicant
     if (process.env.RESEND_API_KEY) {
       try {
-        await resend.emails.send({
+        await getResendClient().emails.send({
           from: 'Flow <hello@goto.klinikflow.app>',
           to: email,
           subject: 'Tack för din beta-ansökan till Flow! 🎉',
@@ -88,7 +87,7 @@ export async function POST(req: Request) {
     // Send notification to admin
     if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {
       try {
-        await resend.emails.send({
+        await getResendClient().emails.send({
           from: 'Flow <hello@goto.klinikflow.app>',
           to: process.env.ADMIN_EMAIL,
           subject: `Ny beta-ansökan från ${clinicName}`,
