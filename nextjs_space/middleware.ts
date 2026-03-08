@@ -26,6 +26,7 @@ export async function middleware(request: NextRequest) {
     '/api/signup',
     '/api/webhooks/meta',  // Meta webhook verification
     '/api/webhooks/46elks', // 46elks SMS webhooks
+    '/api/test-sync',  // TEMPORARY: Test sync endpoint
   ]
 
   // Check if route is public
